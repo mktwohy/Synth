@@ -14,83 +14,83 @@
         <Button
             android:id="@+id/C4"
             android:tag="C4"
+            android:text="C"
             android:layout_marginHorizontal="2sp"
             android:paddingHorizontal="10sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="C"
             android:onClick="playButton"
             />
         <Button
             android:id="@+id/D4"
             android:tag="D4"
+            android:text="D"
             android:layout_marginHorizontal="2sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="D"
             android:onClick="playButton"
             />
 
         <Button
             android:id="@+id/E4"
             android:tag="E4"
+            android:text="E"
             android:layout_marginHorizontal="2sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="E"
             android:onClick="playButton"
             />
         <Button
             android:id="@+id/F4"
             android:tag="F4"
+            android:text="F"
             android:layout_marginHorizontal="2sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="F"
             android:onClick="playButton"
             />
         <Button
             android:id="@+id/G4"
             android:tag="G4"
+            android:text="G"
             android:layout_marginHorizontal="2sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="G"
             android:onClick="playButton"
             />
         <Button
             android:id="@+id/A4"
             android:tag="A4"
+            android:text="A"
             android:layout_weight="1"
             android:layout_marginHorizontal="2sp"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="A"
             android:onClick="playButton"
             />
         <Button
             android:id="@+id/B4"
             android:tag="B4"
+            android:text="B"
             android:layout_marginHorizontal="2sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="G"
             android:onClick="playButton"
             />
         <Button
             android:id="@+id/C5"
             android:tag="C5"
+            android:text="C"
             android:layout_marginHorizontal="2sp"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="200sp"
-            android:text="C"
             android:onClick="playButton"
             />
     </LinearLayout>
