@@ -6,18 +6,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.example.synth.databinding.ActivityMainBinding
-import java.util.*
-import kotlin.math.PI
-import kotlin.math.sin
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
     private var counter = 0
-    private val buffer = mutableSetOf<SignalOperations>()
+    private val buffer = mutableSetOf<Signal>()
     private val audioTracks = mutableListOf<AudioTrack>()
 
 
     companion object{
+        val SAMPLE_RATE = 44100
+        val BUFFER_TIME = 20
+        val SAMPLES_PER_BUFFER = SAMPLE_RATE * BUFFER_TIME / 1000
+
         private val C_4_SIGNAL = SinSignal(Tone.C_4.freq)
         private val D_4_SIGNAL = SinSignal(Tone.D_4.freq)
         private val E_4_SIGNAL = SinSignal(Tone.E_4.freq)
@@ -61,21 +62,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun playAudioInBuffer(){
-        val signals = buffer.toMutableList()
-        var sumSig = signals.removeLast()
-        while(signals.isNotEmpty()){
-            sumSig += signals.removeLast()
-            signals.removeLast()
-        }
-        audioTracks.add(sumSig.play())
-        buffer.clear()
+        val signalSum = buffer.toList().sum()
+        Log.d("mikeSum", "${buffer.size} Notes: $signalSum")
+        audioTracks.add(signalSum.play()) //play signal and save in queue to be removed from memory
+        buffer.clear() //clear buffer since it's been used now
     }
-    fun mainLoop(){
+
+    private fun mainLoop(){
         Thread {
             while (true) {
                 if(audioTracks.size > 20) clearAudioTrackMemory()
                 if(buffer.isNotEmpty()) playAudioInBuffer()
-                Thread.sleep(20)
+                Thread.sleep(BUFFER_TIME.toLong())
             }
         }.start()
 
