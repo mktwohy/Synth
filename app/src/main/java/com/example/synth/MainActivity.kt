@@ -6,12 +6,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.example.synth.databinding.ActivityMainBinding
+import java.util.*
 import kotlin.math.PI
 import kotlin.math.sin
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
-
+    private var counter = 0
+    private val buffer = mutableSetOf<SignalOperations>()
+    private val audioTracks = mutableListOf<AudioTrack>()
 
 
     companion object{
@@ -30,20 +33,52 @@ class MainActivity : AppCompatActivity() {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
         Log.d("Mike","created")
-
+        mainLoop()
     }
 
     fun playButton(view: View){
+        counter++
         when (view.tag) {
-            bind.C4.tag -> C_4_SIGNAL.play()
-            bind.D4.tag -> D_4_SIGNAL.play()
-            bind.E4.tag -> E_4_SIGNAL.play()
-            bind.F4.tag -> F_4_SIGNAL.play()
-            bind.G4.tag -> G_4_SIGNAL.play()
-            bind.A4.tag -> A_4_SIGNAL.play()
-            bind.B4.tag -> B_4_SIGNAL.play()
-            bind.C5.tag -> C_5_SIGNAL.play()
+            bind.C4.tag -> buffer.add(C_4_SIGNAL)
+            bind.D4.tag -> buffer.add(D_4_SIGNAL)
+            bind.E4.tag -> buffer.add(E_4_SIGNAL)
+            bind.F4.tag -> buffer.add(F_4_SIGNAL)
+            bind.G4.tag -> buffer.add(G_4_SIGNAL)
+            bind.A4.tag -> buffer.add(A_4_SIGNAL)
+            bind.B4.tag -> buffer.add(B_4_SIGNAL)
+            bind.C5.tag -> buffer.add(C_5_SIGNAL)
+            bind.RandomNote.tag -> buffer.add(SinSignal(Tone.values().slice(30..70).random().freq))
         }
+
+        Log.d("counter","$counter")
+    }
+
+    private fun clearAudioTrackMemory(){
+        while(audioTracks.size > 5){
+            audioTracks.removeFirst().release()
+        }
+        Log.d("counter","Audio CLEARED")
+    }
+
+    private fun playAudioInBuffer(){
+        val signals = buffer.toMutableList()
+        var sumSig = signals.removeLast()
+        while(signals.isNotEmpty()){
+            sumSig += signals.removeLast()
+            signals.removeLast()
+        }
+        audioTracks.add(sumSig.play())
+        buffer.clear()
+    }
+    fun mainLoop(){
+        Thread {
+            while (true) {
+                if(audioTracks.size > 20) clearAudioTrackMemory()
+                if(buffer.isNotEmpty()) playAudioInBuffer()
+                Thread.sleep(20)
+            }
+        }.start()
+
     }
 
 
