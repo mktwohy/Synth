@@ -1,70 +1,48 @@
 package com.example.synth
 
-import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.util.Log
 import kotlin.math.PI
-import kotlin.math.round
 import kotlin.math.sin
 
-/*
-fun List<Int>.toByteArray(): ByteArray{
-    val bytes = ByteArray(size*2)
-    var bIndex = 0
-    for(i in 0 until size){
-//        val byteArray = this[i].toBigInteger().toByteArray()
-//        bytes[bIndex] = byteArray[0]
-//        bytes[bIndex+1] = byteArray[1]
-//        bIndex += 2
-        bytes[i] = this[i].toByte()
-    }
-    return bytes
-}
- */
 
-fun List<Int>.toByteArray(): ByteArray {
-    val start = System.currentTimeMillis()
 
-    val bytes = ByteArray(size * 2)
-    var bIndex = 0
-    for (i in indices) {
-        val bArray = Signal.IntToByteArrayLookupTable[this[i]]
-        if (bArray != null){
-            if (bArray.size > 1) bytes[bIndex] = bArray[1]
-            bytes[bIndex+1] = bArray[0]
-        }
-        bIndex += 2
+
+fun List<Int>.normalize(
+    lowerBound: Int = Signal.MIN_16BIT_VALUE,
+    upperBound: Int = Signal.MAX_16BIT_VALUE
+)
+= if (size > 0) run {
+    //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+            val minValue = this.minByOrNull { it }!!
+            val maxValue = this.maxByOrNull { it }!!
+            this.map { (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound }
     }
-    val time = System.currentTimeMillis() - start
-    Log.d("latencyTest","IntList convert took $time milliseconds")
-    return bytes
-}
+    else NullSignal().data
 
 
 fun ByteArray.toList(bit: Int = 16): List<Int>{
     return if(bit == 8) this.toList()
         else this
             .toList()
-            .zipWithNext()
-            .filterIndexed{ index, _ -> index % 2 == 0 }
-            .map{ it.first + it.second }
+            .chunked(2)
+            .map{ it[0] + it[1] }
             .toList()
-
-
 }
 
 fun List<Signal>.sum() = when(size){
         0 -> NullSignal()
         1 -> this[0]
         2 -> SumSignal(this[0], this[1])
-        else -> this.fold(SinSignal(1)) { result: Signal, next: Signal -> result + next}
+        else -> this.reduce { sumSig: Signal, nextSig: Signal -> sumSig + nextSig}
 }
 
 interface SignalProperties{
     val data: List<Int>
 }
+
 
 abstract class Signal(): SignalProperties{
     companion object{
@@ -72,17 +50,18 @@ abstract class Signal(): SignalProperties{
         const val BUFFER_DURATION   = MainActivity.BUFFER_DURATION
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
         const val TWO_PI            = 2.0 * PI
+        const val MIN_16BIT_VALUE     = -32_768
+        const val MAX_16BIT_VALUE     = 32_767
+
         val IntToByteArrayLookupTable = run{
             val table = mutableMapOf<Int, ByteArray>()
-            val integerRange = -32_768..32_767
-            for (i in integerRange){
+            for (i in MIN_16BIT_VALUE..MAX_16BIT_VALUE){
                 table[i] = i.toBigInteger().toByteArray()
             }
             table
         }
 
     }
-
 
     override fun toString(): String{
         val s = StringBuilder()
@@ -96,6 +75,7 @@ abstract class Signal(): SignalProperties{
     operator fun plus(that: Signal) = SumSignal(this, that)
 
     fun play(): AudioTrack{
+        val start = System.currentTimeMillis() //start latency timer
 
         val audio = AudioTrack.Builder()
             .setAudioAttributes(
@@ -113,81 +93,75 @@ abstract class Signal(): SignalProperties{
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
 
+
             audio.write(data.toByteArray(), 0, data.size * 2)
             audio.play()
 
 
-
+        Log.d("m_latency",
+            "Latency: ${System.currentTimeMillis() - start} ms") //end latency timer
 
         return audio
+    }
+
+    private fun List<Int>.toByteArray(): ByteArray {
+        val bytes = ByteArray(size * 2)
+        var bIndex = 0
+        for (i in indices) {
+            val bArray = Signal.IntToByteArrayLookupTable[this[i]]
+            if (bArray != null){
+                if (bArray.size > 1) bytes[bIndex] = bArray[1]
+                bytes[bIndex+1] = bArray[0]
+            }
+            bIndex += 2
+        }
+        return bytes
     }
 }
 
 /**
- * Silent signal. Useful when adding multiple signals together
+ * Silent signal.
  * @param length number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val data = List(size) { _ -> 0 }
 }
 
-class SumSignal(s1: Signal, s2: Signal): Signal(){
-    override val data = s1.data.zip(s2.data).map { (it.first + it.second) % 127 }
 
-    operator fun plusAssign(that: Signal){ SumSignal(this, that) }
-}
-
+/**
+ * Represents a pure sine wave
+ * @param freq frequency of wave
+ * @param numPeriods number of times the period will repeat in Signal's interval
+ */
 class SinSignal(private val freq: Int, numPeriods: Int = 100) : Signal() {
     override val data = run{
         val interval     = mutableListOf<Int>()
         val period       = mutableListOf<Int>()
         val periodLength = SAMPLE_RATE / freq
 
+        //Calculate y-values in a single period
         for (i in 0 until periodLength){
-            period.add((sin(TWO_PI * i / periodLength) * 127).toInt())
+            period.add((sin(TWO_PI * i / periodLength) * MAX_16BIT_VALUE).toInt())
         }
 
+        //Repeat this period until it is the desired length
         repeat(numPeriods){ interval.addAll(period) }
-
         interval
     }
 }
 
-/*
-class SinSignal(
-    val freq: Int,
-) : Signal() {
-
-    override val data = if (freq > 0) generateInterval(SAMPLE_RATE / freq)
-                        else ByteArray(BUFFER_SIZE)
-
-    private fun generateInterval(periodLength: Int): ByteArray{
-//        val period = generatePeriod(periodLength)
-//        val interval = ByteArray(BUFFER_SIZE)
-//        Log.d("m_Iterate", "START: PeriodLength: $periodLength")
-//        var relativeIndex = 0
-//        for (i in 0 until BUFFER_SIZE){
-//            Log.d("m_Iterate", "\t$i, ${i%periodLength}")
-//            relativeIndex = i - i / periodLength
-//            interval[i] = period[i % periodLength].toByte()
-//        }
-        val period = generatePeriod(periodLength)
-        val interval = mutableListOf<Int>()
-        while(interval.size < BUFFER_SIZE) { interval.addAll(period) }
-
-        //.subList(0, BUFFER_SIZE)
-        return interval.toByteArray()
-    }
-
-    private fun generatePeriod(periodLength: Int, start: Int = 0): List<Int>{
-        val period = mutableListOf<Int>()
-        for (i in 0 until periodLength){
-            val angle = (TWO_PI*i / periodLength)
-            period.add((127 * sin(angle)).toInt())
-        }
-        Log.d("m_period", "period: $period")
-        return period
-    }
-
-}
+/**
+ * Creates a combined Signal of two Signal objects.
+ * @param s1 first signal in sum
+ * @param s2 second signal in sum
  */
+class SumSignal(s1: Signal, s2: Signal): Signal(){
+    override val data = s1.data
+                            .zip(s2.data)
+                            .map { it.first + it.second }
+                            .normalize()
+
+
+
+    operator fun plusAssign(that: Signal){ SumSignal(this, that) }
+}

@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_DURATION = 20
+        const val BUFFER_DURATION = 20 //ms
         const val BUFFER_SIZE = SAMPLE_RATE * BUFFER_DURATION / 1000
 
         private val C_4_SIGNAL = SinSignal(Tone.C_4.freq)
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
-        Log.d("Mike","created")
+        Log.d("m_debug","created")
         mainLoop()
     }
 
@@ -56,12 +56,12 @@ class MainActivity : AppCompatActivity() {
         while(audioTracks.size > 5){
             audioTracks.removeFirst().release()
         }
-        Log.d("counter","Audio CLEARED")
+        Log.d("m_debug","Audio CLEARED")
     }
 
     private fun playAudioInBuffer(){
         val signalSum = buffer.toList().sum()
-        Log.d("mikeSum", "${buffer.size} Notes: $signalSum")
+        Log.d("m_debug", "${buffer.size} Notes: $signalSum")
         audioTracks.add(signalSum.play()) //play signal and save in queue to be removed from memory
         buffer.clear() //clear buffer since it's been used now
     }
@@ -74,8 +74,5 @@ class MainActivity : AppCompatActivity() {
                 Thread.sleep(BUFFER_DURATION.toLong())
             }
         }.start()
-
     }
-
-
 }
