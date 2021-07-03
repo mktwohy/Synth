@@ -105,8 +105,34 @@
         android:onClick="playButton"
         android:tag="RandomNote"
         android:text="Random Note"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/Chord"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout" />
+
+    <Button
+        android:id="@+id/Chord"
+        android:tag="Chord"
+        android:text="Chord"
+        android:onClick="playButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2sp"
+        android:layout_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/RandomNote"
+        app:layout_constraintEnd_toStartOf="@+id/TwoNotes"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout" />
+
+    <Button
+        android:id="@+id/TwoNotes"
+        android:tag="TwoNotes"
+        android:text="Two Notes"
+        android:onClick="playButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="2sp"
+        android:layout_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/Chord"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/linearLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

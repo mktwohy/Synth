@@ -9,15 +9,14 @@ import com.example.synth.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
-    private var counter = 0
     private val buffer = mutableSetOf<Signal>()
     private val audioTracks = mutableListOf<AudioTrack>()
 
 
     companion object{
-        val SAMPLE_RATE = 44100
-        val BUFFER_TIME = 20
-        val SAMPLES_PER_BUFFER = SAMPLE_RATE * BUFFER_TIME / 1000
+        const val SAMPLE_RATE = 44100
+        const val BUFFER_DURATION = 20
+        const val BUFFER_SIZE = SAMPLE_RATE * BUFFER_DURATION / 1000
 
         private val C_4_SIGNAL = SinSignal(Tone.C_4.freq)
         private val D_4_SIGNAL = SinSignal(Tone.D_4.freq)
@@ -38,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun playButton(view: View){
-        counter++
         when (view.tag) {
             bind.C4.tag -> buffer.add(C_4_SIGNAL)
             bind.D4.tag -> buffer.add(D_4_SIGNAL)
@@ -49,9 +47,9 @@ class MainActivity : AppCompatActivity() {
             bind.B4.tag -> buffer.add(B_4_SIGNAL)
             bind.C5.tag -> buffer.add(C_5_SIGNAL)
             bind.RandomNote.tag -> buffer.add(SinSignal(Tone.values().slice(30..70).random().freq))
+            bind.Chord.tag -> listOf(C_4_SIGNAL, E_4_SIGNAL, G_4_SIGNAL).forEach{buffer.add(it)}
+            bind.TwoNotes.tag -> listOf(C_4_SIGNAL, E_4_SIGNAL).forEach{buffer.add(it)}
         }
-
-        Log.d("counter","$counter")
     }
 
     private fun clearAudioTrackMemory(){
@@ -73,7 +71,7 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 if(audioTracks.size > 20) clearAudioTrackMemory()
                 if(buffer.isNotEmpty()) playAudioInBuffer()
-                Thread.sleep(BUFFER_TIME.toLong())
+                Thread.sleep(BUFFER_DURATION.toLong())
             }
         }.start()
 
