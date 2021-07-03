@@ -63,7 +63,7 @@ fun List<Signal>.sum() = when(size){
 }
 
 interface SignalProperties{
-    val data: ByteArray
+    val data: List<Int>
 }
 
 abstract class Signal(): SignalProperties{
@@ -113,7 +113,7 @@ abstract class Signal(): SignalProperties{
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
 
-            audio.write(data, 0, data.size)
+            audio.write(data.toByteArray(), 0, data.size * 2)
             audio.play()
 
 
@@ -127,12 +127,12 @@ abstract class Signal(): SignalProperties{
  * Silent signal. Useful when adding multiple signals together
  * @param length number of samples in ByteArray of data
  */
-class NullSignal(length: Int = BUFFER_SIZE): Signal() {
-    override val data = ByteArray(length)
+class NullSignal(size: Int = BUFFER_SIZE): Signal() {
+    override val data = List(size) { _ -> 0 }
 }
 
 class SumSignal(s1: Signal, s2: Signal): Signal(){
-    override val data = s1.data.zip(s2.data).map { (it.first + it.second) % 127 }.toByteArray()
+    override val data = s1.data.zip(s2.data).map { (it.first + it.second) % 127 }
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }
@@ -149,7 +149,7 @@ class SinSignal(private val freq: Int, numPeriods: Int = 100) : Signal() {
 
         repeat(numPeriods){ interval.addAll(period) }
 
-        interval.toByteArray()
+        interval
     }
 }
 
