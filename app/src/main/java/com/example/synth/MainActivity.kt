@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             bind.A4.tag -> buffer.add(A_4_SIGNAL)
             bind.B4.tag -> buffer.add(B_4_SIGNAL)
             bind.C5.tag -> buffer.add(C_5_SIGNAL)
-            bind.RandomNote.tag -> buffer.add(SinSignal(Tone.values().slice(30..70).random().freq))
+            bind.RandomNote.tag -> buffer.add(SinSignal(Tone.values().slice(60..80).random().freq))
             bind.Chord.tag -> listOf(C_4_SIGNAL, E_4_SIGNAL, G_4_SIGNAL).forEach{buffer.add(it)}
             bind.TwoNotes.tag -> listOf(C_4_SIGNAL, E_4_SIGNAL).forEach{buffer.add(it)}
         }

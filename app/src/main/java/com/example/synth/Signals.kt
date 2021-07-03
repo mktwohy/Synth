@@ -1,26 +1,28 @@
 package com.example.synth
 
+import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.util.Log
 import kotlin.math.PI
+import kotlin.math.round
 import kotlin.math.sin
 
-
-//fun List<Int>.toByteArray(): ByteArray{
-//    val bytes = ByteArray(size*2)
-//    var bIndex = 0
-//    for(i in 0 until size){
-////        val byteArray = this[i].toBigInteger().toByteArray()
-////        bytes[bIndex] = byteArray[0]
-////        bytes[bIndex+1] = byteArray[1]
-////        bIndex += 2
-//        bytes[i] = this[i].toByte()
-//    }
-//    return bytes
-//}
-
+/*
+fun List<Int>.toByteArray(): ByteArray{
+    val bytes = ByteArray(size*2)
+    var bIndex = 0
+    for(i in 0 until size){
+//        val byteArray = this[i].toBigInteger().toByteArray()
+//        bytes[bIndex] = byteArray[0]
+//        bytes[bIndex+1] = byteArray[1]
+//        bIndex += 2
+        bytes[i] = this[i].toByte()
+    }
+    return bytes
+}
+ */
 
 fun List<Int>.toByteArray(): ByteArray {
     val start = System.currentTimeMillis()
@@ -28,15 +30,18 @@ fun List<Int>.toByteArray(): ByteArray {
     val bytes = ByteArray(size * 2)
     var bIndex = 0
     for (i in indices) {
-        val bArray = this[i].toBigInteger().toByteArray()
-        bytes[bIndex+1] = bArray[0]
-        if (bArray.size > 1) bytes[bIndex] = bArray[1]
+        val bArray = Signal.IntToByteArrayLookupTable[this[i]]
+        if (bArray != null){
+            if (bArray.size > 1) bytes[bIndex] = bArray[1]
+            bytes[bIndex+1] = bArray[0]
+        }
         bIndex += 2
     }
     val time = System.currentTimeMillis() - start
     Log.d("latencyTest","IntList convert took $time milliseconds")
     return bytes
 }
+
 
 fun ByteArray.toList(bit: Int = 16): List<Int>{
     return if(bit == 8) this.toList()
@@ -67,6 +72,15 @@ abstract class Signal(): SignalProperties{
         const val BUFFER_DURATION   = MainActivity.BUFFER_DURATION
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
         const val TWO_PI            = 2.0 * PI
+        val IntToByteArrayLookupTable = run{
+            val table = mutableMapOf<Int, ByteArray>()
+            val integerRange = -32_768..32_767
+            for (i in integerRange){
+                table[i] = i.toBigInteger().toByteArray()
+            }
+            table
+        }
+
     }
 
 
@@ -123,18 +137,19 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }
 
-class SinSignal(private val freq: Int) : Signal() {
-    override val data = generatePeriod(100)
-
-
-    private fun generatePeriod(numPeriods: Int, start: Int = 0): ByteArray{
+class SinSignal(private val freq: Int, numPeriods: Int = 100) : Signal() {
+    override val data = run{
+        val interval     = mutableListOf<Int>()
+        val period       = mutableListOf<Int>()
         val periodLength = SAMPLE_RATE / freq
-        val size = numPeriods*periodLength
-        val period = mutableListOf<Int>()
-        for (i in 0 until size){
-            period.add((sin(2.0 * PI * i / periodLength) * 127).toInt())
+
+        for (i in 0 until periodLength){
+            period.add((sin(TWO_PI * i / periodLength) * 127).toInt())
         }
-        return period.toByteArray()
+
+        repeat(numPeriods){ interval.addAll(period) }
+
+        interval.toByteArray()
     }
 }
 
