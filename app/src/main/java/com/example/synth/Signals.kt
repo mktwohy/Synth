@@ -8,17 +8,12 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 
-
-
-fun List<Int>.normalize(
-    lowerBound: Int = Signal.MIN_16BIT_VALUE,
-    upperBound: Int = Signal.MAX_16BIT_VALUE
-)
-= if (size > 0) run {
+fun List<Float>.normalize(): List<Float> =
+    if (size > 0) run {
     //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
             val minValue = this.minByOrNull { it }!!
             val maxValue = this.maxByOrNull { it }!!
-            this.map { (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound }
+            this.map { 2f * ( (it - minValue) / (maxValue - minValue) ) - 1f }
     }
     else NullSignal().data
 
@@ -40,11 +35,10 @@ fun List<Signal>.sum() = when(size){
 }
 
 interface SignalProperties{
-    val data: List<Int>
+    val data: List<Float>
 }
 
-
-abstract class Signal(): SignalProperties{
+abstract class Signal: SignalProperties{
     companion object{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_DURATION   = MainActivity.BUFFER_DURATION
@@ -66,7 +60,7 @@ abstract class Signal(): SignalProperties{
     override fun toString(): String{
         val s = StringBuilder()
         for(byte in data){
-            s.append(byte.toInt())
+            s.append(byte.toFloat())
             s.append(" ")
         }
         return s.toString()
@@ -89,7 +83,7 @@ abstract class Signal(): SignalProperties{
                     .setSampleRate(44100)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build())
-            .setBufferSizeInBytes(data.size)
+            .setBufferSizeInBytes(data.size * 2)
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
 
@@ -104,18 +98,25 @@ abstract class Signal(): SignalProperties{
         return audio
     }
 
-    private fun List<Int>.toByteArray(): ByteArray {
-        val bytes = ByteArray(size * 2)
+    private fun List<Float>.toByteArray(): ByteArray {
+        val intArray = this
+            .normalize()                      //range -> -1.0 to 1.0
+            .map { it * MAX_16BIT_VALUE }     //range -> -32,768.0 to 32,767.0
+            .map { it.toInt() }               //range -> -32,768 to 32,767
+        Log.d("m_toByteArray()", "Int Array: $intArray")
+
+        val byteArray = ByteArray(size * 2)
         var bIndex = 0
         for (i in indices) {
-            val bArray = Signal.IntToByteArrayLookupTable[this[i]]
-            if (bArray != null){
-                if (bArray.size > 1) bytes[bIndex] = bArray[1]
-                bytes[bIndex+1] = bArray[0]
+            val bytes = IntToByteArrayLookupTable[intArray[i]]
+            if (bytes != null){
+                if (bytes.size > 1)
+                    byteArray[bIndex] = bytes[1]
+                byteArray[bIndex+1] = bytes[0]
             }
             bIndex += 2
         }
-        return bytes
+        return byteArray
     }
 }
 
@@ -124,24 +125,23 @@ abstract class Signal(): SignalProperties{
  * @param length number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
-    override val data = List(size) { _ -> 0 }
+    override val data = List(size) { 0f }
 }
-
 
 /**
  * Represents a pure sine wave
  * @param freq frequency of wave
  * @param numPeriods number of times the period will repeat in Signal's interval
  */
-class SinSignal(private val freq: Int, numPeriods: Int = 100) : Signal() {
+class SinSignal(private val freq: Float, numPeriods: Int = 100) : Signal() {
     override val data = run{
-        val interval     = mutableListOf<Int>()
-        val period       = mutableListOf<Int>()
-        val periodLength = SAMPLE_RATE / freq
+        val interval     = mutableListOf<Float>()
+        val period       = mutableListOf<Float>()
+        val periodLength = SAMPLE_RATE / freq .toInt()
 
         //Calculate y-values in a single period
         for (i in 0 until periodLength){
-            period.add((sin(TWO_PI * i / periodLength) * MAX_16BIT_VALUE).toInt())
+            period.add(sin(TWO_PI * i / periodLength).toFloat())
         }
 
         //Repeat this period until it is the desired length
@@ -159,9 +159,6 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
     override val data = s1.data
                             .zip(s2.data)
                             .map { it.first + it.second }
-                            .normalize()
-
-
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }
