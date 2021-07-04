@@ -7,15 +7,17 @@ import android.util.Log
 import kotlin.math.PI
 import kotlin.math.sin
 
-
+//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
 fun List<Float>.normalize(): List<Float> =
-    if (size > 0) run {
-    //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-            val minValue = this.minByOrNull { it }!!
-            val maxValue = this.maxByOrNull { it }!!
-            this.map { 2f * ( (it - minValue) / (maxValue - minValue) ) - 1f }
+    if (size > 0) {
+        val minValue = this.minByOrNull { it }!!
+        val maxValue = this.maxByOrNull { it }!!
+
+        if (minValue >= -1 && maxValue <= 1) this
+        else this.map { 2 * ( (it - minValue) / (maxValue - minValue) ) - 1 }
     }
     else NullSignal().data
+
 
 
 fun ByteArray.toList(bit: Int = 16): List<Int>{
@@ -103,7 +105,8 @@ abstract class Signal: SignalProperties{
             .normalize()                      //range -> -1.0 to 1.0
             .map { it * MAX_16BIT_VALUE }     //range -> -32,768.0 to 32,767.0
             .map { it.toInt() }               //range -> -32,768 to 32,767
-        Log.d("m_toByteArray()", "Int Array: $intArray")
+        Log.d("m_toByteArray()", "Before:${this}")
+        Log.d("m_toByteArray()", "After: ${this.normalize()}")
 
         val byteArray = ByteArray(size * 2)
         var bIndex = 0
