@@ -24,7 +24,7 @@ enum class Interval(val ratio: Float){
  *          (Unfortunately, I couldn't use # for sharp, as it is a literal)
  *      Third character:  octave
  */
-enum class Tone(val freq: Float) {
+enum class Note(val freq: Float) {
     C_0 (16.35f),
     Cs0 (17.32f),
     Df0 (17.32f),

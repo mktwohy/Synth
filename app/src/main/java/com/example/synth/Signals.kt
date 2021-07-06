@@ -27,7 +27,6 @@ abstract class Signal: SignalProperties{
         const val TWO_PI              = 2.0 * PI
         const val MIN_16BIT_VALUE     = -32_768
         const val MAX_16BIT_VALUE     = 32_767
-        const val MAX_UNSIGNED_16BIT  = 65535
     }
 
     fun play(): AudioTrack{
@@ -49,9 +48,7 @@ abstract class Signal: SignalProperties{
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
 
-            audio.write(data.normalize().toIntArray().toShortArray(),
-                0,
-                data.size)
+            audio.write(data.normalize().toIntArray().toShortArray(), 0, data.size)
             audio.play()
 
 
