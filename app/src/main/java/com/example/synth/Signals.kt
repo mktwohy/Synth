@@ -7,27 +7,6 @@ import android.util.Log
 import kotlin.math.PI
 import kotlin.math.sin
 
-//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-fun List<Float>.normalize(): List<Float> =
-    if (size > 0) {
-        val minValue = this.minByOrNull { it }!!
-        val maxValue = this.maxByOrNull { it }!!
-
-        if (minValue >= -1 && maxValue <= 1) this
-        else this.map { 2 * ( (it - minValue) / (maxValue - minValue) ) - 1 }
-    }
-    else NullSignal().data
-
-
-
-fun ByteArray.toList(bit: Int = 16): List<Int>{
-    return if(bit == 8) this.toList()
-        else this
-            .toList()
-            .chunked(2)
-            .map{ it[0] + it[1] }
-            .toList()
-}
 
 fun List<Signal>.sum() = when(size){
         0 -> NullSignal()
@@ -45,30 +24,11 @@ abstract class Signal: SignalProperties{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_DURATION   = MainActivity.BUFFER_DURATION
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
-        const val TWO_PI            = 2.0 * PI
+        const val TWO_PI              = 2.0 * PI
         const val MIN_16BIT_VALUE     = -32_768
         const val MAX_16BIT_VALUE     = 32_767
-
-        val IntToByteArrayLookupTable = run{
-            val table = mutableMapOf<Int, ByteArray>()
-            for (i in MIN_16BIT_VALUE..MAX_16BIT_VALUE){
-                table[i] = i.toBigInteger().toByteArray()
-            }
-            table
-        }
-
+        const val MAX_UNSIGNED_16BIT  = 65535
     }
-
-    override fun toString(): String{
-        val s = StringBuilder()
-        for(byte in data){
-            s.append(byte.toFloat())
-            s.append(" ")
-        }
-        return s.toString()
-    }
-
-    operator fun plus(that: Signal) = SumSignal(this, that)
 
     fun play(): AudioTrack{
         val start = System.currentTimeMillis() //start latency timer
@@ -82,15 +42,16 @@ abstract class Signal: SignalProperties{
             .setAudioFormat(
                 AudioFormat.Builder()
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .setSampleRate(44100)
+                    .setSampleRate(SAMPLE_RATE)
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build())
-            .setBufferSizeInBytes(data.size * 2)
+            .setBufferSizeInBytes(data.size)
             .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
 
-
-            audio.write(data.toByteArray(), 0, data.size * 2)
+            audio.write(data.normalize().toIntArray().toShortArray(),
+                0,
+                data.size)
             audio.play()
 
 
@@ -100,27 +61,41 @@ abstract class Signal: SignalProperties{
         return audio
     }
 
-    private fun List<Float>.toByteArray(): ByteArray {
-        val intArray = this
-            .normalize()                      //range -> -1.0 to 1.0
-            .map { it * MAX_16BIT_VALUE }     //range -> -32,768.0 to 32,767.0
-            .map { it.toInt() }               //range -> -32,768 to 32,767
-        Log.d("m_toByteArray()", "Before:${this}")
-        Log.d("m_toByteArray()", "After: ${this.normalize()}")
+    //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+    private fun List<Float>.normalize(
+        lowerBound: Float = -1f,
+        upperBound: Float = 1f
+    ) =
+        if (size > 0) {
+            val minValue = this.minByOrNull { it }!!
+            val maxValue = this.maxByOrNull { it }!!
 
-        val byteArray = ByteArray(size * 2)
-        var bIndex = 0
-        for (i in indices) {
-            val bytes = IntToByteArrayLookupTable[intArray[i]]
-            if (bytes != null){
-                if (bytes.size > 1)
-                    byteArray[bIndex] = bytes[1]
-                byteArray[bIndex+1] = bytes[0]
+            if (minValue >= -1 && maxValue <= 1) this
+            else this.map {
+                (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound
             }
-            bIndex += 2
         }
-        return byteArray
+        else NullSignal().data
+
+    private fun List<Float>.toIntArray(scalar: Int = MAX_16BIT_VALUE) =
+        this.map { (it * scalar).toInt() }
+
+    private fun List<Int>.toShortArray() =
+        this.map { it.toShort() }.toShortArray()
+
+
+    override fun toString(): String{
+        val s = StringBuilder()
+        for(value in data){
+            s.append(value)
+            s.append(" ")
+        }
+        return s.toString()
     }
+
+    operator fun plus(that: Signal) =
+        SumSignal(this, that)
+
 }
 
 /**
