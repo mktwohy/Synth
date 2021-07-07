@@ -5,12 +5,13 @@ import android.content.res.Resources
 import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 
 data class Key(
     val name: Note,
+    val color: Paint,
     var signal: Signal,
-    var isPressed: Boolean = false,
     val rects: MutableList<RectF> = mutableListOf()
     )
 
@@ -22,6 +23,7 @@ data class PianoGrid(
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
+    val pressedKeys = mutableSetOf<Key>()
     private val screen = (Resources.getSystem().displayMetrics)
     private val whiteWidth = screen.widthPixels / 7.toFloat()
     private val whiteHeight = screen.heightPixels.toFloat()
@@ -29,7 +31,7 @@ class PianoView(context: Context, attrs: AttributeSet)
     private val blackHeight = whiteHeight * 0.55f
 
     private val white = Paint().apply { setARGB(255, 255, 255, 255) }
-    private val purple = Paint().apply { setARGB(255, 255, 0, 255) }
+    private val purple = Paint().apply { setARGB(100, 255, 0, 255) }
     private val black = Paint().apply {
         setARGB(255, 0, 0, 0)
         strokeWidth = whiteWidth / 80
@@ -39,7 +41,7 @@ class PianoView(context: Context, attrs: AttributeSet)
     private val pianoGrid: PianoGrid
 
     init{
-        keys = createKeys(4 * 12..5 * 12)
+        keys = createKeys(4 * 12 until 5 * 12)
         pianoGrid = createGrid()
         assignRectsToKeys()
     }
@@ -47,14 +49,15 @@ class PianoView(context: Context, attrs: AttributeSet)
     private fun createKeys(noteRange: IntRange): List<Key>{
         Log.d("m_funCall","InitKeys!")
         val kList = mutableListOf<Key>().apply {
-            val notes = Note.values().toList().subList(noteRange.first, noteRange.last)
+            val notes = Note.values().toList().subList(noteRange.first, noteRange.last+1)
             for (n in notes) {
-                this.add(Key(n, SinSignal(n.freq)))
+                val color = if (n.name[1] == '_')
+                    white else black
+                add(Key(n, color, SinSignal(n.freq)))
             }
         }
         return kList.toList()
     }
-
 
     private fun createGrid(): PianoGrid {
         Log.d("m_funCall","initGrid!")
@@ -122,6 +125,26 @@ class PianoView(context: Context, attrs: AttributeSet)
         }
     }
 
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (event?.action != MotionEvent.ACTION_DOWN && event?.action != MotionEvent.ACTION_MOVE)
+            return false
+
+
+        val (x, y) = event.x to event.y
+        Log.d("m_touch", "Touch at $x, $y")
+
+        for(key in keys){
+            for(rect in key.rects)
+                if ( (x in rect.left..rect.right) && (y in rect.top..rect.bottom) ){
+                    Log.d("m_touch", "${key.name} PRESSED")
+                    pressedKeys.add(key)
+                    postInvalidate()
+                    return true
+                }
+        }
+        return false
+    }
+
     override fun onDraw(canvas: Canvas?) {
         Log.d("m_funCall","onDraw!")
         super.onDraw(canvas)
@@ -129,12 +152,13 @@ class PianoView(context: Context, attrs: AttributeSet)
 
         for (k in keys) {
             for (rect in k.rects) {
-                if (k.name.toString()[1] == '_')
-                    canvas.apply {
-                        drawRect(rect, white)
+                canvas.apply {
+                    drawRect(rect, k.color)
+                    if (k.color == white)
                         drawLine(rect.left, rect.top, rect.left, rect.bottom, black)
-                    }
-                else canvas.drawRect(rect, black)
+                    if(k in pressedKeys)
+                        drawRect(rect, purple)
+                }
             }
         }
     }

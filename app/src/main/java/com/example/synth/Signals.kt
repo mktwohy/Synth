@@ -45,11 +45,17 @@ abstract class Signal: SignalProperties{
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build())
             .setBufferSizeInBytes(data.size)
-            .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+            .setTransferMode(AudioTrack.MODE_STATIC)
+            //.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
             .build()
 
-            audio.write(data.normalize().toIntArray().toShortArray(), 0, data.size)
-            audio.play()
+        audio.apply{
+            setLoopPoints(0, data.size/2, -1)
+            write(data.normalize().toIntArray().toShortArray(), 0, data.size)
+            play()
+        }
+
+
 
 
         Log.d("m_latency",
@@ -108,11 +114,13 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  * @param freq frequency of wave
  * @param numPeriods number of times the period will repeat in Signal's interval
  */
-class SinSignal(private val freq: Float, numPeriods: Int = 100) : Signal() {
+class SinSignal(private val freq: Float, duration: Int = BUFFER_DURATION) : Signal() {
     override val data = run{
         val interval     = mutableListOf<Float>()
         val period       = mutableListOf<Float>()
         val periodLength = SAMPLE_RATE / freq .toInt()
+        val numPeriods   = (BUFFER_SIZE / periodLength) * 20
+        Log.d("m_period", "$numPeriods periods")
 
         //Calculate y-values in a single period
         for (i in 0 until periodLength){

@@ -65,6 +65,13 @@ class MainActivity : AppCompatActivity() {
             Log.d("m_debug","Audio CLEARED")
         }
 
+        fun addPressedKeysToBuffer(){
+            for(k in bind.piano.pressedKeys){
+                buffer.add(k.signal)
+            }
+            bind.piano.pressedKeys.clear()
+        }
+
         fun playAudioInBuffer(){
             val signalSum = buffer.toList().sum()
             Log.d("m_debug", "${buffer.size} Notes: $signalSum")
@@ -74,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
         Thread {
             while (true) {
-
+                addPressedKeysToBuffer()
                 if(audioTracks.size > 20) clearAudioTrackMemory()
                 if(buffer.isNotEmpty()) playAudioInBuffer()
                 Thread.sleep(BUFFER_DURATION.toLong())
