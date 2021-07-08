@@ -17,10 +17,16 @@ fun List<Signal>.sum() = when(size){
 
 interface SignalProperties{
     val data: List<Float>
+    val pcmData: ShortArray
 }
 
 abstract class Signal: SignalProperties{
-    companion object{
+    override val pcmData: ShortArray by lazy {
+        data.normalize().toIntArray().toShortArray()
+    }
+
+
+        companion object{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_DURATION   = MainActivity.BUFFER_DURATION
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
@@ -29,75 +35,76 @@ abstract class Signal: SignalProperties{
         const val MAX_16BIT_VALUE     = 32_767
     }
 
-    fun play(): AudioTrack{
-        val start = System.currentTimeMillis() //start latency timer
+        fun play(): AudioTrack{
+            val start = System.currentTimeMillis() //start latency timer
 
-        val audio = AudioTrack.Builder()
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_GAME)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build())
-            .setAudioFormat(
-                AudioFormat.Builder()
-                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .setSampleRate(SAMPLE_RATE)
-                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                    .build())
-            .setBufferSizeInBytes(data.size)
-            .setTransferMode(AudioTrack.MODE_STATIC)
-            //.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
-            .build()
+            val audio = AudioTrack.Builder()
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_GAME)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build())
+                .setAudioFormat(
+                    AudioFormat.Builder()
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setSampleRate(SAMPLE_RATE)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .build())
+                .setBufferSizeInBytes(data.size)
+                .setTransferMode(AudioTrack.MODE_STATIC)
+                //.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+                .build()
 
-        audio.apply{
-            setLoopPoints(0, data.size/2, -1)
-            write(data.normalize().toIntArray().toShortArray(), 0, data.size)
-            play()
-        }
-
-
-
-
-        Log.d("m_latency",
-            "Latency: ${System.currentTimeMillis() - start} ms") //end latency timer
-
-        return audio
-    }
-
-    //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-    private fun List<Float>.normalize(
-        lowerBound: Float = -1f,
-        upperBound: Float = 1f
-    ) =
-        if (size > 0) {
-            val minValue = this.minByOrNull { it }!!
-            val maxValue = this.maxByOrNull { it }!!
-
-            if (minValue >= -1 && maxValue <= 1) this
-            else this.map {
-                (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound
+            audio.apply{
+                setLoopPoints(0, data.size/2, -1)
+                write(data.normalize().toIntArray().toShortArray(), 0, data.size)
+                play()
             }
+
+
+
+
+            Log.d("m_latency",
+                "Latency: ${System.currentTimeMillis() - start} ms") //end latency timer
+
+            return audio
         }
-        else NullSignal().data
 
-    private fun List<Float>.toIntArray(scalar: Int = MAX_16BIT_VALUE) =
-        this.map { (it * scalar).toInt() }
+        //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+        fun List<Float>.normalize(
+            lowerBound: Float = -1f,
+            upperBound: Float = 1f
+        ) =
+            if (size > 0) {
+                val minValue = this.minByOrNull { it }!!
+                val maxValue = this.maxByOrNull { it }!!
 
-    private fun List<Int>.toShortArray() =
-        this.map { it.toShort() }.toShortArray()
+                if (minValue >= -1 && maxValue <= 1) this
+                else this.map {
+                    (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound
+                }
+            }
+            else NullSignal().data
+
+        fun List<Float>.toIntArray(scalar: Int = MAX_16BIT_VALUE) =
+            this.map { (it * scalar).toInt() }
+
+        fun List<Int>.toShortArray() =
+            this.map { it.toShort() }.toShortArray()
 
 
-    override fun toString(): String{
-        val s = StringBuilder()
-        for(value in data){
-            s.append(value)
-            s.append(" ")
+        override fun toString(): String{
+            val s = StringBuilder()
+            for(value in data){
+                s.append(value)
+                s.append(" ")
+            }
+            return s.toString()
         }
-        return s.toString()
-    }
 
-    operator fun plus(that: Signal) =
-        SumSignal(this, that)
+        operator fun plus(that: Signal) =
+            SumSignal(this, that)
+
 
 }
 
@@ -107,6 +114,7 @@ abstract class Signal: SignalProperties{
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val data = List(size) { 0f }
+
 }
 
 /**
@@ -131,6 +139,7 @@ class SinSignal(private val freq: Float, duration: Int = BUFFER_DURATION) : Sign
         repeat(numPeriods){ interval.addAll(period) }
         interval
     }
+
 }
 
 /**
