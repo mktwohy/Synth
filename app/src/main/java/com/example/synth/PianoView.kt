@@ -126,24 +126,35 @@ class PianoView(context: Context, attrs: AttributeSet)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event?.action != MotionEvent.ACTION_DOWN && event?.action != MotionEvent.ACTION_MOVE)
-            return false
+        if (event == null) return false
 
+        fun addPressedKey(x: Float, y: Float){
+            pressedKeys.clear()
 
-        val (x, y) = event.x to event.y
-        Log.d("m_touch", "Touch at $x, $y")
-
-        for(key in keys){
-            for(rect in key.rects)
-                if ( (x in rect.left..rect.right) && (y in rect.top..rect.bottom) ){
-                    Log.d("m_touch", "${key.name} PRESSED")
-                    pressedKeys.add(key)
-                    postInvalidate()
-                    return true
-                }
+            for(key in keys) {
+                for (rect in key.rects)
+                    if ((x in rect.left..rect.right) && (y in rect.top..rect.bottom)) {
+                        pressedKeys.add(key)
+                    }
+            }
         }
-        return false
+
+        for (i in 0 until event.pointerCount) {
+            val x = event.getX(i)
+            val y = event.getY(i)
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> addPressedKey(x, y)
+              MotionEvent.ACTION_MOVE -> { pressedKeys.clear()
+                addPressedKey(event.x, event.y) }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> pressedKeys.clear()
+            }
+        }
+
+        return true
+
     }
+
+
 
     override fun onDraw(canvas: Canvas?) {
         Log.d("m_funCall","onDraw!")

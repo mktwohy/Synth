@@ -35,43 +35,9 @@ abstract class Signal: SignalProperties{
         const val MAX_16BIT_VALUE     = 32_767
     }
 
-        fun play(): AudioTrack{
-            val start = System.currentTimeMillis() //start latency timer
-
-            val audio = AudioTrack.Builder()
-                .setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_GAME)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build())
-                .setAudioFormat(
-                    AudioFormat.Builder()
-                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                        .setSampleRate(SAMPLE_RATE)
-                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                        .build())
-                .setBufferSizeInBytes(data.size)
-                .setTransferMode(AudioTrack.MODE_STATIC)
-                //.setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
-                .build()
-
-            audio.apply{
-                setLoopPoints(0, data.size/2, -1)
-                write(data.normalize().toIntArray().toShortArray(), 0, data.size)
-                play()
-            }
-
-
-
-
-            Log.d("m_latency",
-                "Latency: ${System.currentTimeMillis() - start} ms") //end latency timer
-
-            return audio
-        }
 
         //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-        fun List<Float>.normalize(
+        private fun List<Float>.normalize(
             lowerBound: Float = -1f,
             upperBound: Float = 1f
         ) =
@@ -86,10 +52,10 @@ abstract class Signal: SignalProperties{
             }
             else NullSignal().data
 
-        fun List<Float>.toIntArray(scalar: Int = MAX_16BIT_VALUE) =
+        private fun List<Float>.toIntArray(scalar: Int = MAX_16BIT_VALUE) =
             this.map { (it * scalar).toInt() }
 
-        fun List<Int>.toShortArray() =
+        private fun List<Int>.toShortArray() =
             this.map { it.toShort() }.toShortArray()
 
 
@@ -104,8 +70,6 @@ abstract class Signal: SignalProperties{
 
         operator fun plus(that: Signal) =
             SumSignal(this, that)
-
-
 }
 
 /**
@@ -114,7 +78,6 @@ abstract class Signal: SignalProperties{
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val data = List(size) { 0f }
-
 }
 
 /**
@@ -122,12 +85,12 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  * @param freq frequency of wave
  * @param numPeriods number of times the period will repeat in Signal's interval
  */
-class SinSignal(private val freq: Float, duration: Int = BUFFER_DURATION) : Signal() {
+class SinSignal(private val freq: Float) : Signal() {
     override val data = run{
         val interval     = mutableListOf<Float>()
         val period       = mutableListOf<Float>()
         val periodLength = SAMPLE_RATE / freq .toInt()
-        val numPeriods   = (BUFFER_SIZE / periodLength) * 20
+        val numPeriods   = (BUFFER_SIZE / periodLength)
         Log.d("m_period", "$numPeriods periods")
 
         //Calculate y-values in a single period
