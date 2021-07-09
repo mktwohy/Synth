@@ -3,7 +3,6 @@ package com.example.synth
 import android.media.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
@@ -25,12 +24,11 @@ class MainActivity : AppCompatActivity() {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        Log.d("m_debug","created")
         mainLoop()
     }
 
     private fun mainLoop(){
-        val at = AudioTrack.Builder()
+        val audioTrack = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_GAME)
@@ -46,11 +44,11 @@ class MainActivity : AppCompatActivity() {
             .build()
 
 
-        at.play()
+        audioTrack.play()
         Thread {
             while (true) {
-                val pk = bind.piano.pressedKeys.map { it.signal }.sum().pcmData
-                at.write(pk, 0, pk.size)
+                val pcm = bind.piano.pcmOutput
+                audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }
         }.start()

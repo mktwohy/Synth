@@ -9,8 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.Window
 import androidx.core.view.doOnLayout
-
-
+import androidx.core.view.doOnNextLayout
 
 /**
  * An interactive piano keyboard
@@ -25,7 +24,7 @@ class PianoView(context: Context, attrs: AttributeSet)
         /**
          * Stores information about each Key in the PianoView
          * @param name   The fundamental note name associated with the Key
-         * @param color  The color of the Key, which is either black or white
+         * @param color  The Key's Paint, which is either black or white
          * @param signal The Signal that will play when the note is pressed
          * @param rects  The RectF objects that make up the Key.
          * These rectangles are used to draw the Key on screen and define the Key's hitbox
@@ -57,14 +56,15 @@ class PianoView(context: Context, attrs: AttributeSet)
         private val purple = Paint().apply { setARGB(100, 255, 0, 255) }
         private val black  = Paint().apply { setARGB(255, 0, 0, 0) ; strokeWidth = 2f }
 
-        private fun createKeys(octave: Int) =
-            Note.notesInOctave(octave).map { note ->
+        private fun createKeys(octave: Int): List<Key> {
+            return Note.notesInOctave(octave).map { note ->
                 Key(
                     note,
                     if (note.name[1] == '_') white else black,
                     SinSignal(note.freq)
                 )
             }
+        }
 
         private fun createGrid(viewWidth: Int, viewHeight: Int): PianoGrid {
             val whiteWidth  = viewWidth / 7 .toFloat()
@@ -136,22 +136,37 @@ class PianoView(context: Context, attrs: AttributeSet)
     }
 
     val pressedKeys  = mutableSetOf<Key>()
+    var pcmOutput: ShortArray = NullSignal().pcmData
     private val keys = createKeys(4)
     private lateinit var pianoGrid: PianoGrid
 
     init{
-        rootView.doOnLayout {
+        rootView.doOnNextLayout {
             pianoGrid = createGrid(width, height)
             assignRectsToKeys(pianoGrid, keys)
         }
     }
 
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        if (canvas == null) return
+
+        for (k in keys) {
+            for (r in k.rects) {
+                canvas.apply {
+                    drawRect(r, k.color)
+                    if (k.color == white) drawLine(r.left, r.top, r.left, r.bottom, black)
+                    if(k in pressedKeys)  drawRect(r, purple)
+                }
+            }
+        }
+    }
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
+        pressedKeys.clear()
 
         fun addPressedKey(x: Float, y: Float){
-            pressedKeys.clear()
-
             for(key in keys) {
                 for (rect in key.rects)
                     if ((x in rect.left..rect.right) && (y in rect.top..rect.bottom)) {
@@ -170,25 +185,9 @@ class PianoView(context: Context, attrs: AttributeSet)
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> pressedKeys.clear()
             }
         }
+        pcmOutput = pressedKeys.map { it.signal }.sum().pcmData
         return true
-
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        Log.d("m_funCall","onDraw!")
-        super.onDraw(canvas)
-        if (canvas == null) return
 
-        for (k in keys) {
-            for (r in k.rects) {
-                canvas.apply {
-                    drawRect(r, k.color)
-                    if (k.color == white)
-                        drawLine(r.left, r.top, r.left, r.bottom, black)
-                    if(k in pressedKeys)
-                        drawRect(r, purple)
-                }
-            }
-        }
-    }
 }
