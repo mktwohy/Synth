@@ -26,19 +26,16 @@ class PianoView(context: Context, attrs: AttributeSet)
          * @param name   The fundamental note name associated with the Key
          * @param color  The Key's Paint, which is either black or white
          * @param signal The Signal that will play when the note is pressed
-         * @param rects  The RectF objects that make up the Key.
-         * These rectangles are used to draw the Key on screen and define the Key's hitbox
          */
         data class Key(
             val name: Note,
             val color: Paint,
             var signal: Signal,
-            val rects: MutableList<RectF> = mutableListOf()
         )
 
         /**
          * A Grid of RectF objects that are used to draw each Key on screen and identify which Key the user
-         * touches. The grid is made up of two rows that cut the keyboard in half.
+         * touches. The grid is made up of two rows that horizontally cut the keyboard in half
          *
          * Every white key is made up of one Rect from the bottom row and one from the top row,
          * whereas every black key is made up of one Rect from the top row.
@@ -103,17 +100,16 @@ class PianoView(context: Context, attrs: AttributeSet)
             )
         }
 
-        private fun assignRectsToKeys(pianoGrid: PianoGrid, keys: List<Key>) {
-            Log.d("m_funCall","assignRectsToKeys!")
+        private fun assignRectsToKeys(pianoGrid: PianoGrid, keys: List<Key>,
+                                      rectToKey: MutableMap<RectF, Key>
+        ) {
             fun assignWhite(key: Key, topRowIndex: Int, bottomRowIndex: Int) {
-                key.rects.apply {
-                    add(pianoGrid.bottomRow[bottomRowIndex])
-                    add(pianoGrid.topRow[topRowIndex])
-                }
+                rectToKey[pianoGrid.bottomRow[bottomRowIndex]] = key
+                rectToKey[pianoGrid.topRow[topRowIndex]] = key
             }
 
             fun assignBlack(key: Key, topRowIndex: Int) {
-                key.rects.add(pianoGrid.topRow[topRowIndex])
+                rectToKey[pianoGrid.topRow[topRowIndex]] = key
             }
 
             for (k in keys) {
@@ -135,15 +131,16 @@ class PianoView(context: Context, attrs: AttributeSet)
         }
     }
 
-    val pressedKeys  = mutableSetOf<Key>()
+    val pressedKeys = mutableSetOf<Key>()
     var pcmOutput: ShortArray = NullSignal().pcmData
     private val keys = createKeys(4)
+    private val rectToKey = mutableMapOf<RectF, Key>()
     private lateinit var pianoGrid: PianoGrid
 
     init{
         rootView.doOnNextLayout {
             pianoGrid = createGrid(width, height)
-            assignRectsToKeys(pianoGrid, keys)
+            assignRectsToKeys(pianoGrid, keys, rectToKey)
         }
     }
 
@@ -151,13 +148,12 @@ class PianoView(context: Context, attrs: AttributeSet)
         super.onDraw(canvas)
         if (canvas == null) return
 
-        for (k in keys) {
-            for (r in k.rects) {
-                canvas.apply {
-                    drawRect(r, k.color)
-                    if (k.color == white) drawLine(r.left, r.top, r.left, r.bottom, black)
-                    if(k in pressedKeys)  drawRect(r, purple)
-                }
+        for (r in pianoGrid.topRow + pianoGrid.bottomRow) {
+            val k = rectToKey[r]!!
+            canvas.apply {
+                drawRect(r, k.color)
+                if (k.color == white) drawLine(r.left, r.top, r.left, r.bottom, black)
+                if(k in pressedKeys)  drawRect(r, purple)
             }
         }
     }
@@ -166,24 +162,35 @@ class PianoView(context: Context, attrs: AttributeSet)
         if (event == null) return false
         pressedKeys.clear()
 
-        fun addPressedKey(x: Float, y: Float){
-            for(key in keys) {
-                for (rect in key.rects)
-                    if ((x in rect.left..rect.right) && (y in rect.top..rect.bottom)) {
-                        pressedKeys.add(key)
-                    }
+        fun getKey(x: Float, y: Float): Key?{
+            if(y < height/2) {    //search top row
+                for (rect in pianoGrid.topRow)
+                    if (x in rect.left..rect.right) return rectToKey[rect]
             }
+            else {                //search bottom row
+                for (rect in pianoGrid.bottomRow)
+                    if (x in rect.left..rect.right) return rectToKey[rect]
+            }
+            return null
         }
 
         for (i in 0 until event.pointerCount) {
-            val x = event.getX(i)
-            val y = event.getY(i)
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> addPressedKey(x, y)
-              MotionEvent.ACTION_MOVE -> { pressedKeys.clear()
-                addPressedKey(event.x, event.y) }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> pressedKeys.clear()
+            val key = getKey(event.getX(i), event.getY(i))
+            if(key != null) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                        pressedKeys.add(key)
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        pressedKeys.clear()
+                        pressedKeys.add(key)
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL ->
+                        pressedKeys.remove(key)
+                    }
             }
+            else Log.d("m_nullKey", "key is null")
+
         }
         pcmOutput = pressedKeys.map { it.signal }.sum().pcmData
         return true

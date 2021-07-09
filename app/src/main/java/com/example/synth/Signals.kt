@@ -27,9 +27,8 @@ abstract class Signal: SignalProperties{
     }
 
 
-        companion object{
+    companion object{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
-        const val BUFFER_DURATION   = MainActivity.BUFFER_DURATION
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
         const val TWO_PI              = 2.0 * PI
         const val MIN_16BIT_VALUE     = -32_768
