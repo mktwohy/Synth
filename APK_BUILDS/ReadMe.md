@@ -5,5 +5,5 @@ Install Instructions:
   - Builds use the following naming scheme: Synth_v(month)-(day)-(year)
 - Click "view raw." 
   - This should download the file. 
-- Once downloaded, click on the download and it should automatically. 
-  - If it doesn't install, you'll need to enable installs from unknown sources (which, in this case, should be your web browser). 
+- Once downloaded, click on the download and it should automatically install. 
+  - If it doesn't install, you'll need to go to your web browser app settings and enable the option titled "Install Unknown Apps"
