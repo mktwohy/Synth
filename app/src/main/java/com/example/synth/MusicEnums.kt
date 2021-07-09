@@ -137,5 +137,9 @@ enum class Note(val freq: Float) {
     companion object{
         fun subList(noteRange: IntRange) =
             Note.values().toList().subList(noteRange.first, noteRange.last+1)
+
+        fun notesInOctave(octave: Int) =
+            if (octave > 8) listOf<Note>()
+            else subList(octave*12 until ((octave+1) * 12) )
     }
 }
