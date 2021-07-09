@@ -8,6 +8,14 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 
+/**
+ * Stores information about each Key in the PianoView
+ * @param name   The fundamental note name associated with the Key
+ * @param color  The color of the Key, which is either black or white
+ * @param signal The Signal that will play when the note is pressed
+ * @param rects  The RectF objects that make up the Key.
+ * These rectangles are used to draw the Key on screen and define the Key's hitbox
+ */
 data class Key(
     val name: Note,
     val color: Paint,
@@ -15,11 +23,28 @@ data class Key(
     val rects: MutableList<RectF> = mutableListOf()
     )
 
+/**
+ * A Grid of RectF objects that are used to draw each Key on screen and identify which Key the user
+ * touches. The grid is made up of two rows that cut the keyboard in half.
+ *
+ * Every white key is made up of one Rect from the bottom row and one from the top row,
+ * whereas every black key is made up of one Rect from the top row.
+ *
+ * @param topRow A list of 11 rectangles that visually define the top row
+ * (black keys and partial white keys)
+ * @param bottomRow A list of 7 rects that visually define the bottom row (only white keys)
+ */
 data class PianoGrid(
     val topRow      : List<RectF> = listOf(),
     val bottomRow   : List<RectF> = listOf()
 )
 
+/**
+ * An interactive piano keyboard
+ *
+ * A PianoView is made up of Keys which are visually represented by the PianoGrid
+ * @property pressedKeys A set of Keys which are currently pressed
+ */
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
@@ -46,18 +71,10 @@ class PianoView(context: Context, attrs: AttributeSet)
         assignRectsToKeys()
     }
 
-    private fun createKeys(noteRange: IntRange): List<Key>{
-        Log.d("m_funCall","InitKeys!")
-        val kList = mutableListOf<Key>().apply {
-            val notes = Note.values().toList().subList(noteRange.first, noteRange.last+1)
-            for (n in notes) {
-                val color = if (n.name[1] == '_')
-                    white else black
-                add(Key(n, color, SinSignal(n.freq)))
-            }
+    private fun createKeys(noteRange: IntRange) =
+        Note.subList(noteRange).map { note ->
+            (Key(note, if (note.name[1] == '_') white else black, SinSignal(note.freq)))
         }
-        return kList.toList()
-    }
 
     private fun createGrid(): PianoGrid {
         Log.d("m_funCall","initGrid!")

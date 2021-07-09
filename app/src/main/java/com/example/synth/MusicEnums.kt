@@ -132,5 +132,10 @@ enum class Note(val freq: Float) {
     Gs8 (6644.88f),
     A_8 (7040.0f),
     As8 (7458.62f),
-    B_8 (7902.13f)
+    B_8 (7902.13f);
+
+    companion object{
+        fun subList(noteRange: IntRange) =
+            Note.values().toList().subList(noteRange.first, noteRange.last+1)
+    }
 }

@@ -20,6 +20,7 @@ interface SignalProperties{
     val pcmData: ShortArray
 }
 
+/** Generates a sound and the associated PCM data, which can be played by an AudioTrack */
 abstract class Signal: SignalProperties{
     override val pcmData: ShortArray by lazy {
         data.normalize().toIntArray().toShortArray()
