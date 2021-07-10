@@ -132,8 +132,8 @@ class PianoView(context: Context, attrs: AttributeSet)
     }
 
     val pressedKeys = mutableSetOf<Key>()
-    var pcmOutput: ShortArray = NullSignal().pcmData
-    private val keys = createKeys(4)
+    var pcmOutput: ShortArray = Signal.NullSignal.pcmData
+    private val keys = createKeys(5)
     private val rectToKey = mutableMapOf<RectF, Key>()
     private lateinit var pianoGrid: PianoGrid
 
@@ -181,11 +181,10 @@ class PianoView(context: Context, attrs: AttributeSet)
                     MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                         pressedKeys.add(key)
                     }
-                    MotionEvent.ACTION_MOVE -> {
-                        pressedKeys.clear()
+                    MotionEvent.ACTION_MOVE-> {
                         pressedKeys.add(key)
                     }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL ->
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL ->
                         pressedKeys.remove(key)
                     }
             }

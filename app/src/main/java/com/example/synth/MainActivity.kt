@@ -3,8 +3,10 @@ package com.example.synth
 import android.media.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
+import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
@@ -41,12 +43,13 @@ class MainActivity : AppCompatActivity() {
                     .build())
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
+            .apply { play() }
 
-
-        audioTrack.play()
         Thread {
             while (true) {
                 val pcm = bind.piano.pcmOutput
+                val pcmData = pcm.toList()
+                Log.d("m_pcm", "${pcmData.size}: $pcmData")
                 audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }

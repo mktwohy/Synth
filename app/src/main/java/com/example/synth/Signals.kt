@@ -26,13 +26,13 @@ abstract class Signal: SignalProperties{
         data.normalize().toIntArray().toShortArray()
     }
 
-
     companion object{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
         const val TWO_PI              = 2.0 * PI
         const val MIN_16BIT_VALUE     = -32_768
         const val MAX_16BIT_VALUE     = 32_767
+        val NullSignal = NullSignal(BUFFER_SIZE)
     }
 
 
@@ -91,7 +91,6 @@ class SinSignal(private val freq: Float) : Signal() {
         val period       = mutableListOf<Float>()
         val periodLength = SAMPLE_RATE / freq .toInt()
         val numPeriods   = (BUFFER_SIZE / periodLength)
-        Log.d("m_period", "$numPeriods periods")
 
         //Calculate y-values in a single period
         for (i in 0 until periodLength){
@@ -111,9 +110,17 @@ class SinSignal(private val freq: Float) : Signal() {
  * @param s2 second signal in sum
  */
 class SumSignal(s1: Signal, s2: Signal): Signal(){
-    override val data = s1.data
-                            .zip(s2.data)
-                            .map { it.first + it.second }
+    override val data = run {
+        val sum = mutableListOf<Float>()
+        var s1Energy: Float
+        var s2Energy: Float
+        for (i in 0..maxOf(s1.data.size, s2.data.size)){
+            s1Energy = if (i in s1.data.indices) s1.data[i] else 0f
+            s2Energy = if (i in s2.data.indices) s2.data[i] else 0f
+            sum.add(s1Energy + s2Energy)
+        }
+        sum.toList()
+    }
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }
