@@ -47,9 +47,10 @@ class MainActivity : AppCompatActivity() {
 
         Thread {
             while (true) {
-                val pcm = bind.piano.pcmOutput
-                val pcmData = pcm.toList()
-                Log.d("m_pcm", "${pcmData.size}: $pcmData")
+                val pcm = bind.piano.pcmOutput.getNextChunk(BUFFER_SIZE)
+                with(pcm.toList()){
+                    Log.d("m_pcm", "$size: $this")
+                }
                 audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }

@@ -31,6 +31,8 @@ package com.example.synth
             .map{ it[0] + it[1] }
             .toList()
 
+    private fun List<Int>.toShortArray() =
+        this.map { it.toShort() }.toShortArray()
 
 
 

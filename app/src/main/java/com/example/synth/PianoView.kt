@@ -132,7 +132,7 @@ class PianoView(context: Context, attrs: AttributeSet)
     }
 
     val pressedKeys = mutableSetOf<Key>()
-    var pcmOutput: ShortArray = Signal.NullSignal.pcmData
+    var pcmOutput: CircularShortArray = Signal.NullSignal.pcmData
     private val keys = createKeys(5)
     private val rectToKey = mutableMapOf<RectF, Key>()
     private lateinit var pianoGrid: PianoGrid
@@ -189,9 +189,13 @@ class PianoView(context: Context, attrs: AttributeSet)
                     }
             }
             else Log.d("m_nullKey", "key is null")
-
         }
-        pcmOutput = pressedKeys.map { it.signal }.sum().pcmData
+
+        pcmOutput = pressedKeys
+            .map { it.signal }
+            .sum()
+            .pcmData
+
         return true
     }
 
