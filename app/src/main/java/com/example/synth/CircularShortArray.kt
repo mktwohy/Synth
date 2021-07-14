@@ -4,6 +4,7 @@ import java.lang.IndexOutOfBoundsException
 
 class CircularShortArray(size: Int) {
     val data = ShortArray(size)
+    var size = 0
     private var currentIndex = 0
 
     fun getNextChunk(chunkSize: Int): ShortArray {
@@ -24,6 +25,7 @@ class CircularShortArray(size: Int) {
 
     operator fun set(index: Int, value: Short){
         data[index] = value
+        size++
     }
 
 }

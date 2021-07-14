@@ -15,15 +15,15 @@ fun List<Signal>.sum() = when(size){
 
 
 //----- List<Int> ----- //
+//https://www.geeksforgeeks.org/gcd-two-array-numbers/
+fun gcd(a: Int, b: Int): Int =
+    if (a == 0) b
+    else gcd(b % a, a)
+
+fun lcm(a: Int, b: Int): Int =
+    a / gcd(a, b) * b
+
 fun List<Int>.lcm(): Int{
-    //https://www.geeksforgeeks.org/gcd-two-array-numbers/
-    fun gcd(a: Int, b: Int): Int =
-        if (a == 0) b
-        else gcd(b % a, a)
-
-    fun lcm(a: Int, b: Int): Int =
-        a / gcd(a, b) * b
-
     var lcm = this[0]
     for (i in this.indices) {
         lcm *= gcd(lcm, this[i])
@@ -46,7 +46,7 @@ fun List<Int>.toCircularShortArray(): CircularShortArray{
 fun List<Float>.loopToFill(newSize: Int): List<Float>{
     val newList = mutableListOf<Float>()
     repeat((newSize / this.size) + 1) { newList.addAll(this) }
-    return newList.subList(0, newSize - 1)
+    return newList.subList(0, newSize)
 }
 
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1

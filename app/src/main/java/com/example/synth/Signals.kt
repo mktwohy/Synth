@@ -81,7 +81,7 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
 
     override val data =
         run {
-            val intervalLength = SAMPLE_RATE / frequencies.lcm()
+            val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
             val sum = mutableListOf<Float>()
             val s1Looped = s1.data.loopToFill(intervalLength)
             val s2Looped = s2.data.loopToFill(intervalLength)

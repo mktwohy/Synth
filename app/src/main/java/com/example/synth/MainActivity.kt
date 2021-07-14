@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 512
+        const val BUFFER_SIZE = 256
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,12 +46,12 @@ class MainActivity : AppCompatActivity() {
             .apply { play() }
 
         Thread {
+            var pcm: ShortArray
             while (true) {
-                val pcm = bind.piano.pcmOutput.getNextChunk(BUFFER_SIZE)
-                with(pcm.toList()){
-                    Log.d("m_pcm", "$size: $this")
-                }
-                audioTrack.write(pcm, 0, pcm.size)
+                pcm = bind.piano.pcmOutput.getNextChunk(BUFFER_SIZE)
+                with(pcm.toList()){ Log.d("m_pcm", "$size: $this") }
+                if (bind.piano.pressedKeys.size > 0)
+                    audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }
         }.start()

@@ -191,10 +191,7 @@ class PianoView(context: Context, attrs: AttributeSet)
             else Log.d("m_nullKey", "key is null")
         }
 
-        pcmOutput = pressedKeys
-            .map { it.signal }
-            .sum()
-            .pcmData
+        pcmOutput = pressedKeys.map { it.signal }.sum().pcmData
 
         return true
     }
