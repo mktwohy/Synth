@@ -50,8 +50,7 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 pcm = bind.piano.pcmOutput.getNextChunk(BUFFER_SIZE)
                 with(pcm.toList()){ Log.d("m_pcm", "$size: $this") }
-                if (bind.piano.pressedKeys.size > 0)
-                    audioTrack.write(pcm, 0, pcm.size)
+                audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }
         }.start()

@@ -1,15 +1,38 @@
 package com.example.synth
 
 import android.util.Log
+import java.lang.StringBuilder
+import kotlin.system.measureTimeMillis
+
+fun makeBar(yValue: Int): String{
+    val s = StringBuilder()
+    repeat(yValue){ s.append("#") }
+    return s.toString()
+}
+
+operator fun String.times(multiplier: Int) = this.repeat(multiplier)
+
+fun String.repeat(times: Int): String{
+    val s = StringBuilder()
+    repeat(times) { s.append(this) }
+    return s.toString()
+}
+
+val logTab = "\t" * 152
 
 //----- List<Signal> ----- //
-fun List<Signal>.sum() = when(size){
-    0 -> NullSignal()
-    1 -> this[0]
-    2 -> SumSignal(this[0], this[1])
-    else -> this.reduce { sumSig: Signal, nextSig: Signal ->
-        sumSig + nextSig
+fun List<Signal>.sum(): Signal{
+    var ret: Signal
+    val t = measureTimeMillis {
+        ret = when(size){
+            0 -> NullSignal()
+            1 -> this[0]
+            2 -> this[0] + this[1]
+            else -> this.reduce { acc: Signal, sig: Signal -> acc + sig }
+        }
     }
+    Log.d("m_time","sum(): \n $logTab size: $size  \n $logTab time: ${makeBar(t.toInt())}")
+    return ret
 }
 
 
@@ -24,12 +47,23 @@ fun lcm(a: Int, b: Int): Int =
     a / gcd(a, b) * b
 
 fun List<Int>.lcm(): Int{
-    var lcm = this[0]
-    for (i in this.indices) {
-        lcm *= gcd(lcm, this[i])
+    return when (size){
+        0 -> 0
+        1 -> this[0]
+        2 -> lcm(this[0], this[1])
+        else -> run{
+            var lcm = this[0]
+            println("0: $lcm")
+            for (i in indices) {
+                if(i != 0){
+                    lcm *= lcm(lcm, this[i])
+                    println("$i: $lcm")
+
+                }
+            }
+            lcm
+        }
     }
-    Log.d("m_lcm","$lcm")
-    return lcm
 }
 
 fun List<Int>.toCircularShortArray(): CircularShortArray{

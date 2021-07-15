@@ -45,9 +45,9 @@ abstract class Signal: SignalProperties{
  * @param length number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
-    override val data = List(size) { 0f }
-
     override val frequencies = listOf(0)
+
+    override val data = List(size) { 0f }
 }
 
 /**
@@ -58,16 +58,14 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
 class SinSignal(private val freq: Int) : Signal() {
     override val frequencies = listOf(freq)
 
-    override val data = run{
-        val period       = mutableListOf<Float>()
+    override val data = mutableListOf<Float>().apply{
         val periodLength = SAMPLE_RATE / freq
 
         //Calculate y-values in a single period
         for (i in 0 until periodLength){
-            period.add(sin(TWO_PI * i / periodLength).toFloat())
+            add(sin(TWO_PI * i / periodLength).toFloat())
         }
 
-        period
     }
 }
 
@@ -77,19 +75,17 @@ class SinSignal(private val freq: Int) : Signal() {
  * @param s2 second signal in sum
  */
 class SumSignal(s1: Signal, s2: Signal): Signal(){
-    override val frequencies = s1.frequencies + s2.frequencies
+    override val frequencies = (s1.frequencies + s2.frequencies).distinct()
 
-    override val data =
-        run {
-            val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
-            val sum = mutableListOf<Float>()
-            val s1Looped = s1.data.loopToFill(intervalLength)
-            val s2Looped = s2.data.loopToFill(intervalLength)
-            for (i in 0 until intervalLength){
-                sum.add(s1Looped[i] + s2Looped[i])
-            }
-            sum.toList()
+    override val data = mutableListOf<Float>().apply{
+        val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
+        val s1Looped = s1.data.loopToFill(intervalLength)
+        val s2Looped = s2.data.loopToFill(intervalLength)
+
+        for (i in 0 until intervalLength){
+            add(s1Looped[i] + s2Looped[i])
         }
+    }
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }

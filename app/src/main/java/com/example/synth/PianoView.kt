@@ -10,6 +10,7 @@ import android.view.View
 import android.view.Window
 import androidx.core.view.doOnLayout
 import androidx.core.view.doOnNextLayout
+import kotlin.system.measureTimeMillis
 
 /**
  * An interactive piano keyboard
@@ -100,8 +101,10 @@ class PianoView(context: Context, attrs: AttributeSet)
             )
         }
 
-        private fun assignRectsToKeys(pianoGrid: PianoGrid, keys: List<Key>,
-                                      rectToKey: MutableMap<RectF, Key>
+        private fun assignRectsToKeys(
+            pianoGrid: PianoGrid,
+            keys: List<Key>,
+            rectToKey: MutableMap<RectF, Key>
         ) {
             fun assignWhite(key: Key, topRowIndex: Int, bottomRowIndex: Int) {
                 rectToKey[pianoGrid.bottomRow[bottomRowIndex]] = key
@@ -163,11 +166,13 @@ class PianoView(context: Context, attrs: AttributeSet)
         pressedKeys.clear()
 
         fun getKey(x: Float, y: Float): Key?{
-            if(y < height/2) {    //search top row
+            if(y < height/2) {
+                //search top row
                 for (rect in pianoGrid.topRow)
                     if (x in rect.left..rect.right) return rectToKey[rect]
             }
-            else {                //search bottom row
+            else {
+                //search bottom row
                 for (rect in pianoGrid.bottomRow)
                     if (x in rect.left..rect.right) return rectToKey[rect]
             }
@@ -178,20 +183,25 @@ class PianoView(context: Context, attrs: AttributeSet)
             val key = getKey(event.getX(i), event.getY(i))
             if(key != null) {
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+
+                    MotionEvent.ACTION_DOWN,
+                    MotionEvent.ACTION_POINTER_DOWN,
+                    MotionEvent.ACTION_MOVE ->
                         pressedKeys.add(key)
-                    }
-                    MotionEvent.ACTION_MOVE-> {
-                        pressedKeys.add(key)
-                    }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL ->
+
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_POINTER_UP,
+                    MotionEvent.ACTION_CANCEL ->
                         pressedKeys.remove(key)
-                    }
+                }
             }
             else Log.d("m_nullKey", "key is null")
         }
 
-        pcmOutput = pressedKeys.map { it.signal }.sum().pcmData
+        pcmOutput = pressedKeys
+            .map { it.signal }
+            .sum()      //todo this line is the bottleneck
+            .pcmData
 
         return true
     }
