@@ -163,6 +163,7 @@ class PianoView(context: Context, attrs: AttributeSet)
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
+        val oldPressedKeys = pressedKeys.map{ it.name }
         pressedKeys.clear()
 
         fun getKey(x: Float, y: Float): Key?{
@@ -198,10 +199,12 @@ class PianoView(context: Context, attrs: AttributeSet)
             else Log.d("m_nullKey", "key is null")
         }
 
-        pcmOutput = pressedKeys
-            .map { it.signal }
-            .sum()      //todo this line is the bottleneck
-            .pcmData
+        if(pressedKeys.map { it.name } != oldPressedKeys){
+            pcmOutput = pressedKeys
+                .map { it.signal }
+                .sum()
+                .pcmData
+        }
 
         return true
     }
