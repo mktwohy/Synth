@@ -4,7 +4,7 @@ import android.util.Log
 import java.lang.StringBuilder
 import kotlin.system.measureTimeMillis
 
-fun makeBar(yValue: Int): String{
+fun makeHashTagBar(yValue: Int): String{
     val s = StringBuilder()
     repeat(yValue){ s.append("#") }
     return s.toString()
@@ -20,6 +20,13 @@ fun String.repeat(times: Int): String{
 
 val logTab = "\t" * 152
 
+val sumTimes = mutableListOf<Long>()
+
+fun updateAndDisplayAverageSumTime(time: Long){
+    sumTimes.add(time)
+    Log.d("m_averageTime", "Average Sum Time: ${sumTimes.average()}")
+}
+
 //----- List<Signal> ----- //
 fun List<Signal>.sum(): Signal{
     var ret: Signal
@@ -28,10 +35,17 @@ fun List<Signal>.sum(): Signal{
             0 -> NullSignal()
             1 -> this[0]
             2 -> this[0] + this[1]
-            else -> this.reduce { acc: Signal, sig: Signal -> acc + sig }
+            else -> run{
+                var sum = this[0]
+                for (i in 2..this.indices.last){
+                    sum += this[i]
+                }
+                sum
+            }
         }
     }
-    Log.d("m_time","sum(): \n $logTab size: $size  \n $logTab time: ${makeBar(t.toInt())}")
+    Log.d("m_time","$t milliseconds to sum $size notes")
+    updateAndDisplayAverageSumTime(t)
     return ret
 }
 
