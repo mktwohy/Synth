@@ -20,26 +20,22 @@ fun String.repeat(times: Int): String{
 
 val logTab = "\t" * 152
 
-val sumTimes = mutableListOf<Long>()
-
-fun updateAndDisplayAverageSumTime(time: Long){
-    sumTimes.add(time)
-    Log.d("m_averageTime", "Average Sum Time: ${sumTimes.average()}")
-}
-
 //----- List<Signal> ----- //
+val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>()
 fun List<Signal>.sum(): Signal{
-    var ret: Signal
+    if (size == 0) return Signal.NullSignal
+    val ret: Signal
     val t = measureTimeMillis {
-        ret = when(size){
-            0 -> NullSignal()
-            1 -> this[0]
-            2 -> this[0] + this[1]
-            else -> this.reduce { acc: Signal, sig: Signal -> acc + sig }
+         ret = toSet().run{
+            if (this !in signalsToSumSignal)
+                signalsToSumSignal[this] = this.reduce { acc: Signal, sig: Signal -> acc + sig }
+
+            signalsToSumSignal[this]!!
         }
     }
+
+    Log.d("m_mapSize", "signalsToSumSignal size: ${signalsToSumSignal.size}")
     Log.d("m_time","$t milliseconds to sum $size notes")
-    updateAndDisplayAverageSumTime(t)
     return ret
 }
 
@@ -53,6 +49,7 @@ fun gcd(a: Int, b: Int): Int =
 
 fun lcm(a: Int, b: Int): Int =
     a / gcd(a, b) * b
+
 
 fun List<Int>.lcm(): Int{
     return when (size){
@@ -101,9 +98,10 @@ fun List<Float>.normalize(
         val maxValue = this.maxByOrNull { it }!!
 
         if (minValue >= -1 && maxValue <= 1) this
-        else this.map {
-            (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound
-        }
+        else this
+            .map {
+                (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound
+            }
     }
     else NullSignal().data
 

@@ -1,16 +1,11 @@
 package com.example.synth
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.Window
-import androidx.core.view.doOnLayout
 import androidx.core.view.doOnNextLayout
-import kotlin.system.measureTimeMillis
 
 /**
  * An interactive piano keyboard
@@ -134,7 +129,8 @@ class PianoView(context: Context, attrs: AttributeSet)
         }
     }
 
-    val pressedKeys = mutableSetOf<Key>()
+    private val pressedKeys = mutableSetOf<Key>()
+    private val previousKeyNames = mutableListOf<Note>() //used to check if pressedKeys are new or not
     var pcmOutput: CircularShortArray = Signal.NullSignal.pcmData
     private val keys = createKeys(5)
     private val rectToKey = mutableMapOf<RectF, Key>()
@@ -163,7 +159,10 @@ class PianoView(context: Context, attrs: AttributeSet)
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
-        val oldPressedKeys = pressedKeys.map{ it.name }
+        previousKeyNames.apply{
+            clear()
+            addAll( pressedKeys.map{ it.name } )
+        }
         pressedKeys.clear()
 
         fun getKey(x: Float, y: Float): Key?{
@@ -181,25 +180,27 @@ class PianoView(context: Context, attrs: AttributeSet)
         }
 
         for (i in 0 until event.pointerCount) {
-            val key = getKey(event.getX(i), event.getY(i))
-            if(key != null) {
-                when (event.action) {
+            with(
+                getKey(event.getX(i), event.getY(i))
+            ){
+                    if(this != null) {
+                        when (event.action) {
 
-                    MotionEvent.ACTION_DOWN,
-                    MotionEvent.ACTION_POINTER_DOWN,
-                    MotionEvent.ACTION_MOVE ->
-                        pressedKeys.add(key)
+                            MotionEvent.ACTION_DOWN,
+                            MotionEvent.ACTION_POINTER_DOWN,
+                            MotionEvent.ACTION_MOVE ->
+                                pressedKeys.add(this)
 
-                    MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_POINTER_UP,
-                    MotionEvent.ACTION_CANCEL ->
-                        pressedKeys.remove(key)
+                            MotionEvent.ACTION_UP,
+                            MotionEvent.ACTION_POINTER_UP,
+                            MotionEvent.ACTION_CANCEL ->
+                                pressedKeys.remove(this)
+                        }
                 }
             }
-            else Log.d("m_nullKey", "key is null")
         }
 
-        if(pressedKeys.map { it.name } != oldPressedKeys){
+        if(pressedKeys.map { it.name } != previousKeyNames){
             pcmOutput = pressedKeys
                 .map { it.signal }
                 .sum()

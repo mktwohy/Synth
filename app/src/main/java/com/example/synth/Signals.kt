@@ -7,13 +7,11 @@ import kotlin.math.sin
 interface SignalProperties{
     val data: List<Float>
     val pcmData: CircularShortArray
-    val frequencies: List<Int>
+    val frequencies: Set<Int>
 }
 
 /** Generates a sound and the associated PCM data, which can be played by an AudioTrack */
 abstract class Signal: SignalProperties{
-    private var chunkStartIndex: Int = 0
-
     override val pcmData: CircularShortArray by lazy {
         data.normalize().toIntList(MAX_16BIT_VALUE).toCircularShortArray()
     }
@@ -45,7 +43,7 @@ abstract class Signal: SignalProperties{
  * @param length number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
-    override val frequencies = listOf(0)
+    override val frequencies = setOf(0)
 
     override val data = List(size) { 0f }
 }
@@ -56,7 +54,7 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  * @param numPeriods number of times the period will repeat in Signal's interval
  */
 class SinSignal(private val freq: Int) : Signal() {
-    override val frequencies = listOf(freq)
+    override val frequencies = setOf(freq)
 
     override val data = mutableListOf<Float>().apply{
         val periodLength = SAMPLE_RATE / freq
@@ -75,17 +73,17 @@ class SinSignal(private val freq: Int) : Signal() {
  * @param s2 second signal in sum
  */
 class SumSignal(s1: Signal, s2: Signal): Signal(){
-    override val frequencies = (s1.frequencies + s2.frequencies).distinct()
+    override val frequencies = (s1.frequencies + s2.frequencies).toSet()
 
     override val data = mutableListOf<Float>().apply{
-        val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
-        val s1Looped = s1.data.loopToFill(intervalLength)
-        val s2Looped = s2.data.loopToFill(intervalLength)
+            val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
+            val s1Looped = s1.data.loopToFill(intervalLength)
+            val s2Looped = s2.data.loopToFill(intervalLength)
 
-        for (i in 0 until intervalLength){
-            add(s1Looped[i] + s2Looped[i])
+            for (i in 0 until intervalLength){
+                add(s1Looped[i] + s2Looped[i])
+            }
         }
-    }
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }

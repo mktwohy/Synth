@@ -3,7 +3,7 @@ package com.example.synth
 import java.lang.IndexOutOfBoundsException
 
 class CircularShortArray(size: Int) {
-    val data = ShortArray(size)
+    private val data = ShortArray(size)
     var size = 0
     private var currentIndex = 0
 
