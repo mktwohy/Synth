@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
-import java.lang.StringBuilder
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
@@ -48,8 +47,8 @@ class MainActivity : AppCompatActivity() {
         Thread {
             var pcm: ShortArray
             while (true) {
-                pcm = bind.piano.pcmOutput.getNextChunk(BUFFER_SIZE)
-                with(pcm.toList()){ Log.d("m_pcm", "$size: $this") }
+                pcm = bind.piano.pcmOutput.nextChunk(BUFFER_SIZE)
+                Log.d("m_pcm", pcm.toList().toString())
                 audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }
