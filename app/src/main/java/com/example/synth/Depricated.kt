@@ -35,6 +35,26 @@ package com.example.synth
         this.map { it.toShort() }.toShortArray()
 
 
+//    fun List<Int>.lcm(): Int{
+//        return when (size){
+//            0 -> 0
+//            1 -> this[0]
+//            2 -> lcm(this[0], this[1])
+//            else -> run{
+//                var lcm = this[0]
+//                println("0: $lcm")
+//                for (i in indices) {
+//                    if(i != 0){
+//                        lcm *= lcm(lcm, this[i])
+//                        println("$i: $lcm")
+//
+//                    }
+//                }
+//                lcm
+//            }
+//        }
+//    }
+
 
 
 

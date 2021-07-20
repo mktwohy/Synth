@@ -4,21 +4,6 @@ import android.util.Log
 import java.lang.StringBuilder
 import kotlin.system.measureTimeMillis
 
-fun makeHashTagBar(yValue: Int): String{
-    val s = StringBuilder()
-    repeat(yValue){ s.append("#") }
-    return s.toString()
-}
-
-operator fun String.times(multiplier: Int) = this.repeat(multiplier)
-
-fun String.repeat(times: Int): String{
-    val s = StringBuilder()
-    repeat(times) { s.append(this) }
-    return s.toString()
-}
-
-val logTab = "\t" * 152
 
 //----- List<Signal> ----- //
 val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>()
@@ -42,35 +27,6 @@ fun List<Signal>.sum(): Signal{
 
 
 //----- List<Int> ----- //
-//https://www.geeksforgeeks.org/gcd-two-array-numbers/
-fun gcd(a: Int, b: Int): Int =
-    if (a == 0) b
-    else gcd(b % a, a)
-
-fun lcm(a: Int, b: Int): Int =
-    a / gcd(a, b) * b
-
-
-fun List<Int>.lcm(): Int{
-    return when (size){
-        0 -> 0
-        1 -> this[0]
-        2 -> lcm(this[0], this[1])
-        else -> run{
-            var lcm = this[0]
-            println("0: $lcm")
-            for (i in indices) {
-                if(i != 0){
-                    lcm *= lcm(lcm, this[i])
-                    println("$i: $lcm")
-
-                }
-            }
-            lcm
-        }
-    }
-}
-
 fun List<Int>.toCircularShortArray(): CircularShortArray{
     val ret = CircularShortArray(this.size)
     for(i in this.indices){
@@ -108,3 +64,16 @@ fun List<Float>.normalize(
 
 fun List<Float>.toIntList(scalar: Int) =
     this.map { (it * scalar).toInt() }
+
+
+
+//----- String -----//
+operator fun String.times(multiplier: Int) = this.repeat(multiplier)
+
+fun String.repeat(times: Int): String{
+    val s = StringBuilder()
+    repeat(times) { s.append(this) }
+    return s.toString()
+}
+
+val logTab = "\t" * 152

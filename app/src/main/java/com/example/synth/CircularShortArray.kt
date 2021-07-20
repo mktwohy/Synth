@@ -3,8 +3,8 @@ package com.example.synth
 import java.lang.IndexOutOfBoundsException
 
 class CircularShortArray(size: Int) {
-    private val data = ShortArray(size)
     var size = 0
+    private val data = ShortArray(size)
     private var currentIndex = 0
 
     fun getNextChunk(chunkSize: Int): ShortArray {
@@ -18,12 +18,13 @@ class CircularShortArray(size: Int) {
         return chunk
     }
 
-    operator fun get(i: Int): Short{
-        if (i !in data.indices) throw IndexOutOfBoundsException()
-        return data[i]
+    operator fun get(index: Int): Short{
+        if (index !in data.indices) throw IndexOutOfBoundsException()
+        return data[index]
     }
 
     operator fun set(index: Int, value: Short){
+        if (index !in data.indices) throw IndexOutOfBoundsException()
         data[index] = value
         size++
     }

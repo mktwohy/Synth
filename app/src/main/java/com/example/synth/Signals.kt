@@ -10,6 +10,7 @@ interface SignalProperties{
     val frequencies: Set<Int>
 }
 
+
 /** Generates a sound and the associated PCM data, which can be played by an AudioTrack */
 abstract class Signal: SignalProperties{
     override val pcmData: CircularShortArray by lazy {
@@ -38,9 +39,10 @@ abstract class Signal: SignalProperties{
         SumSignal(this, that)
 }
 
+
 /**
  * Silent signal.
- * @param length number of samples in ByteArray of data
+ * @param size number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val frequencies = setOf(0)
@@ -48,10 +50,10 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val data = List(size) { 0f }
 }
 
+
 /**
  * Represents a pure sine wave
  * @param freq frequency of wave
- * @param numPeriods number of times the period will repeat in Signal's interval
  */
 class SinSignal(private val freq: Int) : Signal() {
     override val frequencies = setOf(freq)
@@ -66,6 +68,7 @@ class SinSignal(private val freq: Int) : Signal() {
 
     }
 }
+
 
 /**
  * Creates a combined Signal of two Signal objects.
@@ -84,6 +87,14 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
                 add(s1Looped[i] + s2Looped[i])
             }
         }
+
+    //https://www.geeksforgeeks.org/gcd-two-array-numbers/
+    private fun gcd(a: Int, b: Int): Int =
+        if (a == 0) b
+        else gcd(b % a, a)
+
+    private fun lcm(a: Int, b: Int): Int =
+        a / gcd(a, b) * b
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }
