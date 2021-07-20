@@ -50,7 +50,7 @@ class PianoView(context: Context, attrs: AttributeSet)
         private val black  = Paint().apply { setARGB(255, 0, 0, 0) ; strokeWidth = 2f }
 
         private fun createKeys(octave: Int): List<Key> {
-            return Note.notesInOctave(octave).map { note ->
+            return Note.toList(octave).map { note ->
                 Key(
                     note,
                     if (note.name[1] == '_') white else black,
@@ -183,19 +183,19 @@ class PianoView(context: Context, attrs: AttributeSet)
             with(
                 getKey(event.getX(i), event.getY(i))
             ){
-                    if(this != null) {
-                        when (event.action) {
+                if(this != null) {
+                    when (event.action) {
 
-                            MotionEvent.ACTION_DOWN,
-                            MotionEvent.ACTION_POINTER_DOWN,
-                            MotionEvent.ACTION_MOVE ->
-                                pressedKeys.add(this)
+                        MotionEvent.ACTION_DOWN,
+                        MotionEvent.ACTION_POINTER_DOWN,
+                        MotionEvent.ACTION_MOVE ->
+                            pressedKeys.add(this)
 
-                            MotionEvent.ACTION_UP,
-                            MotionEvent.ACTION_POINTER_UP,
-                            MotionEvent.ACTION_CANCEL ->
-                                pressedKeys.remove(this)
-                        }
+                        MotionEvent.ACTION_UP,
+                        MotionEvent.ACTION_POINTER_UP,
+                        MotionEvent.ACTION_CANCEL ->
+                            pressedKeys.remove(this)
+                    }
                 }
             }
         }

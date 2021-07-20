@@ -11,30 +11,12 @@ val signals = listOf(
     SinSignal(Note.G_4.freq)
 )
 
-
-fun makeRandomSignal(): Signal{
-    val r = Random.nextInt(12)
-    val note = when(r){
-        0 -> Note.C_4
-        1 -> Note.Cs4
-        2 -> Note.D_4
-        3 -> Note.Ds4
-        4 -> Note.E_4
-        5 -> Note.F_4
-        6 -> Note.Fs4
-        7 -> Note.G_4
-        8 -> Note.Gs4
-        9 -> Note.A_5
-        10 -> Note.As4
-        else -> Note.B_4
-    }
-    return SinSignal(note.freq)
-}
-
 fun makeRandomSumSignal(newSum: Boolean = true): Signal{
     val numNotes = Random.nextInt(5)
     val notes = mutableListOf<Signal>().apply {
-        repeat(numNotes){ add(makeRandomSignal()) }
+        repeat(numNotes){
+            add(SinSignal(Note.toList(5).random().freq))
+        }
     }
     return if (newSum)
         notes.newSum()
