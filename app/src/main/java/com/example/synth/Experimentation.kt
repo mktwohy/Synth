@@ -68,7 +68,7 @@ fun List<Signal>.newSum(): Signal{
             2 -> this[0] + this[1]
             else -> run{
                 var sum = this[0]
-                for (i in 2..this.indices.last){
+                for (i in 1..this.indices.last){
                     sum += this[i]
                 }
                 sum

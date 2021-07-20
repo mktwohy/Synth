@@ -35,13 +35,7 @@ fun List<Signal>.sum(): Signal{
             0 -> NullSignal()
             1 -> this[0]
             2 -> this[0] + this[1]
-            else -> run{
-                var sum = this[0]
-                for (i in 2..this.indices.last){
-                    sum += this[i]
-                }
-                sum
-            }
+            else -> this.reduce { acc: Signal, sig: Signal -> acc + sig }
         }
     }
     Log.d("m_time","$t milliseconds to sum $size notes")
