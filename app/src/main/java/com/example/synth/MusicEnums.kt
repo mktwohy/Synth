@@ -139,7 +139,7 @@ enum class Note(val freq: Int) {
             values().toList().subList(noteRange.first, noteRange.last+1)
 
         fun toList(octave: Int) =
-            if (octave > 8) listOf<Note>()
+            if (octave > 8) listOf()
             else toList(octave*12 until ((octave+1) * 12) )
 
         fun random() =

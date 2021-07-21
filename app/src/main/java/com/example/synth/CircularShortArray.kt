@@ -1,7 +1,5 @@
 package com.example.synth
 
-import java.lang.IndexOutOfBoundsException
-
 /**
  * Circular Array of Shorts. This is ideal for Signals, as it means they can store just one period
  * of their wave and loop over it.

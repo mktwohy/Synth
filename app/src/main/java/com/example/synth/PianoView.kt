@@ -1,3 +1,4 @@
+
 package com.example.synth
 
 import android.content.Context
@@ -130,7 +131,6 @@ class PianoView(context: Context, attrs: AttributeSet)
     }
 
     private val pressedKeys = mutableSetOf<Key>()
-    private val previousKeyNames = mutableListOf<Note>() //used to check if pressedKeys are new or not
     var pcmOutput: CircularShortArray = Signal.NullSignal.pcmData
     private val keys = createKeys(5)
     private val rectToKey = mutableMapOf<RectF, Key>()
@@ -159,11 +159,6 @@ class PianoView(context: Context, attrs: AttributeSet)
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
-        previousKeyNames.apply{
-            clear()
-            addAll( pressedKeys.map{ it.name } )
-        }
-        pressedKeys.clear()
 
         fun getKey(x: Float, y: Float): Key?{
             if(y < height/2) {
@@ -178,6 +173,9 @@ class PianoView(context: Context, attrs: AttributeSet)
             }
             return null
         }
+
+        val previousPressedKeys = pressedKeys.toSet()
+        pressedKeys.clear()
 
         for (i in 0 until event.pointerCount) {
             with(
@@ -200,7 +198,7 @@ class PianoView(context: Context, attrs: AttributeSet)
             }
         }
 
-        if(pressedKeys.map { it.name } != previousKeyNames){
+        if(pressedKeys != previousPressedKeys){
             pcmOutput = pressedKeys
                 .map { it.signal }
                 .sum()

@@ -7,8 +7,27 @@ import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
+/**
+ * Defines constants SAMPLE_RATE and BUFFER_SIZE. It is also responsible for running the main loop,
+ * which reads the current pcmOutput of the PianoView and plays it with AudioTrack
+ */
 class MainActivity : AppCompatActivity() {
     private lateinit var bind: ActivityMainBinding
+    private var runMainLoop = false
+    private val audioTrack = AudioTrack.Builder()
+        .setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build())
+        .setAudioFormat(
+            AudioFormat.Builder()
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setSampleRate(SAMPLE_RATE)
+                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                .build())
+        .setTransferMode(AudioTrack.MODE_STREAM)
+        .build()
 
     companion object{
         const val SAMPLE_RATE = 44100
@@ -20,38 +39,37 @@ class MainActivity : AppCompatActivity() {
 
         this.supportActionBar?.hide()
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            WindowManager.LayoutParams.FLAG_FULLSCREEN)
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        mainLoop()
+        runMainLoop = true
+        Thread { mainLoop() }.start()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!runMainLoop){
+            runMainLoop = true
+            mainLoop()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        runMainLoop = false
     }
 
     private fun mainLoop(){
-        val audioTrack = AudioTrack.Builder()
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_GAME)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build())
-            .setAudioFormat(
-                AudioFormat.Builder()
-                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .setSampleRate(SAMPLE_RATE)
-                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                    .build())
-            .setTransferMode(AudioTrack.MODE_STREAM)
-            .build()
-            .apply { play() }
-
-        Thread {
+            audioTrack.play()
             var pcm: ShortArray
-            while (true) {
+            while (runMainLoop) {
                 pcm = bind.piano.pcmOutput.nextChunk(BUFFER_SIZE)
                 Log.d("m_pcm", pcm.toList().toString())
                 audioTrack.write(pcm, 0, pcm.size)
                 bind.piano.postInvalidate()
             }
-        }.start()
+            audioTrack.stop()
     }
 }

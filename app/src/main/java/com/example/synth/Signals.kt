@@ -1,6 +1,5 @@
 package com.example.synth
 
-import android.util.Log
 import kotlin.math.PI
 import kotlin.math.sin
 
