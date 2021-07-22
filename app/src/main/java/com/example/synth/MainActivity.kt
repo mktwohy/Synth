@@ -12,22 +12,7 @@ import com.example.synth.databinding.ActivityMainBinding
  * which reads the current pcmOutput of the PianoView and plays it with AudioTrack
  */
 class MainActivity : AppCompatActivity() {
-    private lateinit var bind: ActivityMainBinding
-    private var runMainLoop = false
-    private val audioTrack = AudioTrack.Builder()
-        .setAudioAttributes(
-            AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build())
-        .setAudioFormat(
-            AudioFormat.Builder()
-                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                .setSampleRate(SAMPLE_RATE)
-                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                .build())
-        .setTransferMode(AudioTrack.MODE_STREAM)
-        .build()
+    lateinit var bind: ActivityMainBinding
 
     companion object{
         const val SAMPLE_RATE = 44100
@@ -43,33 +28,18 @@ class MainActivity : AppCompatActivity() {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        runMainLoop = true
-        Thread { mainLoop() }.start()
-
+        bind.piano.audioEngine.start()
     }
 
     override fun onResume() {
         super.onResume()
-        if (!runMainLoop){
-            runMainLoop = true
-            mainLoop()
-        }
+        bind.piano.audioEngine.start()
     }
 
     override fun onPause() {
         super.onPause()
-        runMainLoop = false
+        bind.piano.audioEngine.stop()
     }
 
-    private fun mainLoop(){
-            audioTrack.play()
-            var pcm: ShortArray
-            while (runMainLoop) {
-                pcm = bind.piano.pcmOutput.nextChunk(BUFFER_SIZE)
-                Log.d("m_pcm", pcm.toList().toString())
-                audioTrack.write(pcm, 0, pcm.size)
-                bind.piano.postInvalidate()
-            }
-            audioTrack.stop()
-    }
+
 }

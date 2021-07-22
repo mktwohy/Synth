@@ -9,6 +9,34 @@ import android.view.View
 import androidx.core.view.doOnNextLayout
 
 /**
+ * Stores information about each Key in the PianoView
+ * @param name   The fundamental note name associated with the Key
+ * @param color  The Key's Paint, which is either black or white
+ * @param signal The Signal that will play when the note is pressed
+ */
+data class Key(
+    val name: Note,
+    val color: Paint,
+    var signal: Signal,
+)
+
+/**
+ * A Grid of RectF objects that are used to draw each Key on screen and identify which Key the user
+ * touches. The grid is made up of two rows that horizontally cut the keyboard in half
+ *
+ * Every white key is made up of one Rect from the bottom row and one from the top row,
+ * whereas every black key is made up of one Rect from the top row.
+ *
+ * @param topRow A list of 11 rectangles that visually define the top row
+ * (black keys and partial white keys)
+ * @param bottomRow A list of 7 rects that visually define the bottom row (only white keys)
+ */
+data class PianoGrid(
+    val topRow      : List<RectF> = listOf(),
+    val bottomRow   : List<RectF> = listOf()
+)
+
+/**
  * An interactive piano keyboard
  *
  * A PianoView is made up of Keys which are visually represented by the PianoGrid
@@ -17,38 +45,11 @@ import androidx.core.view.doOnNextLayout
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
-    companion object{
-        /**
-         * Stores information about each Key in the PianoView
-         * @param name   The fundamental note name associated with the Key
-         * @param color  The Key's Paint, which is either black or white
-         * @param signal The Signal that will play when the note is pressed
-         */
-        data class Key(
-            val name: Note,
-            val color: Paint,
-            var signal: Signal,
-        )
-
-        /**
-         * A Grid of RectF objects that are used to draw each Key on screen and identify which Key the user
-         * touches. The grid is made up of two rows that horizontally cut the keyboard in half
-         *
-         * Every white key is made up of one Rect from the bottom row and one from the top row,
-         * whereas every black key is made up of one Rect from the top row.
-         *
-         * @param topRow A list of 11 rectangles that visually define the top row
-         * (black keys and partial white keys)
-         * @param bottomRow A list of 7 rects that visually define the bottom row (only white keys)
-         */
-        data class PianoGrid(
-            val topRow      : List<RectF> = listOf(),
-            val bottomRow   : List<RectF> = listOf()
-        )
-
-        private val white  = Paint().apply { setARGB(255, 255, 255, 255) }
+    /*** Holds the functions and paints that are used to draw and initialize PianoView*/
+    companion object {
+        private val white = Paint().apply { setARGB(255, 255, 255, 255) }
         private val purple = Paint().apply { setARGB(100, 255, 0, 255) }
-        private val black  = Paint().apply { setARGB(255, 0, 0, 0) ; strokeWidth = 2f }
+        private val black = Paint().apply { setARGB(255, 0, 0, 0); strokeWidth = 2f }
 
         private fun createKeys(octave: Int): List<Key> {
             return Note.toList(octave).map { note ->
@@ -61,9 +62,9 @@ class PianoView(context: Context, attrs: AttributeSet)
         }
 
         private fun createGrid(viewWidth: Int, viewHeight: Int): PianoGrid {
-            val whiteWidth  = viewWidth / 7 .toFloat()
-            val whiteHeight = viewHeight    .toFloat()
-            val blackWidth  = whiteWidth  / 2
+            val whiteWidth = viewWidth / 7.toFloat()
+            val whiteHeight = viewHeight.toFloat()
+            val blackWidth = whiteWidth / 2
             val blackHeight = whiteHeight / 2
 
             val topWidths = mutableListOf<Float>().apply {
@@ -84,8 +85,8 @@ class PianoView(context: Context, attrs: AttributeSet)
             fun initRow(top: Float, bottom: Float, widths: List<Float>) =
                 mutableListOf<RectF>().apply {
                     var left = 0f
-                    for(w in widths) {
-                        add( RectF(left, top, left + w, bottom) )
+                    for (w in widths) {
+                        add(RectF(left, top, left + w, bottom))
                         left += w
                     }
                     toList()
@@ -130,17 +131,18 @@ class PianoView(context: Context, attrs: AttributeSet)
         }
     }
 
-    private val pressedKeys = mutableSetOf<Key>()
-    var pcmOutput: CircularShortArray = Signal.NullSignal.pcmData
+    val audioEngine: AudioEngine
     private val keys = createKeys(5)
-    private val rectToKey = mutableMapOf<RectF, Key>()
+    private val pressedKeys = mutableSetOf<Key>()
+    private val rectToKey = mutableMapOf<RectF, Key>() //used to determine which key is pressed
     private lateinit var pianoGrid: PianoGrid
 
-    init{
+    init {
         rootView.doOnNextLayout {
             pianoGrid = createGrid(width, height)
             assignRectsToKeys(pianoGrid, keys, rectToKey)
         }
+        audioEngine = AudioEngine(this)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -152,7 +154,7 @@ class PianoView(context: Context, attrs: AttributeSet)
             canvas.apply {
                 drawRect(r, k.color)
                 if (k.color == white) drawLine(r.left, r.top, r.left, r.bottom, black)
-                if(k in pressedKeys)  drawRect(r, purple)
+                if (k in pressedKeys) drawRect(r, purple)
             }
         }
     }
@@ -160,14 +162,11 @@ class PianoView(context: Context, attrs: AttributeSet)
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
 
-        fun getKey(x: Float, y: Float): Key?{
-            if(y < height/2) {
-                //search top row
+        fun findKeyAt(x: Float, y: Float): Key? {
+            if (y < height / 2) {   //search top row
                 for (rect in pianoGrid.topRow)
                     if (x in rect.left..rect.right) return rectToKey[rect]
-            }
-            else {
-                //search bottom row
+            } else {                //search bottom row
                 for (rect in pianoGrid.bottomRow)
                     if (x in rect.left..rect.right) return rectToKey[rect]
             }
@@ -178,10 +177,8 @@ class PianoView(context: Context, attrs: AttributeSet)
         pressedKeys.clear()
 
         for (i in 0 until event.pointerCount) {
-            with(
-                getKey(event.getX(i), event.getY(i))
-            ){
-                if(this != null) {
+            with(findKeyAt(event.getX(i), event.getY(i))) {
+                if (this != null) {
                     when (event.action) {
 
                         MotionEvent.ACTION_DOWN,
@@ -198,12 +195,8 @@ class PianoView(context: Context, attrs: AttributeSet)
             }
         }
 
-        if(pressedKeys != previousPressedKeys){
-            pcmOutput = pressedKeys
-                .map { it.signal }
-                .sum()
-                .pcmData
-        }
+        if (pressedKeys != previousPressedKeys)
+            audioEngine.updatePcm(pressedKeys)
 
         return true
     }
