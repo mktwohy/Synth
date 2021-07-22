@@ -4,11 +4,11 @@ package com.example.synth
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
-import com.example.synth.Note.Companion.moveNote
-import com.example.synth.Note.Companion.octave
+import com.example.synth.Note.Companion.transpose
 
 /**
  * Stores information about each Key in the PianoView
@@ -170,8 +170,9 @@ class PianoView(context: Context, attrs: AttributeSet)
         if (newOctave in 0..8) {
             val step = (newOctave - octave) * 12
             for (k in keys){
-                k.note = k.note.moveNote(step)
-                k.signal = SinSignal(k.note.freq)
+                k.note = k.note.transpose(step)
+                val newSignal = k.signal.transpose(step)
+                k.signal = newSignal
             }
             octave = newOctave
         }

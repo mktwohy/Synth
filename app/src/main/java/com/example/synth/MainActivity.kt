@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 512
+        const val BUFFER_SIZE = 256
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

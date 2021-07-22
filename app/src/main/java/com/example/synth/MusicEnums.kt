@@ -1,5 +1,8 @@
 package com.example.synth
 
+import android.util.Log
+import kotlin.math.absoluteValue
+
 
 enum class Interval(val ratio: Float){
     PER_1   (1/1    .toFloat()),
@@ -13,7 +16,25 @@ enum class Interval(val ratio: Float){
     MIN_6   (8/5    .toFloat()),
     MIN_7   (9/5    .toFloat()),
     MAJ_7   (15/8   .toFloat()),
-    OCTAVE  (2/1    .toFloat())
+    OCTAVE  (2/1    .toFloat());
+
+    companion object {
+        fun stepToRatio(steps: Int): Float {
+            var absoluteSteps = steps.absoluteValue
+            var octaves = 1
+
+            while (absoluteSteps > 12) {
+                octaves++
+                absoluteSteps -= 12
+            }
+
+            val ratioForOneOctave = values()[absoluteSteps - 1].ratio
+            val ratio = ratioForOneOctave * octaves
+            val ret = if (steps >= 0) ratio else (1 / ratio)
+            Log.d("m_transpose","ratio: $ret")
+            return ret
+        }
+    }
 }
 
 
@@ -150,7 +171,7 @@ enum class Note(val freq: Int) {
         fun random() =
             values().random()
 
-        fun Note.moveNote(steps: Int): Note{
+        fun Note.transpose(steps: Int): Note{
             val allNotes = values().toList()
             val newIndex = allNotes.indexOf(this) + steps
             return allNotes[newIndex]

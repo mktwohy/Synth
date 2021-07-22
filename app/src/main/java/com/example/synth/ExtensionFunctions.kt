@@ -40,6 +40,7 @@ fun List<Int>.toCircularShortArray(): CircularShortArray{
 //------ List<Float> ----- //
 fun List<Float>.loopToFill(newSize: Int): List<Float>{
     val newList = mutableListOf<Float>()
+    Log.d("m_memoryLeak","Loop ${newSize / this.size} times")
     repeat((newSize / this.size) + 1) { newList.addAll(this) }
     return newList.subList(0, newSize)
 }
@@ -48,18 +49,19 @@ fun List<Float>.loopToFill(newSize: Int): List<Float>{
 fun List<Float>.normalize(
     lowerBound: Float = -1f,
     upperBound: Float = 1f
-) =
-    if (size > 0) {
+): List<Float> {
+    return if (size > 0) {
         val minValue = this.minByOrNull { it }!!
         val maxValue = this.maxByOrNull { it }!!
 
-        if (minValue >= -1 && maxValue <= 1) this
-        else this
-            .map {
-                (upperBound - lowerBound) * ( (it - minValue) / (maxValue - minValue) ) + lowerBound
-            }
+        if (minValue >= -1 && maxValue <= 1)
+            this
+        else
+            this.map { (upperBound - lowerBound) * ((it - minValue) / (maxValue - minValue)) + lowerBound }
+    } else {
+        NullSignal().data
     }
-    else NullSignal().data
+}
 
 
 fun List<Float>.toIntList(scalar: Int) =

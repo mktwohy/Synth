@@ -1,5 +1,7 @@
 package com.example.synth
 
+import android.util.Log
+import java.lang.Exception
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -16,9 +18,6 @@ abstract class Signal: SignalProperties{
         data.normalize().toIntList(MAX_16BIT_VALUE).toCircularShortArray()
     }
 
-    val fundamental
-        get() = frequencies.minByOrNull { it } ?: 0
-
     companion object{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
@@ -27,6 +26,8 @@ abstract class Signal: SignalProperties{
         const val MAX_16BIT_VALUE     = 32_767
         val NullSignal = NullSignal(BUFFER_SIZE)
     }
+
+    abstract fun transpose(step: Int): Signal
 
     override fun toString(): String{
         val s = StringBuilder()
@@ -48,8 +49,8 @@ abstract class Signal: SignalProperties{
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val frequencies = setOf(0)
-
     override val data = List(size) { 0f }
+    override fun transpose(step: Int) = NullSignal
 }
 
 
@@ -58,8 +59,11 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  * @param freq frequency of wave
  */
 class SinSignal(private val freq: Int) : Signal() {
-    override val frequencies = setOf(freq)
+    init{
+        if (freq == 0) throw Exception("For freq == 0, use NullSignal")
+    }
 
+    override val frequencies = setOf(freq)
     override val data = mutableListOf<Float>().apply{
         val periodLength = SAMPLE_RATE / freq
 
@@ -67,7 +71,12 @@ class SinSignal(private val freq: Int) : Signal() {
         for (i in 0 until periodLength){
             add(sin(TWO_PI * i / periodLength).toFloat())
         }
+    }
 
+    override fun transpose(step: Int): Signal {
+        val fundFreq = frequencies.minByOrNull { it }
+            ?: return NullSignal
+        return SinSignal( (fundFreq * Interval.stepToRatio(step)) .toInt() )
     }
 }
 
@@ -78,6 +87,7 @@ class SinSignal(private val freq: Int) : Signal() {
  * @param s2 second signal in sum
  */
 class SumSignal(s1: Signal, s2: Signal): Signal(){
+
     override val frequencies = (s1.frequencies + s2.frequencies).toSet()
 
     override val data = mutableListOf<Float>().apply{
@@ -90,6 +100,15 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
             }
         }
 
+    override fun transpose(step: Int): Signal {
+        val ratio = Interval.stepToRatio(step)
+        val transposedSignals = mutableListOf<Signal>()
+        for(f in frequencies){
+            transposedSignals.add(SinSignal(f * ratio.toInt()))
+        }
+        return transposedSignals.sum()
+    }
+
     //https://www.geeksforgeeks.org/gcd-two-array-numbers/
     private fun gcd(a: Int, b: Int): Int =
         if (a == 0) b
@@ -99,4 +118,6 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
         a / gcd(a, b) * b
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
+
+
 }
