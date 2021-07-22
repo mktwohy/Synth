@@ -6,12 +6,54 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
+
+    <Button
+        android:id="@+id/octaveDown"
+        android:text="-"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="octaveDown"
+        android:layout_marginHorizontal="5sp"
+        app:layout_constraintEnd_toStartOf="@+id/octave"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/piano"
+        />
+
+    <TextView
+        android:id="@+id/octave"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:background="@color/white"
+        android:layout_width="20sp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/piano"
+        app:layout_constraintEnd_toStartOf="@+id/octaveUp"
+        />
+
+    <Button
+        android:id="@+id/octaveUp"
+        android:text="+"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="octaveUp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/piano"
+        />
+
     <com.example.synth.PianoView
         android:id="@+id/piano"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/octaveUp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

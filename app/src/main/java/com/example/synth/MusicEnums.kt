@@ -16,6 +16,7 @@ enum class Interval(val ratio: Float){
     OCTAVE  (2/1    .toFloat())
 }
 
+
 /**
  * Enum naming format:
  *
@@ -137,6 +138,8 @@ enum class Note(val freq: Int) {
     B_8 (7902);
 
     companion object{
+        fun toList() = values().toList()
+
         fun toList(noteRange: IntRange) =
             values().toList().subList(noteRange.first, noteRange.last+1)
 
@@ -146,5 +149,14 @@ enum class Note(val freq: Int) {
 
         fun random() =
             values().random()
+
+        fun Note.moveNote(steps: Int): Note{
+            val allNotes = values().toList()
+            val newIndex = allNotes.indexOf(this) + steps
+            return allNotes[newIndex]
+        }
+
+        val Note.octave
+            get() = name[2].toString().toInt()
     }
 }

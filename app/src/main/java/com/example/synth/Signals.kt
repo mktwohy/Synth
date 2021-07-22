@@ -16,6 +16,9 @@ abstract class Signal: SignalProperties{
         data.normalize().toIntList(MAX_16BIT_VALUE).toCircularShortArray()
     }
 
+    val fundamental
+        get() = frequencies.minByOrNull { it } ?: 0
+
     companion object{
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE

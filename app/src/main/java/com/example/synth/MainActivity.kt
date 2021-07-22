@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import com.example.synth.databinding.ActivityMainBinding
 
 /** A full-screen PianoView activity. Also manages the AudioEngine */
@@ -28,7 +29,18 @@ class MainActivity : AppCompatActivity() {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
+        bind.octave.text = bind.piano.octave.toString()
         bind.piano.audioEngine.start()
+    }
+
+    fun octaveDown(view: View){
+        bind.piano.changeOctave(bind.piano.octave - 1)
+        bind.octave.text = bind.piano.octave.toString()
+    }
+
+    fun octaveUp(view: View){
+        bind.piano.changeOctave(bind.piano.octave + 1)
+        bind.octave.text = bind.piano.octave.toString()
     }
 
     override fun onResume() {

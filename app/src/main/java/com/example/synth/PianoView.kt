@@ -7,15 +7,17 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
+import com.example.synth.Note.Companion.moveNote
+import com.example.synth.Note.Companion.octave
 
 /**
  * Stores information about each Key in the PianoView
- * @param name   The fundamental note name associated with the Key
+ * @param note   The fundamental note name associated with the Key
  * @param color  The Key's Paint, which is either black or white
  * @param signal The Signal that will play when the note is pressed
  */
 data class Key(
-    val name: Note,
+    var note: Note,
     val color: Paint,
     var signal: Signal,
 )
@@ -117,7 +119,7 @@ class PianoView(context: Context, attrs: AttributeSet)
             }
 
             for (k in keys) {
-                when (k.name.toString().substring(0, 2)) {
+                when (k.note.toString().substring(0, 2)) {
                     "C_" -> assignWhite(k, 0, 0)
                     "Cs" -> assignBlack(k, 1)
                     "D_" -> assignWhite(k, 2, 1)
@@ -136,7 +138,8 @@ class PianoView(context: Context, attrs: AttributeSet)
     }
 
     val audioEngine: AudioEngine
-    private val keys = createKeys(5)
+    var octave = 5
+    private val keys = createKeys(octave)
     private val pressedKeys = mutableSetOf<Key>()
     private val rectToKey = mutableMapOf<RectF, Key>() //used to determine which key is pressed
     private lateinit var pianoGrid: PianoGrid
@@ -160,6 +163,17 @@ class PianoView(context: Context, attrs: AttributeSet)
                 if (k.color == white) drawLine(r.left, r.top, r.left, r.bottom, black)
                 if (k in pressedKeys) drawRect(r, purple)
             }
+        }
+    }
+
+    fun changeOctave(newOctave: Int){
+        if (newOctave in 0..8) {
+            val step = (newOctave - octave) * 12
+            for (k in keys){
+                k.note = k.note.moveNote(step)
+                k.signal = SinSignal(k.note.freq)
+            }
+            octave = newOctave
         }
     }
 
