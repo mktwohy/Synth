@@ -4,8 +4,13 @@ import java.lang.StringBuilder
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 
+/**
+ * Used for latency testing. It's currently incomplete, ignore it for now
+ */
+
 object LatencyUtil {
-    fun makeHashTagBar(yValue: Int): String{
+    /** Generates a horizontal bar of #'s */
+    fun histogramBar(yValue: Int): String{
         val s = StringBuilder()
         repeat(yValue){ s.append("#") }
         return s.toString()

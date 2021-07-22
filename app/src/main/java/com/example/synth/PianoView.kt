@@ -21,9 +21,11 @@ data class Key(
 )
 
 /**
- * A Grid of RectF objects that are used to draw each Key on screen and identify which Key the user
- * touches. The grid is made up of two rows that horizontally cut the keyboard in half
+ * A Grid of RectF objects that are used to draw each Key on screen. Additionally, each rectangle
+ * acts as a hitbox for its assigned key.
  *
+ * The grid splits the keyboard in half, forming two rows. This means each key can simplified
+ * as either one or two rectangles;
  * Every white key is made up of one Rect from the bottom row and one from the top row,
  * whereas every black key is made up of one Rect from the top row.
  *
@@ -37,15 +39,17 @@ data class PianoGrid(
 )
 
 /**
- * An interactive piano keyboard
+ * An interactive piano keyboard.
  *
- * A PianoView is made up of Keys which are visually represented by the PianoGrid
- * @property pressedKeys A set of Keys which are currently pressed
+ * It has a PianoGrid, which references a list of Key objects. When the PianoView detects touch
+ * input, it uses the PianoGrid to detect which Keys have been pressed. The client can then view
+ * this information by accessing the set of pressedKeys.
+ * @property pressedKeys A set of Key objects which are currently pressed
  */
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
-    /*** Holds the functions and paints that are used to draw and initialize PianoView*/
+    /*** Holds the functions and paints that are used to draw and initialize PianoView */
     companion object {
         private val white = Paint().apply { setARGB(255, 255, 255, 255) }
         private val purple = Paint().apply { setARGB(100, 255, 0, 255) }

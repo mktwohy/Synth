@@ -7,10 +7,7 @@ import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
-/**
- * Defines constants SAMPLE_RATE and BUFFER_SIZE. It is also responsible for running the main loop,
- * which reads the current pcmOutput of the PianoView and plays it with AudioTrack
- */
+/** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity : AppCompatActivity() {
     lateinit var bind: ActivityMainBinding
 
@@ -22,9 +19,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //Make the app fullscreen. TODO: works for now, but don't use deprecated methods.
         this.supportActionBar?.hide()
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
+        //Set up data binding with views
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 

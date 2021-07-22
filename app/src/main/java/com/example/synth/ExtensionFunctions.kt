@@ -10,17 +10,17 @@ val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>()
 fun List<Signal>.sum(): Signal{
     if (size == 0) return Signal.NullSignal
     val ret: Signal
-    val t = measureTimeMillis {
+    with (measureTimeMillis {
          ret = toSet().run{
             if (this !in signalsToSumSignal)
                 signalsToSumSignal[this] = this.reduce { acc: Signal, sig: Signal -> acc + sig }
 
             signalsToSumSignal[this]!!
+            }
         }
-    }
+    ){ Log.d("m_time","$this milliseconds to sum $size notes") }
 
     Log.d("m_mapSize", "signalsToSumSignal size: ${signalsToSumSignal.size}")
-    Log.d("m_time","$t milliseconds to sum $size notes")
     return ret
 }
 

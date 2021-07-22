@@ -2,7 +2,7 @@ package com.example.synth
 
 /**
  * Circular Array of Shorts. This is ideal for Signals, as it means they can store just one period
- * of their wave and loop over it.
+ * of their wave and the AudioEngine can loop over it.
  */
 class CircularShortArray(override var size: Int = 0): Collection<Short> {
     private val data = ShortArray(size)

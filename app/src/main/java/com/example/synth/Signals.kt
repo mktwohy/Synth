@@ -40,7 +40,7 @@ abstract class Signal: SignalProperties{
 
 
 /**
- * Silent signal.
+ * Represents a silent signal.
  * @param size number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {

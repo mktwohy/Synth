@@ -5,7 +5,7 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.util.Log
 
-
+/** Uses an AudioTrack object to play its current PCM audio data on a loop. */
 class AudioEngine(private val pianoView: PianoView){
     private var pcm: CircularShortArray = Signal.NullSignal.pcmData
     private var runMainLoop = false
@@ -33,9 +33,9 @@ class AudioEngine(private val pianoView: PianoView){
         }
     }
 
-    fun stop(){
-        runMainLoop = false
-    }
+    fun stop(){ runMainLoop = false }
+
+    fun mute(){ pcm = Signal.NullSignal.pcmData }
 
     fun updatePcm(pressedKeys: Set<Key>){
         pcm = pressedKeys
