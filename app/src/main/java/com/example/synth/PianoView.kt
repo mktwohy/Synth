@@ -175,6 +175,7 @@ class PianoView(context: Context, attrs: AttributeSet)
                 k.signal = newSignal
             }
             octave = newOctave
+            signalsToSumSignal.clear()
         }
     }
 

@@ -28,3 +28,17 @@ object LatencyUtil {
         return notes.sum()
     }
 }
+
+fun main(){
+    val times = mutableListOf<Long>()
+    repeat(1000){
+        val listSize = Random.nextInt(1, 10)
+        val list = (0..listSize).map{ Random.nextInt(1, 500) }
+
+        val lcm: Int
+        val time = measureTimeMillis { lcm = list.lcm() }
+            .also{ times.add(it) }
+        println(" $time ms to calculate lcm = $lcm for $list")
+    }
+    println("Average lcm time: ${times.average()}")
+}

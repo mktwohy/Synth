@@ -14,11 +14,15 @@ interface SignalProperties{
 
 /** Generates a sound and the associated PCM data, which can be played by an AudioTrack */
 abstract class Signal: SignalProperties{
+    init{
+
+    }
     override val pcmData: CircularShortArray by lazy {
         data.normalize().toIntList(MAX_16BIT_VALUE).toCircularShortArray()
     }
 
     companion object{
+        var numSignals: Int = 0
         const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
         const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
         const val TWO_PI              = 2.0 * PI

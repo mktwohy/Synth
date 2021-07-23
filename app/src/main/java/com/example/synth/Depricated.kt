@@ -40,7 +40,22 @@ fun ByteArray.toList(bit: Int = 16): List<Int> =
 private fun List<Int>.toShortArray() =
     this.map { it.toShort() }.toShortArray()
 
-
+//fun List<Signal>.sum(): Signal{
+//    if (size == 0) return Signal.NullSignal
+//    val ret: Signal
+//    with (measureTimeMillis {
+//         ret = toSet().run{
+//            if (this !in signalsToSumSignal)
+//                signalsToSumSignal[this] = this.reduce { acc: Signal, sig: Signal -> acc + sig }
+//
+//            signalsToSumSignal[this]!!
+//            }
+//        }
+//    ){ Log.d("m_time","$this milliseconds to sum $size notes") }
+//
+//    Log.d("m_mapSize", "signalsToSumSignal size: ${signalsToSumSignal.size}")
+//    return ret
+//}
 
 
 

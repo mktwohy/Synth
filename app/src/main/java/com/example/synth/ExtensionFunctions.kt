@@ -6,23 +6,7 @@ import kotlin.system.measureTimeMillis
 
 
 //----- List<Signal> ----- //
-val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>() //stores results of List<Signal>.sum() for faster sum times
-//fun List<Signal>.sum(): Signal{
-//    if (size == 0) return Signal.NullSignal
-//    val ret: Signal
-//    with (measureTimeMillis {
-//         ret = toSet().run{
-//            if (this !in signalsToSumSignal)
-//                signalsToSumSignal[this] = this.reduce { acc: Signal, sig: Signal -> acc + sig }
-//
-//            signalsToSumSignal[this]!!
-//            }
-//        }
-//    ){ Log.d("m_time","$this milliseconds to sum $size notes") }
-//
-//    Log.d("m_mapSize", "signalsToSumSignal size: ${signalsToSumSignal.size}")
-//    return ret
-//}
+
 fun List<Signal>.sum(): Signal{
     val signalSet = this.toSet()
     if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
