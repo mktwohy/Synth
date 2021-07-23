@@ -24,12 +24,15 @@ val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>() //stores results of
 //    return ret
 //}
 fun List<Signal>.sum(): Signal{
-    return when (size){
+    val signalSet = this.toSet()
+    if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
+    val ret = when (size){
         0 -> Signal.NullSignal
         1 -> this[0]
         2 -> SumSignal(this[0], this[1])
         else -> SumSignal(this.toSet())
     }
+    return ret.also { signalsToSumSignal[signalSet] = it }
 
 }
 
