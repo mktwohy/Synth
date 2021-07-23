@@ -1,12 +1,27 @@
 package com.example.synth
 
+/** Index for circularly navigating an array */
+class CircularIndex(private val loopSize: Int){
+    /** Current index value */
+    var i: Int = 0
+
+    fun iterate(step: Int = 1){
+        i = (i + step) % loopSize
+    }
+
+    fun reset(){ i = 0 }
+}
+
 /**
  * Circular Array of Shorts. This is ideal for Signals, as it means they can store just one period
  * of their wave and the AudioEngine can loop over it.
  */
 class CircularShortArray(override var size: Int = 0): Collection<Short> {
     private val data = ShortArray(size)
-    var circularIndex = 0
+    var index = CircularIndex(size)
+
+    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
+    fun reset(){ index.reset() }
 
     /**
      * Builds and returns a chunk of data by circularly iterating over and appending
@@ -20,14 +35,12 @@ class CircularShortArray(override var size: Int = 0): Collection<Short> {
 
         return ShortArray(chunkSize).also{ chunk ->
             for (i in chunk.indices) {
-                chunk[i] = data[circularIndex]
-                circularIndex = (circularIndex + 1) % data.size
+                chunk[i] = data[index.i]
+                index.iterate()
             }
         }
     }
 
-    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
-    fun reset(){ circularIndex = 0 }
 
     fun toList() = data.toList()
     operator fun get(index: Int): Short{ return data[index] }
@@ -53,7 +66,4 @@ class CircularShortArray(override var size: Int = 0): Collection<Short> {
 
         return true
     }
-
-
-
 }

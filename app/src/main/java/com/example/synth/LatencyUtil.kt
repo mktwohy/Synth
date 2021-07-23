@@ -28,20 +28,3 @@ object LatencyUtil {
         return notes.sum()
     }
 }
-
-
-
-
-fun main() {
-    val newSize = 10
-    val list = listOf(1,2,3,4,5)
-    val sequence = list.asSequence().iterator()
-
-    val newList = IntArray(newSize)
-    for(i in newList.indices){
-        newList[i] = sequence.next()
-    }
-
-    println(newList)
-
-}

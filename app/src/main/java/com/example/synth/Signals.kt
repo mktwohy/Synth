@@ -48,6 +48,9 @@ abstract class Signal: SignalProperties{
  * @param size number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
+    init {
+        Log.d("m_Signal", "NullSignal created!")
+    }
     override val frequencies = setOf(0)
     override val data = List(size) { 0f }
     override fun transpose(step: Int) = NullSignal
@@ -60,6 +63,7 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  */
 class SinSignal(private val freq: Int) : Signal() {
     init{
+        Log.d("m_Signal", "SinSignal(freq) created!")
         if (freq == 0) throw Exception("For freq == 0, use NullSignal")
     }
 
@@ -86,19 +90,53 @@ class SinSignal(private val freq: Int) : Signal() {
  * @param s1 first signal in sum
  * @param s2 second signal in sum
  */
-class SumSignal(s1: Signal, s2: Signal): Signal(){
+class SumSignal: Signal{
 
-    override val frequencies = (s1.frequencies + s2.frequencies).toSet()
+    override val frequencies: Set<Int>
 
-    override val data = mutableListOf<Float>().apply{
+    override val data: List<Float>
+
+    constructor(s1: Signal, s2: Signal){
+        Log.d("m_Signal", "SumSignal(s1,s2) created!")
+        frequencies = (s1.frequencies + s2.frequencies).toSet()
+        data = mutableListOf<Float>().apply{
             val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
-            val s1Looped = s1.data.loopToFill(intervalLength)
-            val s2Looped = s2.data.loopToFill(intervalLength)
+            var s1Index = CircularIndex(s1.data.size)
+            var s2Index = CircularIndex(s2.data.size)
 
             for (i in 0 until intervalLength){
-                add(s1Looped[i] + s2Looped[i])
+                this.add(s1.data[s1Index.i] + s2.data[s2Index.i])
+                s1Index.iterate()
+                s2Index.iterate()
             }
         }
+    }
+
+    constructor(signals: Set<Signal>){
+        Log.d("m_Signal", "SumSignal(set<Signal>) created!")
+        frequencies = mutableSetOf<Int>().apply {
+            for(s in signals){
+                addAll(s.frequencies)
+            }
+        }.toSet()
+
+        data = mutableListOf<Float>().apply{
+            val datas = signals.map { it.data }
+            val intervalLength = datas.map { it.size }.lcm()
+            val dataToIndex = mutableMapOf<List<Float>, CircularIndex>().apply{
+                for (d in datas){
+                    this[d] = CircularIndex(d.size)
+                }
+            }
+
+            for (i in 0 until intervalLength){
+                this.add( datas.reduce { acc, d -> acc + d[dataToIndex[d]!!.i] }.sum() )
+                dataToIndex.values.forEach{ circularIndex -> circularIndex.iterate() }
+            }
+
+        }
+    }
+
 
     override fun transpose(step: Int): Signal {
         val ratio = Interval.stepToRatio(step)
@@ -109,13 +147,6 @@ class SumSignal(s1: Signal, s2: Signal): Signal(){
         return transposedSignals.sum()
     }
 
-    //https://www.geeksforgeeks.org/gcd-two-array-numbers/
-    private fun gcd(a: Int, b: Int): Int =
-        if (a == 0) b
-        else gcd(b % a, a)
-
-    private fun lcm(a: Int, b: Int): Int =
-        a / gcd(a, b) * b
 
     operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 

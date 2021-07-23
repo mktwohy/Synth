@@ -6,25 +6,32 @@ import kotlin.system.measureTimeMillis
 
 
 //----- List<Signal> ----- //
-val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>()
+val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>() //stores results of List<Signal>.sum() for faster sum times
+//fun List<Signal>.sum(): Signal{
+//    if (size == 0) return Signal.NullSignal
+//    val ret: Signal
+//    with (measureTimeMillis {
+//         ret = toSet().run{
+//            if (this !in signalsToSumSignal)
+//                signalsToSumSignal[this] = this.reduce { acc: Signal, sig: Signal -> acc + sig }
+//
+//            signalsToSumSignal[this]!!
+//            }
+//        }
+//    ){ Log.d("m_time","$this milliseconds to sum $size notes") }
+//
+//    Log.d("m_mapSize", "signalsToSumSignal size: ${signalsToSumSignal.size}")
+//    return ret
+//}
 fun List<Signal>.sum(): Signal{
-    if (size == 0) return Signal.NullSignal
-    val ret: Signal
-    with (measureTimeMillis {
-         ret = toSet().run{
-            if (this !in signalsToSumSignal)
-                signalsToSumSignal[this] = this.reduce { acc: Signal, sig: Signal -> acc + sig }
+    return when (size){
+        0 -> Signal.NullSignal
+        1 -> this[0]
+        2 -> SumSignal(this[0], this[1])
+        else -> SumSignal(this.toSet())
+    }
 
-            signalsToSumSignal[this]!!
-            }
-        }
-    ){ Log.d("m_time","$this milliseconds to sum $size notes") }
-
-    Log.d("m_mapSize", "signalsToSumSignal size: ${signalsToSumSignal.size}")
-    return ret
 }
-
-
 
 //----- List<Int> ----- //
 fun List<Int>.toCircularShortArray(): CircularShortArray{
@@ -35,16 +42,27 @@ fun List<Int>.toCircularShortArray(): CircularShortArray{
     return ret
 }
 
+//https://www.geeksforgeeks.org/gcd-two-array-numbers/
+fun gcd(a: Int, b: Int): Int =
+    if (a == 0) b
+    else gcd(b % a, a)
+
+fun lcm(a: Int, b: Int): Int =
+    a * b / gcd(a, b)
+
+fun List<Int>.lcm(): Int{
+    val list = this.filter { it != 0 }
+    return when (list.size){
+        0 -> 0
+        1 -> list[0]
+        2 -> lcm(list[0], list[1])
+        else -> list.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
+    }
+}
+
 
 
 //------ List<Float> ----- //
-fun List<Float>.loopToFill(newSize: Int): List<Float>{
-    val newList = mutableListOf<Float>()
-    Log.d("m_memoryLeak","Loop ${newSize / this.size} times")
-    repeat((newSize / this.size) + 1) { newList.addAll(this) }
-    return newList.subList(0, newSize)
-}
-
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
 fun List<Float>.normalize(
     lowerBound: Float = -1f,

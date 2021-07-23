@@ -50,7 +50,7 @@ class AudioEngine(private val pianoView: PianoView){
             var chunk: ShortArray
             while (runMainLoop) {
                 chunk = pcm.nextChunk(MainActivity.BUFFER_SIZE)
-                Log.d("m_pcm", chunk.toList().toString())
+                //Log.d("m_pcm", chunk.toList().toString())
                 audioTrack.write(chunk, 0, chunk.size)
                 pianoView.postInvalidate()
             }

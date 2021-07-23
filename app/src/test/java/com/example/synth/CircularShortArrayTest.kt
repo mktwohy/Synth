@@ -80,8 +80,8 @@ class CircularShortArrayTest {
             with (SinSignal(n.freq).pcmData){
                 repeat(40){
                     assertNotEquals(
-                        circularIndex.also { nextChunk(bufferSize) } + bufferSize - 1,
-                        circularIndex
+                        index.i.also { nextChunk(bufferSize) } + bufferSize - 1,
+                        index.i
                         )
                 }
                 println()
