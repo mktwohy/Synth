@@ -1,25 +1,21 @@
 package com.example.synth
 
-import android.util.Log
 import java.lang.Exception
 import kotlin.math.PI
 import kotlin.math.sin
 
 interface SignalProperties{
     val data: List<Float>
-    val pcmData: CircularShortArray
     val frequencies: Set<Int>
 }
 
 
 /** Generates a sound and the associated PCM data, which can be played by an AudioTrack */
 abstract class Signal: SignalProperties{
-    init{
-
-    }
-    override val pcmData: CircularShortArray by lazy {
+    open fun dataToPcm(): CircularShortArray =
         data.normalize().toIntList(MAX_16BIT_VALUE).toCircularShortArray()
-    }
+    //TODO: The conversion from Float to Int may be the bottleneck. Find a way to have less conversions
+
 
     companion object{
         var numSignals: Int = 0
@@ -52,11 +48,9 @@ abstract class Signal: SignalProperties{
  * @param size number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
-    init {
-        Log.d("m_Signal", "NullSignal created!")
-    }
     override val frequencies = setOf(0)
     override val data = List(size) { 0f }
+    override fun dataToPcm() = CircularShortArray(BUFFER_SIZE)
     override fun transpose(step: Int) = NullSignal
 }
 
@@ -66,11 +60,6 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  * @param freq frequency of wave
  */
 class SinSignal(private val freq: Int) : Signal() {
-    init{
-        Log.d("m_Signal", "SinSignal(freq) created!")
-        if (freq == 0) throw Exception("For freq == 0, use NullSignal")
-    }
-
     override val frequencies = setOf(freq)
     override val data = mutableListOf<Float>().apply{
         val periodLength = SAMPLE_RATE / freq
@@ -91,8 +80,6 @@ class SinSignal(private val freq: Int) : Signal() {
 
 /**
  * Creates a combined Signal of two Signal objects.
- * @param s1 first signal in sum
- * @param s2 second signal in sum
  */
 class SumSignal: Signal{
 
@@ -100,11 +87,12 @@ class SumSignal: Signal{
 
     override val data: List<Float>
 
+    /** @param s1 first signal in sum
+     * @param s2 second signal in sum */
     constructor(s1: Signal, s2: Signal){
-        Log.d("m_Signal", "SumSignal(s1,s2) created!")
         frequencies = (s1.frequencies + s2.frequencies).toSet()
         data = mutableListOf<Float>().apply{
-            val intervalLength = lcm(s1.pcmData.size, s2.pcmData.size)
+            val intervalLength = lcm(s1.data.size, s2.data.size)
             var s1Index = CircularIndex(s1.data.size)
             var s2Index = CircularIndex(s2.data.size)
 
@@ -116,8 +104,8 @@ class SumSignal: Signal{
         }
     }
 
+    /** @param signals a set of Signals to sum together */
     constructor(signals: Set<Signal>){
-        Log.d("m_Signal", "SumSignal(set<Signal>) created!")
         frequencies = mutableSetOf<Int>().apply {
             for(s in signals){
                 addAll(s.frequencies)
@@ -125,16 +113,16 @@ class SumSignal: Signal{
         }.toSet()
 
         data = mutableListOf<Float>().apply{
-            val datas = signals.map { it.data }
-            val intervalLength = datas.map { it.size }.lcm()
+            val signalDataLists = signals.map { it.data }
+            val intervalLength = signalDataLists.map { it.size }.lcm()
             val dataToIndex = mutableMapOf<List<Float>, CircularIndex>().apply{
-                for (d in datas){
+                for (d in signalDataLists){
                     this[d] = CircularIndex(d.size)
                 }
             }
 
             for (i in 0 until intervalLength){
-                this.add( datas.reduce { acc, d -> acc + d[dataToIndex[d]!!.i] }.sum() )
+                this.add( signalDataLists.reduce { acc, d -> acc + d[dataToIndex[d]!!.i] }.sum() )
                 dataToIndex.values.forEach{ circularIndex -> circularIndex.iterate() }
             }
 

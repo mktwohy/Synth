@@ -2,6 +2,7 @@ package com.example.synth
 
 /** A recycling bin for this project. This code should not be used. */
 
+/*
 @Deprecated("ByteArrays are slow and overly-complicated. Use CircularShortArray instead")
 val IntToByteArrayLookupTable = run{
     val table = mutableMapOf<Int, ByteArray>()
@@ -58,7 +59,7 @@ private fun List<Int>.toShortArray() =
 //}
 
 
-
+*/
 
 
 

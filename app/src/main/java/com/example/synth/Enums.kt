@@ -1,8 +1,15 @@
 package com.example.synth
 
+import android.graphics.Paint
 import android.util.Log
 import kotlin.math.absoluteValue
 
+
+enum class Color(val paint: Paint){
+    WHITE   ( Paint().apply { setARGB(255, 255, 255, 255) } ),
+    PURPLE  ( Paint().apply { setARGB(100, 255, 0, 255) } ),
+    BLACK   ( Paint().apply { setARGB(255, 0, 0, 0); strokeWidth = 2f } );
+}
 
 enum class Interval(val ratio: Float){
     PER_1   (1/1    .toFloat()),
@@ -31,7 +38,7 @@ enum class Interval(val ratio: Float){
             val ratioForOneOctave = values()[absoluteSteps - 1].ratio
             val ratio = ratioForOneOctave * octaves
             val ret = if (steps >= 0) ratio else (1 / ratio)
-            Log.d("m_transpose","ratio: $ret")
+            //Log.d("m_transpose","ratio: $ret")
             return ret
         }
     }

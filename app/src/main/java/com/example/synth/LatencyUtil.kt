@@ -6,9 +6,7 @@ import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 
-/**
- * Used for latency testing. It's currently incomplete, ignore it for now
- */
+/** Used for latency testing. */
 
 object LatencyUtil {
     /** Generates a horizontal bar of #'s */

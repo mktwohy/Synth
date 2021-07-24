@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //Make the app fullscreen. TODO: works for now, but don't use deprecated methods.
+        //Make the app fullscreen. TODO: works for now, but shouldn't use deprecated methods.
         this.supportActionBar?.hide()
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -29,18 +29,18 @@ class MainActivity : AppCompatActivity() {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        bind.octave.text = bind.piano.octave.toString()
+        bind.currentOctave.text = bind.piano.octave.toString()
         bind.piano.audioEngine.start()
     }
 
     fun octaveDown(view: View){
         bind.piano.changeOctave(bind.piano.octave - 1)
-        bind.octave.text = bind.piano.octave.toString()
+        bind.currentOctave.text = bind.piano.octave.toString()
     }
 
     fun octaveUp(view: View){
         bind.piano.changeOctave(bind.piano.octave + 1)
-        bind.octave.text = bind.piano.octave.toString()
+        bind.currentOctave.text = bind.piano.octave.toString()
     }
 
     override fun onResume() {
@@ -52,6 +52,4 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         bind.piano.audioEngine.stop()
     }
-
-
 }

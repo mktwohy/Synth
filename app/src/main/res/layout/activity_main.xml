@@ -17,13 +17,13 @@
         android:layout_height="wrap_content"
         android:onClick="octaveDown"
         android:layout_marginHorizontal="5sp"
-        app:layout_constraintEnd_toStartOf="@+id/octave"
+        app:layout_constraintEnd_toStartOf="@+id/currentOctave"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/piano"
         />
 
     <TextView
-        android:id="@+id/octave"
+        android:id="@+id/currentOctave"
         android:textColor="@color/black"
         android:textAlignment="center"
         android:background="@color/white"

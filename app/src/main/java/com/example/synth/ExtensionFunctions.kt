@@ -16,7 +16,8 @@ fun List<Signal>.sum(): Signal{
         2 -> SumSignal(this[0], this[1])
         else -> SumSignal(this.toSet())
     }
-    return ret.also { signalsToSumSignal[signalSet] = it }
+    return ret
+        .also { signalsToSumSignal[signalSet] = it }
 
 }
 
