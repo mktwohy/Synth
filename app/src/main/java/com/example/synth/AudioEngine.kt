@@ -7,7 +7,12 @@ import android.util.Log
 
 /** Uses an AudioTrack object to play its current PCM audio data on a loop. */
 class AudioEngine(private val pianoView: PianoView){
-    private var pcm: CircularShortArray = Signal.NullSignal.dataToPcm()
+    companion object{
+        const val SAMPLE_RATE = 44100
+        const val BUFFER_SIZE = 512
+    }
+
+    private var currentAudio: CircularIntArray = Signal.NullSignal.audio
     private var runMainLoop = false
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -18,7 +23,7 @@ class AudioEngine(private val pianoView: PianoView){
         .setAudioFormat(
             AudioFormat.Builder()
                 .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                .setSampleRate(MainActivity.SAMPLE_RATE)
+                .setSampleRate(SAMPLE_RATE)
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build())
         .setTransferMode(AudioTrack.MODE_STREAM)
@@ -35,13 +40,13 @@ class AudioEngine(private val pianoView: PianoView){
 
     fun stop(){ runMainLoop = false }
 
-    fun mute(){ pcm = Signal.NullSignal.dataToPcm() }
+    fun mute(){ currentAudio = Signal.NullSignal.audio }
 
     fun updatePcm(pressedKeys: Set<Key>){
-        pcm = pressedKeys
+        currentAudio = pressedKeys
             .map { it.signal }
             .sum()
-            .dataToPcm()
+            .audio.also { it.normalize() }
     }
 
     private fun mainLoop(){
@@ -49,8 +54,8 @@ class AudioEngine(private val pianoView: PianoView){
             audioTrack.play()
             var chunk: ShortArray
             while (runMainLoop) {
-                chunk = pcm.nextChunk(MainActivity.BUFFER_SIZE)
-                //Log.d("m_pcm", chunk.toList().toString())
+                chunk = currentAudio.nextChunk(BUFFER_SIZE).toShortArray()
+                Log.d("m_pcm", chunk.toList().toString())
                 audioTrack.write(chunk, 0, chunk.size)
                 pianoView.postInvalidate()
             }

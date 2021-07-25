@@ -59,6 +59,80 @@ private fun List<Int>.toShortArray() =
 //}
 
 
+class CircularIterator(val data: IntArray){
+    private val index = CircularIndex(data.size)
+
+    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
+    fun reset(){ index.reset() }
+
+    /**
+     * Builds and returns a chunk of data by circularly iterating over and appending
+     * CircularShortArray's data. The next time this method is called, its starting point
+     * will be where the previous chunk ended.
+     * @param chunkSize size of the returned ShortArray
+     * @return a looped chunk of values from data
+     */
+    fun nextChunk(chunkSize: Int): IntArray {
+        if (data.isEmpty()) throw Exception("cannot get chunk of array size 0")
+
+        return IntArray(chunkSize){ data[index.getIndexAndIterate()] }
+    }
+
+    fun nextElement(): Int {
+        if (data.isEmpty()) throw Exception("cannot get chunk of array size 0")
+
+        return data[index.getIndexAndIterate()]
+    }
+}
+
+
+/**
+ * Circular Array of Shorts. This is ideal for Signals, as it means they can store just one period
+ * of their wave and the AudioEngine can loop over it.
+ */
+class CircularShortArray {
+    val size: Int
+    private val data: ShortArray
+    var index: CircularIndex
+
+    constructor(size: Int){
+        this.size = size
+        this.data = ShortArray(size)
+        this.index = CircularIndex(size)
+    }
+
+    constructor(data: ShortArray){
+        this.size = data.size
+        this.data = data
+        this.index = CircularIndex(size)
+    }
+
+
+    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
+    fun reset(){ index.reset() }
+
+    /**
+     * Builds and returns a chunk of data by circularly iterating over and appending
+     * CircularShortArray's data. The next time this method is called, its starting point
+     * will be where the previous chunk ended.
+     * @param chunkSize size of the returned ShortArray
+     * @return a looped chunk of values from data
+     */
+    fun nextChunk(chunkSize: Int): ShortArray {
+        if (size == 0) throw Exception("cannot get chunk of array size 0")
+
+        return ShortArray(chunkSize).also{ chunk ->
+            for (i in chunk.indices) {
+                chunk[i] = data[index.i]
+                index.iterate()
+            }
+        }
+    }
+}
+
+fun IntArray.toCircularShortArray() = CircularShortArray(this.toShortArray())
+
+
 */
 
 

@@ -1,8 +1,6 @@
 package com.example.synth
 
-import android.util.Log
 import java.lang.StringBuilder
-import kotlin.system.measureTimeMillis
 
 
 //----- List<Signal> ----- //
@@ -10,25 +8,42 @@ import kotlin.system.measureTimeMillis
 fun List<Signal>.sum(): Signal{
     val signalSet = this.toSet()
     if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
-    val ret = when (size){
+    return when (size){
         0 -> Signal.NullSignal
         1 -> this[0]
-        2 -> SumSignal(this[0], this[1])
         else -> SumSignal(this.toSet())
-    }
-    return ret
-        .also { signalsToSumSignal[signalSet] = it }
-
+    }.also { signalsToSumSignal[signalSet] = it }
 }
 
-//----- List<Int> ----- //
-fun List<Int>.toCircularShortArray(): CircularShortArray{
-    val ret = CircularShortArray(this.size)
-    for(i in this.indices){
-        ret[i] = this[i].toShort()
+//----- IntArray ----- //
+//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+//https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
+fun IntArray.normalize(
+    lowerBound: Int = Signal.MIN_16BIT_VALUE,
+    upperBound: Int = Signal.MAX_16BIT_VALUE
+) {
+    //Check that array isn't empty
+    if (isEmpty()) return
+
+    val minValue   = this.minByOrNull { it }!!
+    val maxValue   = this.maxByOrNull { it }!!
+    val valueRange = (maxValue - minValue).toFloat()
+    val boundRange = (upperBound - lowerBound).toFloat()
+
+    //Check that array isn't already normalized
+    if ((minValue >= lowerBound && maxValue <= upperBound)
+        || (minValue == 0 && maxValue == 0)) {
+        return
     }
-    return ret
+
+    //Normalize
+    for (i in indices) {
+        this[i] = ( ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound ).toInt()
+    }
 }
+
+fun IntArray.toShortArray() = ShortArray(this.size) { i -> this[i].toShort() }
+
 
 //https://www.geeksforgeeks.org/gcd-two-array-numbers/
 fun gcd(a: Int, b: Int): Int =
@@ -47,32 +62,6 @@ fun List<Int>.lcm(): Int{
         else -> list.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
     }
 }
-
-
-
-//------ List<Float> ----- //
-//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-fun List<Float>.normalize(
-    lowerBound: Float = -1f,
-    upperBound: Float = 1f
-): List<Float> {
-    return if (size > 0) {
-        val minValue = this.minByOrNull { it }!!
-        val maxValue = this.maxByOrNull { it }!!
-
-        if (minValue >= -1 && maxValue <= 1)
-            this
-        else
-            this.map { (upperBound - lowerBound) * ((it - minValue) / (maxValue - minValue)) + lowerBound }
-    } else {
-        NullSignal().data
-    }
-}
-
-
-fun List<Float>.toIntList(scalar: Int) =
-    this.map { (it * scalar).toInt() }
-
 
 
 //----- String -----//
