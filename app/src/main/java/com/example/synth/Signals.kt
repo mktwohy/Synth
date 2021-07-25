@@ -6,18 +6,16 @@ import kotlin.random.Random
 
 interface SignalProperties{
     /** A List<FLoat>*/
-    val data: IntArray
+    val audio: CircularIntArray
     val frequencies: MutableSet<Int>
 }
 
 
 /** Represents a sound, which can be converted to PCM data to be played by an AudioTrack */
 abstract class Signal: SignalProperties{
-    open fun dataToPcm(): CircularShortArray = data.normalize().toCircularShortArray()
-
     companion object{
-        const val SAMPLE_RATE       = MainActivity.SAMPLE_RATE
-        const val BUFFER_SIZE       = MainActivity.BUFFER_SIZE
+        const val SAMPLE_RATE       = AudioEngine.SAMPLE_RATE
+        const val BUFFER_SIZE       = AudioEngine.BUFFER_SIZE
         const val TWO_PI              = 2.0 * PI
         const val MIN_16BIT_VALUE     = -32_768
         const val MAX_16BIT_VALUE     = 32_767
@@ -28,7 +26,7 @@ abstract class Signal: SignalProperties{
 
     override fun toString(): String{
         val s = StringBuilder()
-        for(value in data){
+        for(value in audio){
             s.append(value)
             s.append(" ")
         }
@@ -43,8 +41,7 @@ abstract class Signal: SignalProperties{
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
     override val frequencies = mutableSetOf(0)
-    override val data = IntArray(size)
-    override fun dataToPcm() = CircularShortArray(BUFFER_SIZE)
+    override val audio = CircularIntArray(size)
     override fun transpose(step: Int) = NullSignal
 }
 
@@ -55,9 +52,9 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  */
 class SinSignal(private val freq: Int) : Signal() {
     override val frequencies = mutableSetOf(freq)
-    override val data = run{
+    override val audio = run{
         val period = SAMPLE_RATE / freq
-        IntArray(period) { i -> (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt() }
+        CircularIntArray(period) { i -> (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt() }
     }
 
     override fun transpose(step: Int): Signal {
@@ -75,11 +72,12 @@ class SumSignal(signals: Set<Signal>): Signal() {
             addAll(s.frequencies)
         }
     }
-    override val data = with(signals.map { it.data }){
-        val cIterators = this.map { CircularIterator(it) }
-        IntArray(this.map{ it.size }.lcm()){
-            cIterators.fold(0){ sumAtIndex, iterator -> sumAtIndex + iterator.nextElement() }
+    override val audio = run{
+        val amps = signals.map { it.audio }
+        CircularIntArray(amps.map{ it.size }.lcm()){
+            amps.fold(0){ sumAtIndex, circIntArr -> sumAtIndex + circIntArr.nextElement() }
         }
+
     }
 
     override fun transpose(step: Int): Signal {
@@ -92,15 +90,16 @@ class SumSignal(signals: Set<Signal>): Signal() {
     }
 }
 
-//fun main() {
-//    val sigs = setOf(SinSignal(440), SinSignal(880))
-//    val sum = SumSignal(sigs)
-//    sigs.forEach{ println("size: ${it.data.size} sig: $it") }
-//    println("size: ${sum.data.size} sum: $sum")
-//    println("size: ${sum.data.size} norm: ${sum.data.normalize().toList()}")
-//
-//    val arr = IntArray(10){ Random.nextInt(-50, 50) }
-//    println("arr: ${arr.joinToString { "$it"  }}")
+fun main() {
+    val sigs = setOf(SinSignal(440), SinSignal(880))
+    val sum = SumSignal(sigs)
+    sigs.forEach{ println("size: ${it.audio.size} sig: $it") }
+    println("size: ${sum.audio.size} sum: $sum")
+    println("size: ${sum.audio.size} norm: ${sum.audio.normalize()}")
+
+    val arr = IntArray(10){ Random.nextInt(-50, 50) }
+    println("arr: ${arr.joinToString { "$it"  }}")
 //    println("arr: ${arr.normalize(-10,10).joinToString { "$it" }}")
-//
-//}
+
+
+}

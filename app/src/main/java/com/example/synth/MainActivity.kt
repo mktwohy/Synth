@@ -12,11 +12,6 @@ import com.example.synth.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     lateinit var bind: ActivityMainBinding
 
-    companion object{
-        const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 512
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

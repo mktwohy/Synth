@@ -18,37 +18,34 @@ fun List<Signal>.sum(): Signal{
 }
 
 //----- IntArray ----- //
-
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
 //https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
 fun IntArray.normalize(
     lowerBound: Int = Signal.MIN_16BIT_VALUE,
     upperBound: Int = Signal.MAX_16BIT_VALUE
-): IntArray {
-    if (isEmpty()) return IntArray(0)
+) {
+    //Check that array isn't empty
+    if (isEmpty()) return
 
     val minValue   = this.minByOrNull { it }!!
     val maxValue   = this.maxByOrNull { it }!!
     val valueRange = (maxValue - minValue).toFloat()
     val boundRange = (upperBound - lowerBound).toFloat()
 
-    return if ((minValue >= lowerBound && maxValue <= upperBound)
+    //Check that array isn't already normalized
+    if ((minValue >= lowerBound && maxValue <= upperBound)
         || (minValue == 0 && maxValue == 0)) {
-        this
+        return
     }
-    else {
-        this.apply {
-            for (i in indices) {
-                this[i] = ( ((boundRange * (this[i] - minValue)) /
-                        valueRange) + lowerBound ).toInt()
-            }
-        }
+
+    //Normalize
+    for (i in indices) {
+        this[i] = ( ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound ).toInt()
     }
 }
 
 fun IntArray.toShortArray() = ShortArray(this.size) { i -> this[i].toShort() }
 
-fun IntArray.toCircularShortArray() = CircularShortArray(this.toShortArray())
 
 //https://www.geeksforgeeks.org/gcd-two-array-numbers/
 fun gcd(a: Int, b: Int): Int =
