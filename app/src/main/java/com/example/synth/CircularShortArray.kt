@@ -1,5 +1,7 @@
 package com.example.synth
 
+import shark.PrimitiveType
+
 /** Index for circularly navigating an array */
 class CircularIndex(private val loopSize: Int){
     /** Current index value */
@@ -14,6 +16,31 @@ class CircularIndex(private val loopSize: Int){
     fun reset(){ i = 0 }
 }
 
+class CircularIterator(val data: IntArray){
+    private val index = CircularIndex(data.size)
+
+    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
+    fun reset(){ index.reset() }
+
+    /**
+     * Builds and returns a chunk of data by circularly iterating over and appending
+     * CircularShortArray's data. The next time this method is called, its starting point
+     * will be where the previous chunk ended.
+     * @param chunkSize size of the returned ShortArray
+     * @return a looped chunk of values from data
+     */
+    fun nextChunk(chunkSize: Int): IntArray {
+        if (data.isEmpty()) throw Exception("cannot get chunk of array size 0")
+
+        return IntArray(chunkSize){ data[index.getIndexAndIterate()] }
+    }
+
+    fun nextElement(): Int {
+        if (data.isEmpty()) throw Exception("cannot get chunk of array size 0")
+
+        return data[index.getIndexAndIterate()]
+    }
+}
 
 /** Circular Array of Ints*/
 class CircularIntArray {
@@ -48,6 +75,12 @@ class CircularIntArray {
         if (size == 0) throw Exception("cannot get chunk of array size 0")
 
         return IntArray(chunkSize){ data[index.getIndexAndIterate()] }
+    }
+
+    fun nextPcmChunk(chunkSize: Int): ShortArray{
+        if (size == 0) throw Exception("cannot get chunk of array size 0")
+
+        return ShortArray(chunkSize){ data[index.getIndexAndIterate()].toShort() }
     }
 
 

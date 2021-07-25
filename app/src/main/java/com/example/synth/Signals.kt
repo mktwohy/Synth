@@ -1,13 +1,13 @@
 package com.example.synth
 
-import android.util.Log
 import kotlin.math.PI
 import kotlin.math.sin
+import kotlin.random.Random
 
 interface SignalProperties{
     /** A List<FLoat>*/
     val data: IntArray
-    val frequencies: Set<Int>
+    val frequencies: MutableSet<Int>
 }
 
 
@@ -34,11 +34,6 @@ abstract class Signal: SignalProperties{
         }
         return s.toString()
     }
-
-    operator fun plus(that: Signal) =
-        SumSignal(this, that)
-
-    operator fun plusAssign(that: Signal){ SumSignal(this, that) }
 }
 
 
@@ -47,7 +42,7 @@ abstract class Signal: SignalProperties{
  * @param size number of samples in ByteArray of data
  */
 class NullSignal(size: Int = BUFFER_SIZE): Signal() {
-    override val frequencies = setOf(0)
+    override val frequencies = mutableSetOf(0)
     override val data = IntArray(size)
     override fun dataToPcm() = CircularShortArray(BUFFER_SIZE)
     override fun transpose(step: Int) = NullSignal
@@ -59,7 +54,7 @@ class NullSignal(size: Int = BUFFER_SIZE): Signal() {
  * @param freq frequency of wave
  */
 class SinSignal(private val freq: Int) : Signal() {
-    override val frequencies = setOf(freq)
+    override val frequencies = mutableSetOf(freq)
     override val data = run{
         val period = SAMPLE_RATE / freq
         IntArray(period) { i -> (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt() }
@@ -74,50 +69,18 @@ class SinSignal(private val freq: Int) : Signal() {
 
 
 /** Combines two or more Signals into one Signal. */
-class SumSignal: Signal{
-    override val frequencies: Set<Int>
-    override val data: IntArray
-
-    /**@param s1 first signal in sum
-     * @param s2 second signal in sum */
-    constructor(s1: Signal, s2: Signal){
-        frequencies = (s1.frequencies + s2.frequencies).toSet()
-        data = IntArray(lcm(s1.data.size, s2.data.size)).apply{
-            val s1Index = CircularIndex(s1.data.size)
-            val s2Index = CircularIndex(s2.data.size)
-
-            for (i in this.indices){
-                this[i] = (s1.data[s1Index.i] + s2.data[s2Index.i])
-                s1Index.iterate()
-                s2Index.iterate()
-            }
+class SumSignal(signals: Set<Signal>): Signal() {
+    override val frequencies = mutableSetOf<Int>().apply {
+        for(s in signals){
+            addAll(s.frequencies)
         }
     }
-
-    /** @param signals a set of Signals to sum together */
-    constructor(signals: Set<Signal>){
-        frequencies = mutableSetOf<Int>().apply {
-            for(s in signals){
-                addAll(s.frequencies)
-            }
-        }.toSet()
-
-        val dataArrays = signals.map { it.data }
-        data = IntArray(dataArrays.map { it.size }.lcm()).apply{
-            val dataToIndex = mutableMapOf<IntArray, CircularIndex>().apply{
-                for (arr in dataArrays){
-                    this[arr] = CircularIndex(arr.size)
-                }
-            }
-
-            for (i in this.indices){
-                this[i] = ( dataArrays.reduce { acc, d -> acc + d[dataToIndex[d]!!.i] }.sum() )
-                dataToIndex.values.forEach{ circularIndex -> circularIndex.iterate() }
-            }
-
+    override val data = with(signals.map { it.data }){
+        val cIterators = this.map { CircularIterator(it) }
+        IntArray(this.map{ it.size }.lcm()){
+            cIterators.fold(0){ sumAtIndex, iterator -> sumAtIndex + iterator.nextElement() }
         }
     }
-
 
     override fun transpose(step: Int): Signal {
         val ratio = Interval.stepToRatio(step)
@@ -128,3 +91,16 @@ class SumSignal: Signal{
         return transposedSignals.sum()
     }
 }
+
+//fun main() {
+//    val sigs = setOf(SinSignal(440), SinSignal(880))
+//    val sum = SumSignal(sigs)
+//    sigs.forEach{ println("size: ${it.data.size} sig: $it") }
+//    println("size: ${sum.data.size} sum: $sum")
+//    println("size: ${sum.data.size} norm: ${sum.data.normalize().toList()}")
+//
+//    val arr = IntArray(10){ Random.nextInt(-50, 50) }
+//    println("arr: ${arr.joinToString { "$it"  }}")
+//    println("arr: ${arr.normalize(-10,10).joinToString { "$it" }}")
+//
+//}

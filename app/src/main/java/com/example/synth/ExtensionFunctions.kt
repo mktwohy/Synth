@@ -1,8 +1,6 @@
 package com.example.synth
 
-import android.util.Log
 import java.lang.StringBuilder
-import kotlin.system.measureTimeMillis
 
 
 //----- List<Signal> ----- //
@@ -13,34 +11,39 @@ fun List<Signal>.sum(): Signal{
     val ret = when (size){
         0 -> Signal.NullSignal
         1 -> this[0]
-        2 -> SumSignal(this[0], this[1])
         else -> SumSignal(this.toSet())
     }
     return ret
         .also { signalsToSumSignal[signalSet] = it }
-
 }
 
 //----- IntArray ----- //
+
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+//https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
 fun IntArray.normalize(
     lowerBound: Int = Signal.MIN_16BIT_VALUE,
     upperBound: Int = Signal.MAX_16BIT_VALUE
 ): IntArray {
     if (isEmpty()) return IntArray(0)
 
-    val minValue = this.minByOrNull { it }!!
-    val maxValue = this.maxByOrNull { it }!!
+    val minValue   = this.minByOrNull { it }!!
+    val maxValue   = this.maxByOrNull { it }!!
+    val valueRange = (maxValue - minValue).toFloat()
+    val boundRange = (upperBound - lowerBound).toFloat()
 
     return if ((minValue >= lowerBound && maxValue <= upperBound)
-        || (minValue == 0 && maxValue == 0))
+        || (minValue == 0 && maxValue == 0)) {
         this
-    else
+    }
+    else {
         this.apply {
-            for (i in this.indices){
-                this[i] = (upperBound - lowerBound) *
-                        ((this[i] - minValue) / (maxValue - minValue)) + lowerBound }
+            for (i in indices) {
+                this[i] = ( ((boundRange * (this[i] - minValue)) /
+                        valueRange) + lowerBound ).toInt()
+            }
         }
+    }
 }
 
 fun IntArray.toShortArray() = ShortArray(this.size) { i -> this[i].toShort() }
