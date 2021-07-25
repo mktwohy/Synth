@@ -8,13 +8,11 @@ import java.lang.StringBuilder
 fun List<Signal>.sum(): Signal{
     val signalSet = this.toSet()
     if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
-    val ret = when (size){
+    return when (size){
         0 -> Signal.NullSignal
         1 -> this[0]
         else -> SumSignal(this.toSet())
-    }
-    return ret
-        .also { signalsToSumSignal[signalSet] = it }
+    }.also { signalsToSumSignal[signalSet] = it }
 }
 
 //----- IntArray ----- //
