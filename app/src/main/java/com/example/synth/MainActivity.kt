@@ -14,13 +14,14 @@ class MainActivity : AppCompatActivity() {
 
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 256
+        const val BUFFER_SIZE = 512
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //Make the app fullscreen. TODO: works for now, but shouldn't use deprecated methods.
+        //Make the app fullscreen.
+        // TODO: works for now, but shouldn't use deprecated methods.
         this.supportActionBar?.hide()
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)

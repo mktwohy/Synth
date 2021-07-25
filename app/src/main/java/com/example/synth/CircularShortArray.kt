@@ -9,16 +9,74 @@ class CircularIndex(private val loopSize: Int){
         i = (i + step) % loopSize
     }
 
+    fun getIndexAndIterate() = i.also { iterate() }
+
     fun reset(){ i = 0 }
+}
+
+
+/** Circular Array of Ints*/
+class CircularIntArray {
+    val size: Int
+    private val data: IntArray
+    private var index: CircularIndex
+
+    constructor(size: Int, init: (Int) -> Int = {0} ){
+        this.size = size
+        this.data = IntArray(size, init)
+        this.index = CircularIndex(size)
+    }
+
+    constructor(data: IntArray){
+        this.size = data.size
+        this.data = data
+        this.index = CircularIndex(size)
+    }
+
+
+    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
+    fun reset(){ index.reset() }
+
+    /**
+     * Builds and returns a chunk of data by circularly iterating over and appending
+     * CircularShortArray's data. The next time this method is called, its starting point
+     * will be where the previous chunk ended.
+     * @param chunkSize size of the returned ShortArray
+     * @return a looped chunk of values from data
+     */
+    fun nextChunk(chunkSize: Int): IntArray {
+        if (size == 0) throw Exception("cannot get chunk of array size 0")
+
+        return IntArray(chunkSize){ data[index.getIndexAndIterate()] }
+    }
+
+
+    operator fun get(index: Int): Int{ return data[index] }
+    operator fun set(index: Int, value: Int){ data[index] = value }
+
 }
 
 /**
  * Circular Array of Shorts. This is ideal for Signals, as it means they can store just one period
  * of their wave and the AudioEngine can loop over it.
  */
-class CircularShortArray(override var size: Int = 0): Collection<Short> {
-    private val data = ShortArray(size)
-    var index = CircularIndex(size)
+class CircularShortArray {
+    val size: Int
+    private val data: ShortArray
+    var index: CircularIndex
+
+    constructor(size: Int){
+        this.size = size
+        this.data = ShortArray(size)
+        this.index = CircularIndex(size)
+    }
+
+    constructor(data: ShortArray){
+        this.size = data.size
+        this.data = data
+        this.index = CircularIndex(size)
+    }
+
 
     /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
     fun reset(){ index.reset() }
@@ -39,31 +97,5 @@ class CircularShortArray(override var size: Int = 0): Collection<Short> {
                 index.iterate()
             }
         }
-    }
-
-
-    fun toList() = data.toList()
-    operator fun get(index: Int): Short{ return data[index] }
-    operator fun set(index: Int, value: Short){ data[index] = value }
-
-    override fun isEmpty()                  = size == 0
-    override fun toString()                 = data.contentToString()
-    override fun iterator()                 = data.iterator()
-    override fun contains(element: Short)   = data.contains(element)
-    override fun containsAll(elements: Collection<Short>): Boolean{
-        for(e in elements){
-            if (e !in data) return false
-        }
-        return true
-    }
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as CircularShortArray
-
-        if (!data.contentEquals(other.data)) return false
-
-        return true
     }
 }

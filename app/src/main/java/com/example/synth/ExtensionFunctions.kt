@@ -21,14 +21,31 @@ fun List<Signal>.sum(): Signal{
 
 }
 
-//----- List<Int> ----- //
-fun List<Int>.toCircularShortArray(): CircularShortArray{
-    val ret = CircularShortArray(this.size)
-    for(i in this.indices){
-        ret[i] = this[i].toShort()
-    }
-    return ret
+//----- IntArray ----- //
+//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+fun IntArray.normalize(
+    lowerBound: Int = Signal.MIN_16BIT_VALUE,
+    upperBound: Int = Signal.MAX_16BIT_VALUE
+): IntArray {
+    if (isEmpty()) return IntArray(0)
+
+    val minValue = this.minByOrNull { it }!!
+    val maxValue = this.maxByOrNull { it }!!
+
+    return if ((minValue >= lowerBound && maxValue <= upperBound)
+        || (minValue == 0 && maxValue == 0))
+        this
+    else
+        this.apply {
+            for (i in this.indices){
+                this[i] = (upperBound - lowerBound) *
+                        ((this[i] - minValue) / (maxValue - minValue)) + lowerBound }
+        }
 }
+
+fun IntArray.toShortArray() = ShortArray(this.size) { i -> this[i].toShort() }
+
+fun IntArray.toCircularShortArray() = CircularShortArray(this.toShortArray())
 
 //https://www.geeksforgeeks.org/gcd-two-array-numbers/
 fun gcd(a: Int, b: Int): Int =
@@ -47,32 +64,6 @@ fun List<Int>.lcm(): Int{
         else -> list.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
     }
 }
-
-
-
-//------ List<Float> ----- //
-//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-fun List<Float>.normalize(
-    lowerBound: Float = -1f,
-    upperBound: Float = 1f
-): List<Float> {
-    return if (size > 0) {
-        val minValue = this.minByOrNull { it }!!
-        val maxValue = this.maxByOrNull { it }!!
-
-        if (minValue >= -1 && maxValue <= 1)
-            this
-        else
-            this.map { (upperBound - lowerBound) * ((it - minValue) / (maxValue - minValue)) + lowerBound }
-    } else {
-        NullSignal().data
-    }
-}
-
-
-fun List<Float>.toIntList(scalar: Int) =
-    this.map { (it * scalar).toInt() }
-
 
 
 //----- String -----//

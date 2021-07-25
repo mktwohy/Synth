@@ -37,9 +37,7 @@ enum class Interval(val ratio: Float){
 
             val ratioForOneOctave = values()[absoluteSteps - 1].ratio
             val ratio = ratioForOneOctave * octaves
-            val ret = if (steps >= 0) ratio else (1 / ratio)
-            //Log.d("m_transpose","ratio: $ret")
-            return ret
+            return if (steps >= 0) ratio else (1 / ratio)
         }
     }
 }
