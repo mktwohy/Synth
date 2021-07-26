@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("m_activityLifecycle","create")
 
         //Make the app fullscreen.
         // TODO: works for now, but shouldn't use deprecated methods.
@@ -39,6 +40,24 @@ class MainActivity : AppCompatActivity() {
         bind.currentOctave.text = bind.piano.octave.toString()
     }
 
+    fun noiseDown(view: View){
+        with(bind.piano.audioEngine){
+            if(this.noiseAmount > 0) {
+                this.noiseAmount -= 1
+                bind.noiseLevel.text = this.noiseAmount.toString()
+            }
+        }
+    }
+
+    fun noiseUp(view: View){
+        with(bind.piano.audioEngine){
+            this.noiseAmount += 1
+            bind.noiseLevel.text = this.noiseAmount.toString()
+
+        }
+    }
+
+
     override fun onResume() {
         super.onResume()
         bind.piano.audioEngine.start()
@@ -48,4 +67,5 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         bind.piano.audioEngine.stop()
     }
+
 }

@@ -1,5 +1,7 @@
 package com.example.synth
 
+import kotlin.random.Random
+
 /** Index for circularly navigating an array */
 class CircularIndex{
     private var leftBound: Int
@@ -23,7 +25,11 @@ class CircularIndex{
         i = ( (i + step) % (rightBound + 1) ) + leftBound
     }
 
-    fun getIndexAndIterate() = i.also { iterate() }
+    fun getIndexAndIterate(step: Int = 1, noise: Boolean = false) =
+        i.also {
+            if (noise) iterate(Random.nextInt(1, step+1))
+            else iterate(step)
+        }
 
     /** Moves underlying index to 0 */
     fun reset(){ i = 0 }
@@ -67,10 +73,11 @@ class CircularIntArray: Collection<Int>{
      * @param chunkSize size of the returned ShortArray
      * @return a looped chunk of values from data
      */
-    fun nextChunk(chunkSize: Int): IntArray {
+    fun nextChunk(chunkSize: Int, noiseAmount: Int = 0): IntArray {
         if (size == 0) throw Exception("cannot get chunk of array size 0")
 
-        return IntArray(chunkSize){ data[index.getIndexAndIterate()] }
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
     }
 
     fun nextElement(): Int {

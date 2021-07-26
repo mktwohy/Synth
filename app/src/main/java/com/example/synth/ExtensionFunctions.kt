@@ -9,7 +9,7 @@ fun List<Signal>.sum(): Signal{
     val signalSet = this.toSet()
     if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
     return when (size){
-        0 -> Signal.NullSignal
+        0 -> NullSignal
         1 -> this[0]
         else -> SumSignal(this.toSet())
     }.also { signalsToSumSignal[signalSet] = it }

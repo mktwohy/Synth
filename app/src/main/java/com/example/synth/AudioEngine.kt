@@ -4,15 +4,17 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.util.Log
+import kotlin.random.Random
 
 /** Uses an AudioTrack object to play its current PCM audio data on a loop. */
 class AudioEngine(private val pianoView: PianoView){
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 512
+        const val BUFFER_SIZE = 256
     }
 
-    private var currentAudio: CircularIntArray = Signal.NullSignal.audio
+    var noiseAmount = 0
+    private var currentAudio: CircularIntArray = NullSignal.audio
     private var runMainLoop = false
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -28,11 +30,11 @@ class AudioEngine(private val pianoView: PianoView){
                 .build())
         .setTransferMode(AudioTrack.MODE_STREAM)
         .build()
-    val isPlaying
-        get() = audioTrack.playState == AudioTrack.PLAYSTATE_PLAYING
+
+
 
     fun start(){
-        if (!isPlaying){
+        if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
             runMainLoop = true
             mainLoop()
         }
@@ -40,7 +42,7 @@ class AudioEngine(private val pianoView: PianoView){
 
     fun stop(){ runMainLoop = false }
 
-    fun mute(){ currentAudio = Signal.NullSignal.audio }
+    fun mute(){ currentAudio = NullSignal.audio }
 
     fun updatePcm(pressedKeys: Set<Key>){
         currentAudio = pressedKeys
@@ -49,17 +51,24 @@ class AudioEngine(private val pianoView: PianoView){
             .audio.also { it.normalize() }
     }
 
+    fun destroyAudioTrack(){
+        audioTrack.flush()
+        audioTrack.release()
+    }
+
     private fun mainLoop(){
         Thread {
+            var chunk: IntArray
             audioTrack.play()
-            var chunk: ShortArray
             while (runMainLoop) {
-                chunk = currentAudio.nextChunk(BUFFER_SIZE).toShortArray()
-                Log.d("m_pcm", chunk.toList().toString())
-                audioTrack.write(chunk, 0, chunk.size)
+                chunk = currentAudio.nextChunk(BUFFER_SIZE, noiseAmount)
+//                Log.d("m_pcm", chunk.toList().toString())
+                audioTrack.write(chunk.toShortArray(), 0, chunk.size)
+                Log.d("m_audioTrack","position: ${audioTrack.playbackHeadPosition}")
                 pianoView.postInvalidate()
             }
             audioTrack.stop()
+            audioTrack.flush()
         }.start()
     }
 }

@@ -50,7 +50,7 @@ val calculateLcm = { l: List<Int> -> l.lcm() }
 //val createSumSignal = { s: Set<Signal> -> SumSignal(s) }
 val createSumSignal = { s: Set<Int> -> SumSignal(s.map{ SinSignal(it) }.toSet()) }
 
-val sleep = { d: Long -> run{Thread.sleep(d)} }
+val threadSleep = { d: Long -> run{Thread.sleep(d)} }
 
 fun main(){
 
@@ -74,7 +74,7 @@ fun main(){
 
     measureAvgRunTime( Array(numCases) { i -> i*1 },
         "sleep")
-    { sleep }
+    { threadSleep }
 
 
     val cases = listOf(
