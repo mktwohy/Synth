@@ -56,11 +56,11 @@ fun main(){
 
     val numCases = 50
 
-    measureAvgRunTime( makeRandomSignals(numCases).map{it.audio},
+    measureAvgRunTime( makeRandomSignals(numCases).map{it.amplitudes},
         "convertIntArrayToShortArray")
     { convertIntArrayToShortArray }
 
-    measureAvgRunTime( makeRandomSignals(numCases).map{ it.audio.toList() },
+    measureAvgRunTime( makeRandomSignals(numCases).map{ it.amplitudes.toList() },
     "calculateLcm")
     { calculateLcm }
 

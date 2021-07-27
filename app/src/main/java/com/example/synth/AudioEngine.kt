@@ -4,17 +4,28 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.util.Log
-import kotlin.random.Random
 
-/** Uses an AudioTrack object to play its current PCM audio data on a loop. */
-class AudioEngine(private val pianoView: PianoView){
+/**
+ * A wrapper class for [AudioTrack].
+ *
+ * At any time, set [audioForPlayback] to select the audio you want to play and then call
+ * [start] to begin playing this audio on a loop.
+ *
+ * @property noiseAmount Controls the amount of harmonic noise applied to currentAudio
+ * The noise is a result of manipulating [CircularIntArray.nextChunk]
+ * @property audioForPlayback the audio to be played on a loop by the [AudioEngine]
+ */
+class AudioEngine{
     companion object{
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 256
     }
 
     var noiseAmount = 0
-    private var currentAudio: CircularIntArray = NullSignal.audio
+    var audioForPlayback: CircularIntArray = NullSignal.amplitudes
+        set(audio) {
+            field = audio.also{ it.normalize() }
+        }
     private var runMainLoop = false
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -31,8 +42,7 @@ class AudioEngine(private val pianoView: PianoView){
         .setTransferMode(AudioTrack.MODE_STREAM)
         .build()
 
-
-
+    /** Begins playing *currentAudio* on a loop */
     fun start(){
         if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
             runMainLoop = true
@@ -42,14 +52,7 @@ class AudioEngine(private val pianoView: PianoView){
 
     fun stop(){ runMainLoop = false }
 
-    fun mute(){ currentAudio = NullSignal.audio }
-
-    fun updatePcm(pressedKeys: Set<Key>){
-        currentAudio = pressedKeys
-            .map { it.signal }
-            .sum()
-            .audio.also { it.normalize() }
-    }
+    fun mute(){ audioForPlayback = NullSignal.amplitudes }
 
     fun destroyAudioTrack(){
         audioTrack.flush()
@@ -61,11 +64,10 @@ class AudioEngine(private val pianoView: PianoView){
             var chunk: IntArray
             audioTrack.play()
             while (runMainLoop) {
-                chunk = currentAudio.nextChunk(BUFFER_SIZE, noiseAmount)
-//                Log.d("m_pcm", chunk.toList().toString())
+                chunk = audioForPlayback.nextChunk(BUFFER_SIZE, noiseAmount)
+
+                Log.d("m_pcm", chunk.toList().toString())
                 audioTrack.write(chunk.toShortArray(), 0, chunk.size)
-                Log.d("m_audioTrack","position: ${audioTrack.playbackHeadPosition}")
-                pianoView.postInvalidate()
             }
             audioTrack.stop()
             audioTrack.flush()

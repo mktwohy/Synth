@@ -2,16 +2,19 @@ package com.example.synth
 
 import kotlin.math.PI
 import kotlin.math.sin
-import kotlin.random.Random
 
+/**
+ * @property amplitudes represents the audio data. Setting [AudioEngine.audioTrack] = [amplitudes]
+ * will play the Signal
+ * @property frequencies the known frequencies in the Signal
+ */
 interface SignalProperties{
-    /** A List<FLoat>*/
-    val audio: CircularIntArray
+    val amplitudes: CircularIntArray
     val frequencies: MutableSet<Int>
 }
 
 
-/** Represents a sound, which can be converted to PCM data to be played by an AudioTrack */
+/** Represents a sound, who can be converted to PCM data */
 abstract class Signal: SignalProperties{
     companion object{
         const val SAMPLE_RATE       = AudioEngine.SAMPLE_RATE
@@ -25,7 +28,7 @@ abstract class Signal: SignalProperties{
 
     override fun toString(): String{
         val s = StringBuilder()
-        for(value in audio){
+        for(value in amplitudes){
             s.append(value)
             s.append(" ")
         }
@@ -33,34 +36,19 @@ abstract class Signal: SignalProperties{
     }
 }
 
-///**
-// * Represents a white-noise signal.
-// * @param size number of samples in ByteArray of data
-// */
-//class NoiseSignal(size: Int = BUFFER_SIZE): Signal(){
-//    override val frequencies = mutableSetOf<Int>()
-//    override val audio = CircularIntArray(size){ Random.nextInt(MIN_16BIT_VALUE, MAX_16BIT_VALUE) }
-//    override fun transpose(step: Int): Signal = NoiseSignal()
-//}
 
-/**
- * Represents a silent signal.
- * @param size number of samples in ByteArray of data
- */
+/** Represents a silent signal of size [AudioEngine.BUFFER_SIZE] */
 object NullSignal: Signal() {
-    override val frequencies = mutableSetOf(0)
-    override val audio = CircularIntArray(BUFFER_SIZE)
+    override val frequencies = mutableSetOf<Int>()
+    override val amplitudes = CircularIntArray(BUFFER_SIZE)
     override fun transpose(step: Int) = NullSignal
 }
 
 
-/**
- * Represents a pure sine wave
- * @param freq frequency of wave
- */
+/** Represents a pure sine wave */
 class SinSignal(private val freq: Int) : Signal() {
     override val frequencies = mutableSetOf(freq)
-    override val audio = run{
+    override val amplitudes = run{
         val period = SAMPLE_RATE / freq
         CircularIntArray(period) { i -> (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt() }
     }
@@ -80,8 +68,8 @@ class SumSignal(signals: Set<Signal>): Signal() {
             addAll(s.frequencies)
         }
     }
-    override val audio = run{
-        val amps = signals.map { it.audio }
+    override val amplitudes = run{
+        val amps = signals.map { it.amplitudes }
         CircularIntArray(amps.map{ it.size }.lcm()){
             amps.fold(0){ sumAtIndex, circIntArr -> sumAtIndex + circIntArr.nextElement() }
         }

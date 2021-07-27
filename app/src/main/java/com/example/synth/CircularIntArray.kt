@@ -35,15 +35,12 @@ class CircularIndex{
     fun reset(){ i = 0 }
 }
 
-fun main() {
-    val c = CircularIndex(10)
-    repeat(30){ print("${c.getIndexAndIterate()} ") }
-}
-
-/** Wrapper class for IntArray that keeps track of a CircularIndex to navigate the
+/**
+ * - Wrapper class for IntArray that keeps track of a CircularIndex to navigate the
  * underlying data structure.
- *
- * Note that nextElement() and nextChunk() use the same Circular Index
+ * - This class is used in Synth to represent [Signal.amplitudes]
+ * - Note that nextElement() and nextChunk() use the same Circular Index. This will be changed if
+ * it causes issues
  * */
 class CircularIntArray: Collection<Int>{
     override val size: Int
@@ -51,6 +48,7 @@ class CircularIntArray: Collection<Int>{
     private var index: CircularIndex
 
     constructor(size: Int, init: (Int) -> Int = {0} ){
+        if (size <= 0) throw Exception("Array cannot have size <= 0")
         this.size = size
         this.data = IntArray(size, init)
         this.index = CircularIndex(size)
@@ -62,30 +60,26 @@ class CircularIntArray: Collection<Int>{
         this.index = CircularIndex(size)
     }
 
-
     /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
     fun reset(){ index.reset() }
 
     /**
      * Builds and returns a chunk of data by circularly iterating over and appending
-     * CircularIntArray's data. The next time this method is called, its starting point
-     * will be where the previous chunk ended.
-     * @param chunkSize size of the returned ShortArray
+     * CircularIntArray's data to an IntArray of size [chunkSize].
+     *
+     *  The next time this method is called, its starting point will be where
+     * the previous chunk ended.
+     * @param chunkSize size of the returned IntArray
      * @return a looped chunk of values from data
      */
     fun nextChunk(chunkSize: Int, noiseAmount: Int = 0): IntArray {
-        if (size == 0) throw Exception("cannot get chunk of array size 0")
-
         val step = if (noiseAmount == 0) 1 else noiseAmount
         return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
     }
 
-    fun nextElement(): Int {
-        if (data.isEmpty()) throw Exception("cannot get chunk of array size 0")
+    fun nextElement() = data[index.getIndexAndIterate()]
 
-        return data[index.getIndexAndIterate()]
-    }
-
+    /** Normalizes data so its values don't exceed the range of a 4 byte integer   */
     fun normalize(){
         data.normalize()
     }
