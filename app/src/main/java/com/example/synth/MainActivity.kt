@@ -2,7 +2,6 @@ package com.example.synth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
@@ -41,10 +40,9 @@ class MainActivity : AppCompatActivity(), KeyUpdateEventListener {
     }
 
     override fun onKeyUpdatedEvent(pressedKeys: Set<Key>) {
-        audioEngine.audioForPlayback = pressedKeys
+        audioEngine.signalForPlayback = pressedKeys
                                         .map { it.signal }
                                         .sum()
-                                        .amplitudes
     }
 
     fun octaveDown(view: View){

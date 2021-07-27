@@ -4,8 +4,7 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 /**
- * @property amplitudes represents the audio data. Setting [AudioEngine.audioTrack] = [amplitudes]
- * will play the Signal
+ * @property amplitudes represents the audio data.
  * @property frequencies the known frequencies in the Signal
  */
 interface SignalProperties{
@@ -14,7 +13,11 @@ interface SignalProperties{
 }
 
 
-/** Represents a sound, who can be converted to PCM data */
+/** Represents a sound, who can played two ways:
+ * - to play on a loop, set [AudioEngine.signalForPlayback] = *Signal you want to play*
+ * - to play once, write a larger chunk of Signal's data (using [Signal.amplitudes]'s nextChunk())
+ * to an [android.media.AudioTrack] and call play()
+ * */
 abstract class Signal: SignalProperties{
     companion object{
         const val SAMPLE_RATE       = AudioEngine.SAMPLE_RATE
