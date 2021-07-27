@@ -6,11 +6,22 @@ import android.media.AudioTrack
 import android.util.Log
 
 /**
- * A wrapper class for [AudioTrack].
+ * A wrapper class for [AudioTrack] that plays a [Signal]'s audio on a loop.
  *
- * At any time, set [signalForPlayback] to select the audio you want to play and then call
- * [start] to begin playing this audio on a loop.
  *
+ * Example Usage:
+ * ```
+ * val signal = SinSignal(Note.C_4.freq)    //create an instance of Signal
+ * val audioEngine = AudioEngine()          //create an instance of AudioEngine
+ * audioEngine.signalForPlayback = signal   //set signalForPlayback to signal you want to play
+ * audioEngine.start()                      //start engine
+ * ...
+ * audioEngine.mute()                       //mute the audio
+ * ...
+ * audioEngine.signalForPlayback = SinSignal(440) //play a new Signal mid-playback
+ * ...
+ * audioEngine.stop()
+ * ```
  * @property noiseAmount Controls the amount of harmonic noise applied to currentAudio
  * The noise is a result of manipulating [CircularIntArray.nextChunk]
  * @property signalForPlayback the audio to be played on a loop by the [AudioEngine]
@@ -23,9 +34,7 @@ class AudioEngine{
 
     var noiseAmount = 0
     var signalForPlayback: Signal = NullSignal
-        set(audio) {
-            field = audio.also{ it.amplitudes.normalize() }
-        }
+        set(s) { field = s.also{ it.amplitudes.normalize() } }
     private var runMainLoop = false
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(

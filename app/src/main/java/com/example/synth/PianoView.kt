@@ -12,7 +12,7 @@ import com.example.synth.Note.Companion.transpose
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
 
-/** A wrapper class for Set<Key> that alerts its listeners when it's been updated */
+/** A wrapper class for Set<[PianoKey]> that alerts its listeners when it's been updated */
 class EventPianoKeySet{
     var pianoKeys = setOf<PianoKey>()
         set(newKeys) {
@@ -28,10 +28,10 @@ class EventPianoKeySet{
 
 
 /**
- * Stores information about each Key in the PianoView
- * @param note   The fundamental note name associated with the Key
- * @param color  The Key's Paint, which is either black or white
- * @param signal The Signal that will play when the note is pressed
+ * Stores information about each key in the [PianoView].
+ * @param note   The fundamental [Note] associated with the Key
+ * @param color  The key's [Color], which is either black or white
+ * @param signal The [Signal] that will play when the note is pressed
  */
 data class PianoKey(
     var note: Note,
@@ -44,10 +44,10 @@ data class PianoKey(
  * acts as a hitbox for its assigned [PianoKey].
  *
  *
- * The grid splits the keyboard in half, forming two rows. This structure is used so that every key
- * can be represented by 1-2 rectangles rather than a more complex shape;
- * Every white key is made up of one [RectF] from the bottom row and one from the top row,
- * whereas every black key is made up of one Rect from the top row.
+ * [This grid layout](https://github.com/mktwohy/Synth/blob/master/Images/PianoGridBlueprint.jpg)
+ * is used so that every key can be represented by 1-2 rectangles (white: 2 rectangles, black: 1
+ * rectangle) rather than a more complex shape.
+ *
  *
  * @param width width of the PianoGrid
  * @param height height of the PianoGrid
@@ -71,6 +71,8 @@ class PianoGrid(
     val bottomRow : List<RectF>
     val rectToPianoKey : MutableMap<RectF, PianoKey> = mutableMapOf()
 
+    // This part is pretty lengthy. See link in [PianoGrid] documentation for a picture of what this
+    // init creates. It's not too important, so you can just fold it and not worry about it.
     init{
         //Init keys
         pianoKeys =  Note.toList(octave).map { note ->

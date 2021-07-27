@@ -10,13 +10,13 @@ import kotlin.math.sin
 interface SignalProperties{
     val amplitudes: CircularIntArray
     val frequencies: MutableSet<Int>
+
 }
 
 
-/** Represents a sound, who can played two ways:
- * - to play on a loop, set [AudioEngine.signalForPlayback] = *Signal you want to play*
- * - to play once, write a larger chunk of Signal's data (using [Signal.amplitudes]'s nextChunk())
- * to an [android.media.AudioTrack] and call play()
+/** Represents a sound, which can played by:
+ * - to play once: use [android.media.AudioTrack]
+ * - to play on a loop:
  * */
 abstract class Signal: SignalProperties{
     companion object{
