@@ -9,7 +9,7 @@ fun List<Signal>.sum(): Signal{
     val signalSet = this.toSet()
     if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
     return when (size){
-        0 -> Signal.NullSignal
+        0 -> NullSignal
         1 -> this[0]
         else -> SumSignal(this.toSet())
     }.also { signalsToSumSignal[signalSet] = it }
@@ -45,15 +45,17 @@ fun IntArray.normalize(
 fun IntArray.toShortArray() = ShortArray(this.size) { i -> this[i].toShort() }
 
 
+//----- List<Int> ----- //
 //https://www.geeksforgeeks.org/gcd-two-array-numbers/
-fun gcd(a: Int, b: Int): Int =
-    if (a == 0) b
-    else gcd(b % a, a)
-
-fun lcm(a: Int, b: Int): Int =
-    a * b / gcd(a, b)
 
 fun List<Int>.lcm(): Int{
+    fun gcd(a: Int, b: Int): Int =
+        if (a == 0) b
+        else gcd(b % a, a)
+
+    fun lcm(a: Int, b: Int): Int =
+        a * b / gcd(a, b)
+
     val list = this.filter { it != 0 }
     return when (list.size){
         0 -> 0

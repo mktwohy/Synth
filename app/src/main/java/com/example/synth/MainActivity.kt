@@ -1,22 +1,21 @@
 package com.example.synth
 
-import android.media.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import android.widget.Button
 import com.example.synth.databinding.ActivityMainBinding
 
+
 /** A full-screen PianoView activity. Also manages the AudioEngine */
-class MainActivity : AppCompatActivity() {
-    lateinit var bind: ActivityMainBinding
+class MainActivity : AppCompatActivity(), KeyUpdateEventListener {
+    private lateinit var bind: ActivityMainBinding
+    private val audioEngine = AudioEngine()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //Make the app fullscreen.
-        // TODO: works for now, but shouldn't use deprecated methods.
+        //Make the app fullscreen. TODO: works for now, but shouldn't use deprecated methods.
         this.supportActionBar?.hide()
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -25,27 +24,48 @@ class MainActivity : AppCompatActivity() {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
+        bind.piano.pressedKeys.addKeyUpdateListener(this)
         bind.currentOctave.text = bind.piano.octave.toString()
-        bind.piano.audioEngine.start()
-    }
-
-    fun octaveDown(view: View){
-        bind.piano.changeOctave(bind.piano.octave - 1)
-        bind.currentOctave.text = bind.piano.octave.toString()
-    }
-
-    fun octaveUp(view: View){
-        bind.piano.changeOctave(bind.piano.octave + 1)
-        bind.currentOctave.text = bind.piano.octave.toString()
+        audioEngine.start()
     }
 
     override fun onResume() {
         super.onResume()
-        bind.piano.audioEngine.start()
+        audioEngine.start()
     }
 
     override fun onPause() {
         super.onPause()
-        bind.piano.audioEngine.stop()
+        audioEngine.stop()
     }
+
+    override fun onKeyUpdatedEvent(pressedKeys: Set<Key>) {
+        audioEngine.signalForPlayback = pressedKeys
+                                        .map { it.signal }
+                                        .sum()
+    }
+
+    fun octaveDown(view: View){
+        bind.piano.octave = (bind.piano.octave - 1)
+        bind.currentOctave.text = bind.piano.octave.toString()
+    }
+
+    fun octaveUp(view: View){
+        bind.piano.octave = (bind.piano.octave + 1)
+        bind.currentOctave.text = bind.piano.octave.toString()
+    }
+
+    fun noiseDown(view: View){
+        if(audioEngine.noiseAmount > 0) {
+            audioEngine.noiseAmount -= 1
+            bind.noiseLevel.text = audioEngine.noiseAmount.toString()
+        }
+    }
+
+    fun noiseUp(view: View){
+        audioEngine.noiseAmount += 1
+        bind.noiseLevel.text = audioEngine.noiseAmount.toString()
+    }
+
+
 }

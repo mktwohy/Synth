@@ -9,6 +9,33 @@ import android.view.View
 import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.transpose
 
+//https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
+interface KeyUpdateEventListener{ fun onKeyUpdatedEvent(pressedKeys: Set<Key>) }
+
+/** A set of Keys that alerts its listeners when it's been updated */
+class EventKeySet{
+    private var keySet = setOf<Key>()
+    private val eventListeners = mutableListOf<KeyUpdateEventListener>()
+    
+    fun addKeyUpdateListener(evtListener: KeyUpdateEventListener){
+        eventListeners.add(evtListener)
+    }
+
+    fun updateKeySet(newSet: Set<Key>): Boolean{
+        if(keySet != newSet){
+            keySet = newSet
+            eventListeners.forEach{ listener -> listener.onKeyUpdatedEvent(keySet) }
+            return true
+        }
+        return false
+    }
+
+    fun getKeySet(): Set<Key> {
+        return keySet
+    }
+}
+
+
 /**
  * Stores information about each Key in the PianoView
  * @param note   The fundamental note name associated with the Key
@@ -22,24 +49,25 @@ data class Key(
 )
 
 /**
- * A Grid of RectF objects that are used to draw each Key on screen. Additionally, each RectF
- * acts as a hitbox for its assigned key.
+ * A Grid of [RectF] objects that are used to draw each Key on screen. Additionally, each [RectF]
+ * acts as a hitbox for its assigned [Key].
  *
- * The grid splits the keyboard in half, forming two rows. This means each key can simplified
- * as either one or two rectangles;
- * Every white key is made up of one Rect from the bottom row and one from the top row,
+ *
+ * The grid splits the keyboard in half, forming two rows. This structure is used so that every key
+ * can be represented by 1-2 rectangles rather than a more complex shape;
+ * Every white key is made up of one [RectF] from the bottom row and one from the top row,
  * whereas every black key is made up of one Rect from the top row.
  *
  * @param width width of the PianoGrid
  * @param height height of the PianoGrid
  * @param octave octave of the keys in PianoGrid.
  *
- * @property keys a list of each Key object in the PianoGrid
+ * @property keys a list of each [Key] in the PianoGrid
  * @property topRow A list of 11 rectangles that visually define the top row
  * (made up of black keys and partial white keys)
- * @property bottomRow A list of 7 rects that visually define the bottom row
+ * @property bottomRow A list of 7 rectangles that visually define the bottom row
  * (made up of only white keys)
- * @property rectToKey maps each RectF object to its associated Key. This is
+ * @property rectToKey maps each [RectF] to its associated [Key]. This is
  * used to determine which key is pressed
  */
 class PianoGrid(
@@ -122,6 +150,7 @@ class PianoGrid(
         }
     }
 
+    /** Uses PianoGrid as a hitbox to determine which [Key] the user is touching */
     fun findKeyAt(x: Float, y: Float): Key? {
         fun searchRow(row: List<RectF>): Key?{
             for (rect in row)
@@ -139,24 +168,36 @@ class PianoGrid(
 /**
  * An interactive piano keyboard.
  *
- * It has a PianoGrid, which references a list of Key objects. When the PianoView detects touch
- * input, it uses the PianoGrid to detect which Keys have been pressed. The client can then view
- * this information by accessing the set of pressedKeys.
- * @property pressedKeys A set of Key objects which are currently pressed
+ * It has a [PianoGrid], which references a list of [Key]s. When the [PianoView] detects touch
+ * input, it uses [PianoGrid.findKeyAt] to determine which [Key]s have been pressed and update
+ * [pressedKeys], which alerts its listeners.
+ *
+ * @property pressedKeys A set of Key objects that the user is currently pressing
+ * @property octave Current of Keys on screen (middle C by default).
+ * If you want to change this, use [changeOctave]
  */
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
-    var octave = 4 //Middle C by default. If you want to change this, use changeOctave()
-    val audioEngine: AudioEngine
-    private val pressedKeys = mutableSetOf<Key>()
     private lateinit var pianoGrid: PianoGrid
+    val pressedKeys = EventKeySet()
+    var octave = 4
+        set(newOctave){
+            if (newOctave in 0..8) {
+                val step = (newOctave - octave) * 12
+                for (k in pianoGrid.keys){
+                    k.note = k.note.transpose(step)
+                    val newSignal = k.signal.transpose(step)
+                    k.signal = newSignal
+                }
+                field = newOctave
+            }
+        }
 
     init {
         rootView.doOnNextLayout {
             pianoGrid = PianoGrid(width, height, octave)
         }
-        audioEngine = AudioEngine(this)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -169,54 +210,41 @@ class PianoView(context: Context, attrs: AttributeSet)
                 drawRect(r, k.color.paint)
                 if (k.color == Color.WHITE)
                     drawLine(r.left, r.top, r.left, r.bottom, Color.BLACK.paint)
-                if (k in pressedKeys)
+                if (k in pressedKeys.getKeySet())
                     drawRect(r, Color.PURPLE.paint)
             }
-        }
-    }
-
-    fun changeOctave(newOctave: Int){
-        if (newOctave in 0..8) {
-            val step = (newOctave - octave) * 12
-            for (k in pianoGrid.keys){
-                k.note = k.note.transpose(step)
-                val newSignal = k.signal.transpose(step)
-                k.signal = newSignal
-            }
-            octave = newOctave
         }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
 
-        val previousPressedKeys = pressedKeys.toSet()
-        pressedKeys.clear()
-
+        val newPressedKeys = mutableSetOf<Key>()
         for (i in 0 until event.pointerCount) {
-            with(pianoGrid.findKeyAt(event.getX(i), event.getY(i))) {
-                if (this != null) {
-                    when (event.action) {
+            val key = pianoGrid.findKeyAt(event.getX(i), event.getY(i))
+            if (key != null) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN,
+                    MotionEvent.ACTION_POINTER_DOWN,
+                    MotionEvent.ACTION_MOVE ->
+                        newPressedKeys.add(key)
 
-                        MotionEvent.ACTION_DOWN,
-                        MotionEvent.ACTION_POINTER_DOWN,
-                        MotionEvent.ACTION_MOVE ->
-                            pressedKeys.add(this)
-
-                        MotionEvent.ACTION_UP,
-                        MotionEvent.ACTION_POINTER_UP,
-                        MotionEvent.ACTION_CANCEL ->
-                            pressedKeys.remove(this)
-                    }
+                    MotionEvent.ACTION_UP,
+                    MotionEvent.ACTION_POINTER_UP,
+                    MotionEvent.ACTION_CANCEL ->
+                        newPressedKeys.remove(key)
                 }
             }
+
         }
 
-        if (pressedKeys != previousPressedKeys)
-            audioEngine.updatePcm(pressedKeys)
+        if (pressedKeys.updateKeySet(newPressedKeys.toSet()) ){
+            this.postInvalidate()
+        }
 
         return true
     }
+
 
 
 }

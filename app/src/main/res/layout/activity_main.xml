@@ -48,6 +48,46 @@
         app:layout_constraintBottom_toTopOf="@id/piano"
         />
 
+    <Button
+        android:id="@+id/noiseDown"
+        android:text="-"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="noiseDown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/piano"
+        />
+
+    <TextView
+        android:id="@+id/noiseLevel"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:background="@color/white"
+        android:layout_width="20sp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/piano"
+        app:layout_constraintStart_toEndOf="@+id/noiseDown"
+        />
+
+    <Button
+        android:id="@+id/noiseUp"
+        android:text="+"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5sp"
+        android:onClick="noiseUp"
+        app:layout_constraintStart_toEndOf="@id/noiseLevel"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/piano"
+        />
+
     <com.example.synth.PianoView
         android:id="@+id/piano"
         android:layout_width="wrap_content"
