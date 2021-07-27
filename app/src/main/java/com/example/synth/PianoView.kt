@@ -10,28 +10,19 @@ import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.transpose
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
-interface KeyUpdateEventListener{ fun onKeyUpdatedEvent(pressedKeys: Set<Key>) }
+interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
 
-/** A set of Keys that alerts its listeners when it's been updated */
-class EventKeySet{
-    private var keySet = setOf<Key>()
-    private val eventListeners = mutableListOf<KeyUpdateEventListener>()
-    
-    fun addKeyUpdateListener(evtListener: KeyUpdateEventListener){
-        eventListeners.add(evtListener)
-    }
-
-    fun updateKeySet(newSet: Set<Key>): Boolean{
-        if(keySet != newSet){
-            keySet = newSet
-            eventListeners.forEach{ listener -> listener.onKeyUpdatedEvent(keySet) }
-            return true
+/** A wrapper class for Set<Key> that alerts its listeners when it's been updated */
+class EventPianoKeySet{
+    var pianoKeys = setOf<PianoKey>()
+        set(newKeys) {
+            field = newKeys
+            listeners.forEach{ listener -> listener.onKeyUpdatedEvent(pianoKeys) }
         }
-        return false
-    }
-
-    fun getKeySet(): Set<Key> {
-        return keySet
+    private val listeners = mutableListOf<PianoKeyEventListener>()
+    
+    fun addPianoKeyListener(listener: PianoKeyEventListener){
+        listeners.add(listener)
     }
 }
 
@@ -42,15 +33,15 @@ class EventKeySet{
  * @param color  The Key's Paint, which is either black or white
  * @param signal The Signal that will play when the note is pressed
  */
-data class Key(
+data class PianoKey(
     var note: Note,
     val color: Color,
-    var signal: Signal,
+    var signal: Signal
 )
 
 /**
  * A Grid of [RectF] objects that are used to draw each Key on screen. Additionally, each [RectF]
- * acts as a hitbox for its assigned [Key].
+ * acts as a hitbox for its assigned [PianoKey].
  *
  *
  * The grid splits the keyboard in half, forming two rows. This structure is used so that every key
@@ -62,12 +53,12 @@ data class Key(
  * @param height height of the PianoGrid
  * @param octave octave of the keys in PianoGrid.
  *
- * @property keys a list of each [Key] in the PianoGrid
+ * @property pianoKeys a list of each [PianoKey] in the PianoGrid
  * @property topRow A list of 11 rectangles that visually define the top row
  * (made up of black keys and partial white keys)
  * @property bottomRow A list of 7 rectangles that visually define the bottom row
  * (made up of only white keys)
- * @property rectToKey maps each [RectF] to its associated [Key]. This is
+ * @property rectToPianoKey maps each [RectF] to its associated [PianoKey]. This is
  * used to determine which key is pressed
  */
 class PianoGrid(
@@ -75,15 +66,15 @@ class PianoGrid(
     val height: Int,
     octave: Int
 ){
-    val keys: List<Key>
+    val pianoKeys: List<PianoKey>
     val topRow    : List<RectF>
     val bottomRow : List<RectF>
-    val rectToKey : MutableMap<RectF, Key> = mutableMapOf()
+    val rectToPianoKey : MutableMap<RectF, PianoKey> = mutableMapOf()
 
     init{
         //Init keys
-        keys =  Note.toList(octave).map { note ->
-                Key(
+        pianoKeys =  Note.toList(octave).map { note ->
+                PianoKey(
                     note,
                     if (note.name[1] == '_') Color.WHITE else Color.BLACK,
                     SinSignal(note.freq)
@@ -123,16 +114,16 @@ class PianoGrid(
 
 
         //Init rectToKey
-        fun assignWhite(key: Key, topRowIndex: Int, bottomRowIndex: Int) {
-            rectToKey[bottomRow[bottomRowIndex]] = key
-            rectToKey[topRow[topRowIndex]]       = key
+        fun assignWhite(pianoKey: PianoKey, topRowIndex: Int, bottomRowIndex: Int) {
+            rectToPianoKey[bottomRow[bottomRowIndex]] = pianoKey
+            rectToPianoKey[topRow[topRowIndex]]       = pianoKey
         }
 
-        fun assignBlack(key: Key, topRowIndex: Int) {
-            rectToKey[topRow[topRowIndex]] = key
+        fun assignBlack(pianoKey: PianoKey, topRowIndex: Int) {
+            rectToPianoKey[topRow[topRowIndex]] = pianoKey
         }
 
-        for (k in keys) {
+        for (k in pianoKeys) {
             when (k.note.toString().substring(0, 2)) {
                 "C_" -> assignWhite(k, 0, 0)
                 "Cs" -> assignBlack(k, 1)
@@ -150,12 +141,12 @@ class PianoGrid(
         }
     }
 
-    /** Uses PianoGrid as a hitbox to determine which [Key] the user is touching */
-    fun findKeyAt(x: Float, y: Float): Key? {
-        fun searchRow(row: List<RectF>): Key?{
+    /** Uses PianoGrid as a hitbox to determine which [PianoKey] the user is touching */
+    fun findKeyAt(x: Float, y: Float): PianoKey? {
+        fun searchRow(row: List<RectF>): PianoKey?{
             for (rect in row)
                 if (x in rect.left..rect.right)
-                    return rectToKey[rect]
+                    return rectToPianoKey[rect]
             return null
         }
         return if (y < height / 2)
@@ -168,8 +159,8 @@ class PianoGrid(
 /**
  * An interactive piano keyboard.
  *
- * It has a [PianoGrid], which references a list of [Key]s. When the [PianoView] detects touch
- * input, it uses [PianoGrid.findKeyAt] to determine which [Key]s have been pressed and update
+ * It has a [PianoGrid], which references a list of [PianoKey]s. When the [PianoView] detects touch
+ * input, it uses [PianoGrid.findKeyAt] to determine which [PianoKey]s have been pressed and update
  * [pressedKeys], which alerts its listeners.
  *
  * @property pressedKeys A set of Key objects that the user is currently pressing
@@ -180,12 +171,12 @@ class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
     private lateinit var pianoGrid: PianoGrid
-    val pressedKeys = EventKeySet()
+    val pressedKeys = EventPianoKeySet()
     var octave = 4
         set(newOctave){
             if (newOctave in 0..8) {
                 val step = (newOctave - octave) * 12
-                for (k in pianoGrid.keys){
+                for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
                     val newSignal = k.signal.transpose(step)
                     k.signal = newSignal
@@ -205,12 +196,12 @@ class PianoView(context: Context, attrs: AttributeSet)
         if (canvas == null) return
 
         for (r in pianoGrid.topRow + pianoGrid.bottomRow) {
-            val k = pianoGrid.rectToKey[r]!!
+            val k = pianoGrid.rectToPianoKey[r]!!
             canvas.apply {
                 drawRect(r, k.color.paint)
                 if (k.color == Color.WHITE)
                     drawLine(r.left, r.top, r.left, r.bottom, Color.BLACK.paint)
-                if (k in pressedKeys.getKeySet())
+                if (k in pressedKeys.pianoKeys)
                     drawRect(r, Color.PURPLE.paint)
             }
         }
@@ -219,7 +210,7 @@ class PianoView(context: Context, attrs: AttributeSet)
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
 
-        val newPressedKeys = mutableSetOf<Key>()
+        val newPressedKeys = mutableSetOf<PianoKey>()
         for (i in 0 until event.pointerCount) {
             val key = pianoGrid.findKeyAt(event.getX(i), event.getY(i))
             if (key != null) {
@@ -238,13 +229,11 @@ class PianoView(context: Context, attrs: AttributeSet)
 
         }
 
-        if (pressedKeys.updateKeySet(newPressedKeys.toSet()) ){
+        if (pressedKeys.pianoKeys != newPressedKeys){
+            pressedKeys.pianoKeys = newPressedKeys.toSet()
             this.postInvalidate()
         }
 
         return true
     }
-
-
-
 }

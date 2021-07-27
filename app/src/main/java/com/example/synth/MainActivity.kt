@@ -7,7 +7,7 @@ import com.example.synth.databinding.ActivityMainBinding
 
 
 /** A full-screen PianoView activity. Also manages the AudioEngine */
-class MainActivity : AppCompatActivity(), KeyUpdateEventListener {
+class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding
     private val audioEngine = AudioEngine()
 
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity(), KeyUpdateEventListener {
         bind = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        bind.piano.pressedKeys.addKeyUpdateListener(this)
+        bind.piano.pressedKeys.addPianoKeyListener(this)
         bind.currentOctave.text = bind.piano.octave.toString()
         audioEngine.start()
     }
@@ -39,8 +39,8 @@ class MainActivity : AppCompatActivity(), KeyUpdateEventListener {
         audioEngine.stop()
     }
 
-    override fun onKeyUpdatedEvent(pressedKeys: Set<Key>) {
-        audioEngine.signalForPlayback = pressedKeys
+    override fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) {
+        audioEngine.signalForPlayback = pressedPianoKeys
                                         .map { it.signal }
                                         .sum()
     }

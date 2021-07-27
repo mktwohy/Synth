@@ -44,18 +44,17 @@ class CircularIndex{
  * */
 class CircularIntArray: Collection<Int>{
     override val size: Int
+        get() = data.size
     private val data: IntArray
     private var index: CircularIndex
 
     constructor(size: Int, init: (Int) -> Int = {0} ){
         if (size <= 0) throw Exception("Array cannot have size <= 0")
-        this.size = size
         this.data = IntArray(size, init)
         this.index = CircularIndex(size)
     }
 
     constructor(data: IntArray){
-        this.size = data.size
         this.data = data
         this.index = CircularIndex(size)
     }
@@ -79,7 +78,7 @@ class CircularIntArray: Collection<Int>{
 
     fun nextElement() = data[index.getIndexAndIterate()]
 
-    /** Normalizes data so its values don't exceed the range of a 4 byte integer   */
+    /** Normalizes data so its values don't exceed the range of a 16 bit integer   */
     fun normalize(){
         data.normalize()
     }

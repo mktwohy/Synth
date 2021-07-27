@@ -66,7 +66,8 @@ class AudioEngine{
             while (runMainLoop) {
                 chunk = signalForPlayback.amplitudes.nextChunk(BUFFER_SIZE, noiseAmount)
 
-                Log.d("m_pcm", chunk.toList().toString())
+                //Log.d("m_pcm", chunk.toList().toString())
+
                 audioTrack.write(chunk.toShortArray(), 0, chunk.size)
             }
             audioTrack.stop()
