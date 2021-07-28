@@ -76,6 +76,13 @@ class CircularIntArray: Collection<Int>{
         return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
     }
 
+    /** Does the same as [nextChunk], but converts values to Shorts first
+     * @param array array that chunk is written to */
+    fun nextChunkAsShortArray(chunkSize: Int, noiseAmount: Int = 0): ShortArray {
+            val step = if (noiseAmount == 0) 1 else noiseAmount
+            return ShortArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort() }
+     }
+
     fun nextElement() = data[index.getIndexAndIterate()]
 
     /** Normalizes data so its values don't exceed the range of a 16 bit integer   */

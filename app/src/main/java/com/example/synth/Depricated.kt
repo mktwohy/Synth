@@ -133,6 +133,35 @@ class CircularShortArray {
 fun IntArray.toCircularShortArray() = CircularShortArray(this.toShortArray())
 
 
+
+    /** Does the same as [nextChunk], but writes to an already existing array
+     * @param array array that chunk is written to */
+    fun writeNextChunkTo(array: IntArray, noiseAmount: Int = 0) {
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in array.indices){
+            array[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))]
+        }
+    }
+
+    /** Does the same as [writeNextChunkTo], but converts each value to a Short first
+     * @param array array that chunk is written to */
+    fun writeNextChunkAsShortArrayTo(array: ShortArray, noiseAmount: Int = 0) {
+        data.normalize()
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in array.indices){
+            array[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort()
+        }
+    }
+
+
+    fun IntArray.toShortArray(destination: ShortArray){
+    if (destination.size == this.size){
+        for(i in indices) {
+            destination[i] = this[i].toShort()
+        }
+    }
+}
+
 */
 
 

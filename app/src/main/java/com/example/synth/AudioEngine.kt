@@ -3,7 +3,6 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.util.Log
 
 /**
  * A wrapper class for [AudioTrack] that plays a [Signal]'s audio on a loop.
@@ -70,14 +69,13 @@ class AudioEngine{
 
     private fun mainLoop(){
         Thread {
-            var chunk: IntArray
+//            var chunk: IntArray
+            var chunk: ShortArray
             audioTrack.play()
             while (runMainLoop) {
-                chunk = signalForPlayback.amplitudes.nextChunk(BUFFER_SIZE, noiseAmount)
-
+                chunk = signalForPlayback.amplitudes.nextChunkAsShortArray(BUFFER_SIZE, noiseAmount)
+                audioTrack.write(chunk, 0, chunk.size)
                 //Log.d("m_pcm", chunk.toList().toString())
-
-                audioTrack.write(chunk.toShortArray(), 0, chunk.size)
             }
             audioTrack.stop()
             audioTrack.flush()
