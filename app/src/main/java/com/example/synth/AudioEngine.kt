@@ -23,7 +23,7 @@ import android.media.AudioTrack
  * ```
  * @property noiseAmount Controls the amount of harmonic noise applied to currentAudio
  * The noise is a result of manipulating [CircularIntArray.nextChunk]
- * @property signalForPlayback the audio to be played on a loop by the [AudioEngine]
+ * @property currentSignal the audio to be played on a loop by the [AudioEngine]
  */
 class AudioEngine{
     companion object{
@@ -31,9 +31,10 @@ class AudioEngine{
         const val BUFFER_SIZE = 256
     }
 
+    val buffer = ShortArray(BUFFER_SIZE)
     var noiseAmount = 0
-    var signalForPlayback: Signal = NullSignal
-        set(s) { field = s.also{ it.amplitudes.normalize() } }
+    var currentSignal: Signal = NullSignal
+        set(newSignal) { field = newSignal.also{ it.amplitudes.normalize() } }
     private var runMainLoop = false
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -60,7 +61,7 @@ class AudioEngine{
 
     fun stop(){ runMainLoop = false }
 
-    fun mute(){ signalForPlayback = NullSignal }
+    fun mute(){ currentSignal = NullSignal }
 
     fun destroyAudioTrack(){
         audioTrack.flush()
@@ -69,13 +70,10 @@ class AudioEngine{
 
     private fun mainLoop(){
         Thread {
-//            var chunk: IntArray
-            var chunk: ShortArray
             audioTrack.play()
             while (runMainLoop) {
-                chunk = signalForPlayback.amplitudes.nextChunkAsShortArray(BUFFER_SIZE, noiseAmount)
-                audioTrack.write(chunk, 0, chunk.size)
-                //Log.d("m_pcm", chunk.toList().toString())
+                currentSignal.amplitudes.nextChunkAsShortArray(buffer, noiseAmount)
+                audioTrack.write(buffer, 0, BUFFER_SIZE)
             }
             audioTrack.stop()
             audioTrack.flush()

@@ -73,7 +73,8 @@ class SumSignal(signals: Set<Signal>): Signal() {
     }
     override val amplitudes = run{
         val amps = signals.map { it.amplitudes }
-        CircularIntArray(amps.map{ it.size }.lcm()){
+        val intervalSize = amps.map{ it.size }.lcm()
+        CircularIntArray(intervalSize){
             amps.fold(0){ sumAtIndex, circIntArr -> sumAtIndex + circIntArr.nextElement() }
         }
 

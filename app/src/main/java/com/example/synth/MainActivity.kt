@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     }
 
     override fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) {
-        audioEngine.signalForPlayback = pressedPianoKeys
+        audioEngine.currentSignal = pressedPianoKeys
                                         .map { it.signal }
                                         .sum()
     }

@@ -5,3 +5,5 @@ package com.example.synth
 
 /** Stores recently played SumSignals, which are typically computed by List<Signal>.sum() */
 val signalsToSumSignal = mutableMapOf<Set<Signal>, Signal>()
+
+val numsToLcd = mutableMapOf<Set<Int>, Int>()

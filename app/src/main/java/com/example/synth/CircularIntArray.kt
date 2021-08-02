@@ -62,26 +62,37 @@ class CircularIntArray: Collection<Int>{
     /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
     fun reset(){ index.reset() }
 
-    /**
-     * Builds and returns a chunk of data by circularly iterating over and appending
-     * CircularIntArray's data to an IntArray of size [chunkSize].
-     *
-     *  The next time this method is called, its starting point will be where
-     * the previous chunk ended.
-     * @param chunkSize size of the returned IntArray
-     * @return a looped chunk of values from data
-     */
-    fun nextChunk(chunkSize: Int, noiseAmount: Int = 0): IntArray {
-        val step = if (noiseAmount == 0) 1 else noiseAmount
-        return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
-    }
+//    /**
+//     * Builds and returns a chunk of data by circularly iterating over and appending
+//     * CircularIntArray's data to an IntArray of size [chunkSize].
+//     *
+//     *  The next time this method is called, its starting point will be where
+//     * the previous chunk ended.
+//     * @param chunkSize size of the returned IntArray
+//     * @return a looped chunk of values from data
+//     */
+//    fun nextChunk(chunkSize: Int, noiseAmount: Int = 0): IntArray {
+//        val step = if (noiseAmount == 0) 1 else noiseAmount
+//        return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
+//    }
+//
+//    /** Does the same as [nextChunk], but converts values to Shorts first
+//     * @param array array that chunk is written to */
+//    fun nextChunkAsShortArray(chunkSize: Int, noiseAmount: Int = 0): ShortArray {
+//            val step = if (noiseAmount == 0) 1 else noiseAmount
+//            return ShortArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort() }
+//     }
 
-    /** Does the same as [nextChunk], but converts values to Shorts first
-     * @param array array that chunk is written to */
-    fun nextChunkAsShortArray(chunkSize: Int, noiseAmount: Int = 0): ShortArray {
-            val step = if (noiseAmount == 0) 1 else noiseAmount
-            return ShortArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort() }
-     }
+
+    /** Does the same as [writeNextChunkTo], but converts each value to a Short first
+     * @param destination array that chunk is written to */
+    fun nextChunkAsShortArray(destination: ShortArray, noiseAmount: Int = 0) {
+        data.normalize()
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in destination.indices){
+            destination[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort()
+        }
+    }
 
     fun nextElement() = data[index.getIndexAndIterate()]
 

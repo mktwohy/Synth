@@ -5,14 +5,22 @@ import java.lang.StringBuilder
 
 //----- List<Signal> ----- //
 
+//fun List<Signal>.sum(): Signal{
+//    val signalSet = this.toSet()
+//    if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
+//    return when (size){
+//        0 -> NullSignal
+//        1 -> this[0]
+//        else -> SumSignal(this.toSet())
+//    }.also { signalsToSumSignal[signalSet] = it }
+//}
+
 fun List<Signal>.sum(): Signal{
-    val signalSet = this.toSet()
-    if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
     return when (size){
         0 -> NullSignal
         1 -> this[0]
         else -> SumSignal(this.toSet())
-    }.also { signalsToSumSignal[signalSet] = it }
+    }
 }
 
 //----- IntArray ----- //
@@ -56,12 +64,17 @@ fun List<Int>.lcm(): Int{
     fun lcm(a: Int, b: Int): Int =
         a * b / gcd(a, b)
 
-    val list = this.filter { it != 0 }
-    return when (list.size){
+    return when (this.size){
         0 -> 0
-        1 -> list[0]
-        2 -> lcm(list[0], list[1])
-        else -> list.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
+        1 -> this[0]
+        2 -> lcm(this[0], this[1])
+        else -> {
+            val asSet = this.toSet()
+            if (asSet !in numsToLcd){
+                numsToLcd[asSet]  = this.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
+            }
+            numsToLcd[asSet]!!
+        }
     }
 }
 
