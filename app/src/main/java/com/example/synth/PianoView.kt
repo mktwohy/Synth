@@ -116,29 +116,18 @@ class PianoGrid(
 
 
         //Init rectToKey
-        fun assignWhite(pianoKey: PianoKey, topRowIndex: Int, bottomRowIndex: Int) {
-            rectToPianoKey[bottomRow[bottomRowIndex]] = pianoKey
-            rectToPianoKey[topRow[topRowIndex]]       = pianoKey
-        }
+        var topRowIndex = 0
+        var bottomRowIndex = 0
 
-        fun assignBlack(pianoKey: PianoKey, topRowIndex: Int) {
-            rectToPianoKey[topRow[topRowIndex]] = pianoKey
-        }
-
-        for (k in pianoKeys) {
-            when (k.note.toString().substring(0, 2)) {
-                "C_" -> assignWhite(k, 0, 0)
-                "Cs" -> assignBlack(k, 1)
-                "D_" -> assignWhite(k, 2, 1)
-                "Ds" -> assignBlack(k, 3)
-                "E_" -> assignWhite(k, 4, 2)
-                "F_" -> assignWhite(k, 5, 3)
-                "Fs" -> assignBlack(k, 6)
-                "G_" -> assignWhite(k, 7, 4)
-                "Gs" -> assignBlack(k, 8)
-                "A_" -> assignWhite(k, 9, 5)
-                "As" -> assignBlack(k, 10)
-                "B_" -> assignWhite(k, 11, 6)
+        for (key in pianoKeys) {
+            if (key.color == Color.WHITE) {
+                rectToPianoKey[topRow[topRowIndex]]       = key
+                rectToPianoKey[bottomRow[bottomRowIndex]] = key
+                topRowIndex++
+                bottomRowIndex++
+            }else{
+                rectToPianoKey[topRow[topRowIndex]] = key
+                topRowIndex++
             }
         }
     }
