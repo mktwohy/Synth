@@ -40,6 +40,8 @@ enum class Interval(val ratio: Float){
             val ratio = ratioForOneOctave * octaves
             return if (steps >= 0) ratio else (1 / ratio)
         }
+
+
     }
 }
 

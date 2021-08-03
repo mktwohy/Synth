@@ -1,7 +1,9 @@
 package com.example.synth
 
+import com.example.synth.AudioGenerator.chord
 import com.example.synth.AudioGenerator.sine
-import com.example.synth.AudioGenerator.trigSignal
+import com.example.synth.AudioGenerator.sinusoid
+import com.example.synth.Interval.*
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -16,15 +18,14 @@ object AudioGenerator {
         (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt()
     }
 
-    /** Represents a silent signal of size [AudioEngine.BUFFER_SIZE] */
-    val NullSignal = CircularIntArray(AudioEngine.BUFFER_SIZE)
+    val silence = CircularIntArray(AudioEngine.BUFFER_SIZE)
 
-    fun trigSignal(freq: Int, func: (Int, Int) -> Int): CircularIntArray {
+    fun sinusoid(freq: Int, func: (Int, Int) -> Int): CircularIntArray {
         val period = calculatePeriod(freq)
         return CircularIntArray(period) { i -> func(i, period) }
     }
 
-    fun trigSignal(freqs: Set<Int>, func: (Int, Int) -> Int): CircularIntArray {
+    fun sinusoid(freqs: Set<Int>, func: (Int, Int) -> Int): CircularIntArray {
         val freqToPeriod = mutableMapOf<Int, Int>().apply {
             freqs.forEach{ freq -> put(freq, calculatePeriod(freq)) }
         }
@@ -36,6 +37,14 @@ object AudioGenerator {
         }
     }
 
+    fun chord(fundamental: Note, overtones: Set<Interval>): MutableSet<Int>{
+        return mutableSetOf(fundamental.freq).apply{
+            for(o in overtones){
+                add((fundamental.freq * o.ratio).toInt())
+            }
+        }
+    }
+
     private fun calculateCommonInterval(freqs: Set<Int>) =
         freqs.map { calculatePeriod(it) }.lcm()
 
@@ -43,7 +52,7 @@ object AudioGenerator {
 }
 
 fun main(){
-    println(trigSignal(440, sine))
-    println(trigSignal(setOf(440,880), sine))
+    //println(sinusoid(440, sine))
+    println((sinusoid(chord(Note.C_4, setOf(MAJ_7, OCTAVE)), sine)))
 
 }

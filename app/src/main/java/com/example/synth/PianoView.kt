@@ -7,8 +7,13 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
+import com.example.synth.AudioGenerator.chord
 import com.example.synth.Note.Companion.transpose
 import com.example.synth.AudioGenerator.sine
+import com.example.synth.Note.*
+import com.example.synth.Interval.*
+
+
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
@@ -80,7 +85,8 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Color.WHITE else Color.BLACK,
-                    AudioGenerator.trigSignal(note.freq, sine)
+                    AudioGenerator.sinusoid(
+                        chord(note, setOf(MAJ_3,PER_5,MAJ_7)), sine)
                 )
             }
 
@@ -155,13 +161,13 @@ class PianoGrid(
  * input, it uses [PianoGrid.findKeyAt] to determine which [PianoKey]s have been pressed and update
  * [pressedKeys], which alerts its listeners.
  *
+ * @property noise Controls the amount of harmonic noise applied to currentAudio.
+ * The noise is a result of manipulating [CircularIntArray.nextChunk]
  * @property pressedKeys A set of Key objects that the user is currently pressing
  * @property octave Current of Keys on screen (middle C by default).
  */
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
-
-
 
     val pressedKeys = EventPianoKeySet()
     lateinit var pianoGrid: PianoGrid
@@ -178,7 +184,7 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.audio = AudioGenerator.trigSignal(k.note.freq, sine)
+                    k.audio = AudioGenerator.sinusoid(k.note.freq, sine)
                 }
                 field = newOctave
             }
