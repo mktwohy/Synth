@@ -8,7 +8,9 @@
 
 
 **Changelogs (Note: these will only contain changes noticable to the user):**
-- **7-27-2021 (Latest Build):**
+- **8-2-2021 (Latest Build):**
+  - Excessive memory allocation bug finally fixed. This results in significant performance improvements
+- **7-27-2021:**
   - Added harmonic white-noise effect
 - **7-25-2021:**
   - Under the hood improvements which lessen the severity of the memory bug. This means that more notes can be played simultaneously without slowdown or crashing
