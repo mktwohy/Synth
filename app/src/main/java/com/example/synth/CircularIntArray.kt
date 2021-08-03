@@ -1,5 +1,9 @@
 package com.example.synth
 
+import android.util.Log
+import com.example.synth.CircularIntArray.Companion.sine
+import kotlin.math.PI
+import kotlin.math.sin
 import kotlin.random.Random
 
 /** Index for circularly navigating an array */
@@ -43,10 +47,78 @@ class CircularIndex{
  * it causes issues
  * */
 class CircularIntArray: Collection<Int>{
+    companion object{
+        const val TWO_PI              = 2.0 * PI
+        const val MIN_16BIT_VALUE     = -32_768
+        const val MAX_16BIT_VALUE     = 32_767
+
+        val sine = { i: Int, period: Int ->
+            (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt()
+        }
+        val cosine = { i: Int, period: Int ->
+            (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt()
+        }
+
+        fun signal(size: Int, func: (Int, Int) -> Int) =
+             CircularIntArray(size) { i -> func(i, size) }
+
+
+        fun sinSignal(freq: Int, func: (Int, Int) -> Int) =
+            signal(calculatePeriod(freq), sine)
+
+
+        fun harmonicSignal(
+            fundamental: Note,
+            harmonics: Set<Int>,
+            func: (Int, Int) -> Int
+        ): CircularIntArray {
+            val interval = calculatePeriod(fundamental.freq)
+            val harmonicToPeriod = mutableMapOf<Int, Int>().apply {
+                harmonics.forEach{ harmonic ->
+                    this[harmonic] = interval/harmonic
+                }
+            }
+
+            return CircularIntArray(interval){ i ->
+                harmonics.fold(0){
+                        sumAtIndex, harmonic -> sumAtIndex + func(i, harmonicToPeriod[harmonic]!!)
+                }
+            }
+        }
+
+        fun harmonicSignalSlow(
+            fundamental: Note,
+            harmonics: Map<Int, Int>,
+            func: (Int, Int) -> Int
+        ): CircularIntArray {
+            val ret = sinSignal(fundamental.freq, func)
+            harmonics.filter { it.key != 1 }.forEach {
+                ret += sinSignal(fundamental.freq * it.key, func).apply{ volume = it.value }
+            }
+            return ret
+        }
+
+        fun calculateCommonInterval(freqs: Set<Int>) =
+            freqs.map { calculatePeriod(it) }.lcm()
+
+        fun calculatePeriod(freq: Int) = AudioEngine.SAMPLE_RATE / freq
+    }
+
+    var volume: Int = 100
+        set(value) {
+            if (value in 0..10){
+                data.normalize(
+                    (MIN_16BIT_VALUE * (value/100f)).toInt(),
+                    (MIN_16BIT_VALUE * (value/100f)).toInt()
+                )
+                field = value
+            }
+
+        }
     override val size: Int
         get() = data.size
     var noiseAmount: Int = 0
-    val data: IntArray
+    var data: IntArray
     private var index: CircularIndex
 
     constructor(size: Int, init: (Int) -> Int = {0} ){
@@ -96,6 +168,13 @@ class CircularIntArray: Collection<Int>{
         }
     }
 
+    operator fun plusAssign(that: CircularIntArray){
+        for (i in this.indices) {
+            this[i] += that.data[that.index.getIndexAndIterate(1, (noiseAmount > 0))]
+        }
+        this.normalize()
+    }
+
     operator fun get(index: Int): Int{ return data[index] }
     operator fun set(index: Int, value: Int){ data[index] = value }
 
@@ -111,3 +190,9 @@ class CircularIntArray: Collection<Int>{
     }
 }
 
+fun main() {
+    val note = Note.C_0
+    val overtones = setOf(1,2,4,8)
+    val signal = CircularIntArray.harmonicSignal(note, overtones, sine)
+    print("interval: ${CircularIntArray.calculatePeriod(note.freq)} $signal")
+}

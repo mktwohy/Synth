@@ -1,11 +1,22 @@
 package com.example.synth
 
-import com.example.synth.AudioGenerator.MAX_16BIT_VALUE
-import com.example.synth.AudioGenerator.MIN_16BIT_VALUE
+import android.util.Rational
+import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
+import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
 import java.lang.StringBuilder
+
+//----- Rational ----- //
+fun Rational.times(that: Int) = Rational(numerator*that, numerator)
 
 
 //----- IntArray ----- //
+/** Performs an in-place mapping of an IntArray*/
+fun IntArray.map(transform: (Int) -> Int){
+    for(i in indices){
+        this[i] = transform(this[i])
+    }
+}
+
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
 //https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
 fun IntArray.normalize(

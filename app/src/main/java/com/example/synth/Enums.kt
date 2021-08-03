@@ -1,7 +1,7 @@
 package com.example.synth
 
 import android.graphics.Paint
-import android.util.Log
+import android.util.Rational
 import kotlin.math.absoluteValue
 
 /** The [Paint]s used in the UI */
@@ -12,35 +12,22 @@ enum class Color(val paint: Paint){
 }
 
 /** Musical intervals and their associated mathematical ratio */
-enum class Interval(val ratio: Float){
-    PER_1   (1/1    .toFloat()),
-    MIN_2   (16/15  .toFloat()),
-    MAJ_2   (9/8    .toFloat()),
-    MIN_3   (6/5    .toFloat()),
-    MAJ_3   (5/4    .toFloat()),
-    PER_4   (4/3    .toFloat()),
-    TRITONE (45/32  .toFloat()),
-    PER_5   (3/2    .toFloat()),
-    MIN_6   (8/5    .toFloat()),
-    MIN_7   (9/5    .toFloat()),
-    MAJ_7   (15/8   .toFloat()),
-    OCTAVE  (2/1    .toFloat());
+enum class Interval(val ratio: Rational){
+    PER_1   (Rational(1, 1)),
+    MIN_2   (Rational(16, 15)),
+    MAJ_2   (Rational(9, 8)),
+    MIN_3   (Rational(6, 5)),
+    MAJ_3   (Rational(5, 4)),
+    PER_4   (Rational(4, 3)),
+    TRITONE (Rational(45, 32)),
+    PER_5   (Rational(3,2)),
+    MIN_6   (Rational(8,5)),
+    MIN_7   (Rational(9,5)),
+    MAJ_7   (Rational(15,8)),
+    OCTAVE  (Rational(2,1));
 
     companion object {
-        fun stepToRatio(steps: Int): Float {
-            var absoluteSteps = steps.absoluteValue
-            var octaves = 1
-
-            while (absoluteSteps > 12) {
-                octaves++
-                absoluteSteps -= 12
-            }
-
-            val ratioForOneOctave = values()[absoluteSteps - 1].ratio
-            val ratio = ratioForOneOctave * octaves
-            return if (steps >= 0) ratio else (1 / ratio)
-        }
-
+        fun Int.harmonic(n: Int) = this * n
 
     }
 }
@@ -191,8 +178,4 @@ enum class Note(val freq: Int) {
         val Note.octave
             get() = name[2].toString().toInt()
     }
-}
-
-fun main(){
-    println(Note.toList(4))
 }

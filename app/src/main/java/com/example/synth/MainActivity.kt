@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
-@SuppressWarnings
 /** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding

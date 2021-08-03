@@ -3,8 +3,9 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import com.example.synth.AudioGenerator.MAX_16BIT_VALUE
-import com.example.synth.AudioGenerator.MIN_16BIT_VALUE
+import android.util.Log
+import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
+import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
 
 /**
  * A wrapper class for [AudioTrack] that plays audio (represented by [CircularIntArray]s) on a loop.
@@ -87,6 +88,7 @@ class AudioEngine{
                         audio.addValuesOfNextChunkTo(intBuffer)
                     }
                 }
+                Log.d("m_chunk","${intBuffer.contentToString()}")
                 intBuffer.toShortArray(shortBuffer)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }

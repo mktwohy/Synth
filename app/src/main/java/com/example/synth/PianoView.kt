@@ -7,13 +7,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
-import com.example.synth.AudioGenerator.chord
+import com.example.synth.CircularIntArray.Companion.sine
 import com.example.synth.Note.Companion.transpose
-import com.example.synth.AudioGenerator.sine
-import com.example.synth.Note.*
-import com.example.synth.Interval.*
 
-
+val overtones = mapOf(1 to 100, 2 to 50, 4 to 25, 8 to 17)
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
@@ -37,7 +34,7 @@ class EventPianoKeySet{
  * Stores information about each key in the [PianoView].
  * @param note   The fundamental [Note] associated with the Key
  * @param color  The key's [Color], which is either black or white
- * @param audio The [Signal] that will play when the note is pressed
+ * @param audio The [CircularIntArray] that will play when the note is pressed
  */
 data class PianoKey(
     var note: Note,
@@ -85,10 +82,7 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Color.WHITE else Color.BLACK,
-                    AudioGenerator.sinusoid(
-                        chord(note, setOf(1,2,6,8)),
-                        sine
-                    )
+                    CircularIntArray.harmonicSignalSlow( note, overtones, sine)
                 )
             }
 
@@ -186,10 +180,7 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.audio = AudioGenerator.sinusoid(
-                        chord(k.note, setOf(1,2,6,8)),
-                        sine
-                    )
+                    k.audio = CircularIntArray.harmonicSignalSlow( k.note, overtones, sine)
                 }
                 field = newOctave
             }
