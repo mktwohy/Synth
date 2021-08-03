@@ -170,12 +170,12 @@ enum class Note(val freq: Int) {
     companion object{
         fun toList() = values().toList()
 
-        fun toList(noteRange: IntRange) =
-            values().toList().subList(noteRange.first, noteRange.last+1)
+        fun toList(start: Int, end: Int) =
+            values().toList().subList(start, end)
 
         fun toList(octave: Int) =
             if (octave > 8) listOf()
-            else toList(octave*12 until ((octave+1) * 12) )
+            else toList(octave*12, ((octave+1) * 12) )
 
         fun random() =
             values().random()
@@ -189,4 +189,8 @@ enum class Note(val freq: Int) {
         val Note.octave
             get() = name[2].toString().toInt()
     }
+}
+
+fun main(){
+    println(Note.toList(4))
 }

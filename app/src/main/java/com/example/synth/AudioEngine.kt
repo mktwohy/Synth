@@ -3,7 +3,8 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.util.Log
+import com.example.synth.AudioGenerator.MAX_16BIT_VALUE
+import com.example.synth.AudioGenerator.MIN_16BIT_VALUE
 
 /**
  * A wrapper class for [AudioTrack] that plays a [Signal]'s audio on a loop.
@@ -29,18 +30,24 @@ import android.util.Log
 class AudioEngine{
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 512
+        const val BUFFER_SIZE = 256
     }
 
+    var noiseAmount: Int = 0
     var currentAudio = setOf<CircularIntArray>()
         set(newAudio) {
             field =
                 if(newAudio.isEmpty()) setOf()
-                else newAudio
+                else newAudio.onEach{
+                        it.data.normalize(
+                            MIN_16BIT_VALUE/newAudio.size,
+                            MAX_16BIT_VALUE/newAudio.size
+                        )
+                    }
         }
-    var noiseAmount = 0
     private var runMainLoop = false
-    private val buffer = IntArray(BUFFER_SIZE)
+    private val intBuffer = IntArray(BUFFER_SIZE)
+    private val shortBuffer = ShortArray(BUFFER_SIZE)
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
             AudioAttributes.Builder()
@@ -75,17 +82,14 @@ class AudioEngine{
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                if(currentAudio.isEmpty()){
-                    buffer.indices.forEach{ i -> buffer[i] = 0 }
-                }else{
+                intBuffer.indices.forEach{ i -> intBuffer[i] = 0 }
+                if(currentAudio.isNotEmpty()){
                     for(audio in currentAudio){
-                        audio.addValuesOfNextChunkTo(buffer)
+                        audio.addValuesOfNextChunkTo(intBuffer)
                     }
                 }
-
-                buffer.normalize()
-                Log.d("m_audio","${buffer.contentToString()}")
-                audioTrack.write(buffer.toShortArray(), 0, BUFFER_SIZE)
+                intBuffer.toShortArray(shortBuffer)
+                audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }
             audioTrack.stop()
             audioTrack.flush()

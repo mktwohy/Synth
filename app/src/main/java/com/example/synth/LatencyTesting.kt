@@ -31,7 +31,6 @@ fun <T, R>measureAvgRunTime( cases: Array<T>, funcName: String, func: (T) -> R) 
     measureAvgRunTime(cases.toList(), funcName, func)
 }
 
-val convertIntArrayToShortArray = { a: IntArray -> a.toShortArray() }
 val calculateLcm = { l: List<Int> -> l.lcm() }
 //val createSumSignal = { s: Set<Signal> -> SumSignal(s) }
 

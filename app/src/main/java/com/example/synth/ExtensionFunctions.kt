@@ -2,10 +2,7 @@ package com.example.synth
 
 import com.example.synth.AudioGenerator.MAX_16BIT_VALUE
 import com.example.synth.AudioGenerator.MIN_16BIT_VALUE
-import java.lang.Exception
 import java.lang.StringBuilder
-
-
 
 
 //----- IntArray ----- //
@@ -24,8 +21,10 @@ fun IntArray.normalize(
     val boundRange = (upperBound - lowerBound).toFloat()
 
     //Check that array isn't already normalized
-    if ((minValue >= lowerBound && maxValue <= upperBound)
-        || (minValue == 0 && maxValue == 0)) {
+    // (I would use in range, but this produces excess memory)
+    if ((minValue == 0 && maxValue == 0)
+        || (maxValue <= upperBound && maxValue > upperBound-2
+                && minValue >= lowerBound && minValue < lowerBound+2)) {
         return
     }
 
@@ -35,7 +34,13 @@ fun IntArray.normalize(
     }
 }
 
-fun IntArray.toShortArray() = ShortArray(this.size) { i -> this[i].toShort() }
+fun IntArray.toShortArray(destination: ShortArray){
+    if (this.size != destination.size)
+        throw Exception("Cannot clone to array of different size")
+    for (i in destination.indices){
+        destination[i] = this[i].toShort()
+    }
+}
 
 
 //----- List<Int> ----- //

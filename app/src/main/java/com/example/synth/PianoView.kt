@@ -137,7 +137,7 @@ class PianoGrid(
     fun findKeyAt(x: Float, y: Float): PianoKey? {
         fun searchRow(row: List<RectF>): PianoKey?{
             for (rect in row)
-                if (x in rect.left..rect.right)
+                if (x >= rect.left && x <= rect.right)
                     return rectToPianoKey[rect]
             return null
         }
