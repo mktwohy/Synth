@@ -157,20 +157,28 @@ class PianoGrid(
  *
  * @property pressedKeys A set of Key objects that the user is currently pressing
  * @property octave Current of Keys on screen (middle C by default).
- * If you want to change this, use [changeOctave]
  */
 class PianoView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
-    private lateinit var pianoGrid: PianoGrid
+
+
     val pressedKeys = EventPianoKeySet()
+    lateinit var pianoGrid: PianoGrid
+    var noise: Int = 0
+        set(value){
+            if (value >= 0){
+                pianoGrid.pianoKeys.forEach{ it.audio.noiseAmount = value }
+                field = value
+            }
+        }
     var octave = 4
         set(newOctave){
             if (newOctave in 0..8) {
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.audio = AudioGenerator.NullSignal
+                    k.audio = AudioGenerator.trigSignal(k.note.freq, sine)
                 }
                 field = newOctave
             }

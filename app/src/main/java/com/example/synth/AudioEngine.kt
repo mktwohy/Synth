@@ -33,7 +33,6 @@ class AudioEngine{
         const val BUFFER_SIZE = 256
     }
 
-    var noiseAmount: Int = 0
     var currentAudio = setOf<CircularIntArray>()
         set(newAudio) {
             field =

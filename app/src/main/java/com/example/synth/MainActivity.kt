@@ -55,15 +55,14 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     }
 
     fun noiseDown(view: View){
-        if(audioEngine.noiseAmount > 0) {
-            audioEngine.noiseAmount -= 1
-            bind.noiseLevel.text = audioEngine.noiseAmount.toString()
-        }
+        bind.piano.noise -= 1
+        bind.noiseLevel.text = bind.piano.noise.toString()
+
     }
 
     fun noiseUp(view: View){
-        audioEngine.noiseAmount += 1
-        bind.noiseLevel.text = audioEngine.noiseAmount.toString()
+        bind.piano.noise += 1
+        bind.noiseLevel.text = bind.piano.noise.toString()
     }
 
 
