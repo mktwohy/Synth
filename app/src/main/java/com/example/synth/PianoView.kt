@@ -86,7 +86,9 @@ class PianoGrid(
                     note,
                     if (note.name[1] == '_') Color.WHITE else Color.BLACK,
                     AudioGenerator.sinusoid(
-                        chord(note, setOf(MAJ_3,PER_5,MAJ_7)), sine)
+                        chord(note, setOf(1,2,6,8)),
+                        sine
+                    )
                 )
             }
 
@@ -184,7 +186,10 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.audio = AudioGenerator.sinusoid(k.note.freq, sine)
+                    k.audio = AudioGenerator.sinusoid(
+                        chord(k.note, setOf(1,2,6,8)),
+                        sine
+                    )
                 }
                 field = newOctave
             }

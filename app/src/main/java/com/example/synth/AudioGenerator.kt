@@ -37,10 +37,10 @@ object AudioGenerator {
         }
     }
 
-    fun chord(fundamental: Note, overtones: Set<Interval>): MutableSet<Int>{
+    fun chord(fundamental: Note, overtones: Set<Int>): MutableSet<Int>{
         return mutableSetOf(fundamental.freq).apply{
             for(o in overtones){
-                add((fundamental.freq * o.ratio).toInt())
+                add(fundamental.freq * o)
             }
         }
     }
@@ -53,6 +53,6 @@ object AudioGenerator {
 
 fun main(){
     //println(sinusoid(440, sine))
-    println((sinusoid(chord(Note.C_4, setOf(MAJ_7, OCTAVE)), sine)))
+    println((sinusoid(chord(Note.C_4, setOf(1, 3, 5, 7)), sine)).size)
 
 }
