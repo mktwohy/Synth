@@ -2,10 +2,11 @@ package com.example.synth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
-
+@SuppressWarnings
 /** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding
@@ -40,9 +41,7 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     }
 
     override fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) {
-        audioEngine.currentSignal = pressedPianoKeys
-                                        .map { it.signal }
-                                        .sum()
+        audioEngine.currentAudio = pressedPianoKeys.map { it.audio }.toSet()
     }
 
     fun octaveDown(view: View){

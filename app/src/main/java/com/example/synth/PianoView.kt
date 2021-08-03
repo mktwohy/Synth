@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.transpose
+import com.example.synth.AudioGenerator.sine
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
@@ -31,12 +32,12 @@ class EventPianoKeySet{
  * Stores information about each key in the [PianoView].
  * @param note   The fundamental [Note] associated with the Key
  * @param color  The key's [Color], which is either black or white
- * @param signal The [Signal] that will play when the note is pressed
+ * @param audio The [Signal] that will play when the note is pressed
  */
 data class PianoKey(
     var note: Note,
     val color: Color,
-    var signal: Signal
+    var audio: CircularIntArray
 )
 
 /**
@@ -79,7 +80,7 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Color.WHITE else Color.BLACK,
-                    SinSignal(note.freq)
+                    AudioGenerator.trigSignal(note.freq, sine)
                 )
             }
 
@@ -169,8 +170,7 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    val newSignal = k.signal.transpose(step)
-                    k.signal = newSignal
+                    k.audio = AudioGenerator.NullSignal
                 }
                 field = newOctave
             }

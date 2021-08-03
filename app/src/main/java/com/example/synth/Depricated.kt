@@ -153,7 +153,15 @@ fun IntArray.toCircularShortArray() = CircularShortArray(this.toShortArray())
         }
     }
 
-
+    /** Does the same as [writeNextChunkTo], but converts each value to a Short first
+     * @param destination array that chunk is written to */
+    fun nextChunkAsShortArray(destination: ShortArray, noiseAmount: Int = 0) {
+        data.normalize()
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in destination.indices){
+            destination[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort()
+        }
+    }
     fun IntArray.toShortArray(destination: ShortArray){
     if (destination.size == this.size){
         for(i in indices) {
@@ -163,6 +171,136 @@ fun IntArray.toCircularShortArray() = CircularShortArray(this.toShortArray())
 }
 
 */
+
+/*
+
+import kotlin.math.PI
+import kotlin.math.sin
+
+/**
+ * @property amplitudes represents the audio data.
+ * @property frequencies the known frequencies in the Signal
+ */
+interface SignalProperties{
+    val amplitudes: CircularIntArray
+    val frequencies: MutableSet<Int>
+
+}
+
+
+/** Represents a sound, which can played by:
+ * - to play once: use [android.media.AudioTrack]
+ * - to play on a loop:
+ * */
+abstract class Signal: SignalProperties{
+    companion object{
+        const val SAMPLE_RATE       = AudioEngine.SAMPLE_RATE
+        const val BUFFER_SIZE       = AudioEngine.BUFFER_SIZE
+        const val TWO_PI              = 2.0 * PI
+        const val MIN_16BIT_VALUE     = -32_768
+        const val MAX_16BIT_VALUE     = 32_767
+    }
+
+    abstract fun transpose(step: Int): Signal
+
+    override fun toString(): String{
+        val s = StringBuilder()
+        for(value in amplitudes){
+            s.append(value)
+            s.append(" ")
+        }
+        return s.toString()
+    }
+}
+
+
+/** Represents a silent signal of size [AudioEngine.BUFFER_SIZE] */
+object NullSignal: Signal() {
+    override val frequencies = mutableSetOf<Int>()
+    override val amplitudes = CircularIntArray(BUFFER_SIZE)
+    override fun transpose(step: Int) = NullSignal
+}
+
+
+/** Represents a pure sine wave */
+class SinSignal(private val freq: Int) : Signal() {
+    override val frequencies = mutableSetOf(freq)
+    override val amplitudes = run{
+        val period = SAMPLE_RATE / freq
+        CircularIntArray(period) { i -> (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt() }
+    }
+
+    override fun transpose(step: Int): Signal {
+        val fundFreq = frequencies.minByOrNull { it }
+            ?: return NullSignal
+        return SinSignal( (fundFreq * Interval.stepToRatio(step)) .toInt() )
+    }
+}
+
+
+/** Combines two or more Signals into one Signal. */
+class SumSignal(signals: Set<Signal>): Signal() {
+    override val frequencies = mutableSetOf<Int>().apply {
+        for(s in signals){
+            addAll(s.frequencies)
+        }
+    }
+    override val amplitudes = run{
+        val amps = signals.map { it.amplitudes }
+        val intervalSize = amps.map{ it.size }.lcm()
+        CircularIntArray(intervalSize){
+            amps.fold(0){ sumAtIndex, circIntArr -> sumAtIndex + circIntArr.nextElement() }
+        }
+
+    }
+
+    override fun transpose(step: Int): Signal {
+        val ratio = Interval.stepToRatio(step)
+        val transposedSignals = mutableListOf<Signal>()
+        for(f in frequencies){
+            transposedSignals.add(SinSignal(f * ratio.toInt()))
+        }
+        return transposedSignals.sum()
+    }
+}
+ */
+
+/*
+//----- List<Signal> ----- //
+
+//fun List<Signal>.sum(): Signal{
+//    val signalSet = this.toSet()
+//    if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
+//    return when (size){
+//        0 -> NullSignal
+//        1 -> this[0]
+//        else -> SumSignal(this.toSet())
+//    }.also { signalsToSumSignal[signalSet] = it }
+//}
+
+fun List<Signal>.sum(): Signal{
+    return when (size){
+        0 -> NullSignal
+        1 -> this[0]
+        else -> SumSignal(this.toSet())
+    }
+}
+
+    fun makeRandomSumSignal(): Signal{
+        val numNotes = Random.nextInt(4,5)
+        val notes = mutableSetOf<Signal>().apply {
+            repeat(numNotes){
+                add(SinSignal(Note.toList(5).random().freq))
+            }
+        }
+        return SumSignal(notes)
+    }
+
+    fun makeRandomSignals(
+        n: Int = Random.nextInt(10)
+    ) = Array(n) { makeRandomSumSignal() }
+
+ */
 
 
 

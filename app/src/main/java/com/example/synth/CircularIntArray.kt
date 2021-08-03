@@ -45,65 +45,61 @@ class CircularIndex{
 class CircularIntArray: Collection<Int>{
     override val size: Int
         get() = data.size
-    private val data: IntArray
+    var noiseAmount: Int = 0
+    val data: IntArray
     private var index: CircularIndex
 
     constructor(size: Int, init: (Int) -> Int = {0} ){
-        if (size <= 0) throw Exception("Array cannot have size <= 0")
-        this.data = IntArray(size, init)
+        this.data = IntArray(size, init).also{ it.normalize() }
         this.index = CircularIndex(size)
     }
 
     constructor(data: IntArray){
-        this.data = data
+        this.data = data.also{ it.normalize() }
         this.index = CircularIndex(size)
     }
 
     /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
     fun reset(){ index.reset() }
 
-//    /**
-//     * Builds and returns a chunk of data by circularly iterating over and appending
-//     * CircularIntArray's data to an IntArray of size [chunkSize].
-//     *
-//     *  The next time this method is called, its starting point will be where
-//     * the previous chunk ended.
-//     * @param chunkSize size of the returned IntArray
-//     * @return a looped chunk of values from data
-//     */
-//    fun nextChunk(chunkSize: Int, noiseAmount: Int = 0): IntArray {
-//        val step = if (noiseAmount == 0) 1 else noiseAmount
-//        return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
-//    }
-//
-//    /** Does the same as [nextChunk], but converts values to Shorts first
-//     * @param array array that chunk is written to */
-//    fun nextChunkAsShortArray(chunkSize: Int, noiseAmount: Int = 0): ShortArray {
-//            val step = if (noiseAmount == 0) 1 else noiseAmount
-//            return ShortArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort() }
-//     }
-
-
-    /** Does the same as [writeNextChunkTo], but converts each value to a Short first
-     * @param destination array that chunk is written to */
-    fun nextChunkAsShortArray(destination: ShortArray, noiseAmount: Int = 0) {
-        data.normalize()
-        val step = if (noiseAmount == 0) 1 else noiseAmount
-        for (i in destination.indices){
-            destination[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))].toShort()
-        }
-    }
+    fun normalize(){ data.normalize() }
 
     fun nextElement() = data[index.getIndexAndIterate()]
 
-    /** Normalizes data so its values don't exceed the range of a 16 bit integer   */
-    fun normalize(){
-        data.normalize()
+    /**
+     * Builds and returns a chunk of data by circularly iterating over and appending
+     * CircularIntArray's data to an IntArray of size [chunkSize].
+     *
+     *  The next time this method is called, its starting point will be where
+     * the previous chunk ended.
+     * @param chunkSize size of the returned IntArray
+     * @return a looped chunk of values from data
+     */
+    fun nextChunk(chunkSize: Int): IntArray {
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        return IntArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
+    }
+
+    /** Does the same as [nextChunk], but writes to an existing array
+     * @param destination array that chunk is written to */
+    fun nextChunkTo(destination: IntArray) {
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in destination.indices){
+            destination[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))]
+        }
+    }
+
+    fun addValuesOfNextChunkTo(destination: IntArray){
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in destination.indices){
+            destination[i] += data[index.getIndexAndIterate(step, (noiseAmount > 0))]
+        }
     }
 
     operator fun get(index: Int): Int{ return data[index] }
     operator fun set(index: Int, value: Int){ data[index] = value }
 
+    override fun toString() = data.contentToString()
     override fun isEmpty() = size != 0
     override fun iterator(): Iterator<Int> = data.iterator()
     override fun contains(element: Int) = data.contains(element)

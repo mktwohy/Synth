@@ -1,34 +1,19 @@
 package com.example.synth
 
+import com.example.synth.AudioGenerator.MAX_16BIT_VALUE
+import com.example.synth.AudioGenerator.MIN_16BIT_VALUE
+import java.lang.Exception
 import java.lang.StringBuilder
 
 
-//----- List<Signal> ----- //
 
-//fun List<Signal>.sum(): Signal{
-//    val signalSet = this.toSet()
-//    if(signalSet in signalsToSumSignal) return signalsToSumSignal[signalSet]!!
-//    return when (size){
-//        0 -> NullSignal
-//        1 -> this[0]
-//        else -> SumSignal(this.toSet())
-//    }.also { signalsToSumSignal[signalSet] = it }
-//}
-
-fun List<Signal>.sum(): Signal{
-    return when (size){
-        0 -> NullSignal
-        1 -> this[0]
-        else -> SumSignal(this.toSet())
-    }
-}
 
 //----- IntArray ----- //
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
 //https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
 fun IntArray.normalize(
-    lowerBound: Int = Signal.MIN_16BIT_VALUE,
-    upperBound: Int = Signal.MAX_16BIT_VALUE
+    lowerBound: Int = MIN_16BIT_VALUE,
+    upperBound: Int = MAX_16BIT_VALUE
 ) {
     //Check that array isn't empty
     if (isEmpty()) return
@@ -68,13 +53,7 @@ fun List<Int>.lcm(): Int{
         0 -> 0
         1 -> this[0]
         2 -> lcm(this[0], this[1])
-        else -> {
-            val asSet = this.toSet()
-            if (asSet !in numsToLcd){
-                numsToLcd[asSet]  = this.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
-            }
-            numsToLcd[asSet]!!
-        }
+        else -> this.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
     }
 }
 
