@@ -2,14 +2,13 @@ package com.example.synth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
 /** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding
-    private val audioEngine = AudioEngine()
+    private val audioEngine = AudioEngine(this)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +25,15 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
 
         bind.piano.pressedKeys.addPianoKeyListener(this)
         bind.currentOctave.text = bind.piano.octave.toString()
+        bind.noiseLevel.text = "0"
         audioEngine.start()
+    }
+
+    fun updatePlot(buffer: IntArray){
+        audioEngine.intBuffer.forEachIndexed{ i, value ->
+            bind.plot.buffer[i] = value
+        }
+        bind.plot.postInvalidate()
     }
 
     override fun onResume() {
@@ -55,13 +62,14 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
 
     fun noiseDown(view: View){
         bind.piano.noise -= 1
-        bind.noiseLevel.text = bind.piano.noise.toString()
+        val noise = bind.piano.noise
+        bind.noiseLevel.text = (bind.piano.noise - 1).toString()
 
     }
 
     fun noiseUp(view: View){
         bind.piano.noise += 1
-        bind.noiseLevel.text = bind.piano.noise.toString()
+        bind.noiseLevel.text = (bind.piano.noise - 1).toString()
     }
 
 

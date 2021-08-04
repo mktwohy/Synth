@@ -4,13 +4,41 @@ package com.example.synth
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
 import com.example.synth.CircularIntArray.Companion.sine
 import com.example.synth.Note.Companion.transpose
+import kotlin.math.pow
 
-val overtones = mapOf(1 to 100, 2 to 50, 4 to 25, 8 to 17)
+val fundamental = { i: Int -> i == 1 }
+val odd         = { i: Int -> i % 2 != 1 }
+val even        = { i: Int -> i % 2 == 1 }
+val all         = { _: Int -> true }
+val none        = { _: Int -> false }
+
+
+val overtones =
+    harmonicSeries(1, 10, 0.75f, 1)
+    { i -> fundamental(i) || none(i) }
+
+/** produces a harmonic series with exponential decay*/
+fun harmonicSeries(
+    start: Int,
+    end: Int,
+    decayRate: Float,
+    floor: Int = 1,
+    filter: (Int) -> Boolean
+): Map<Int, Int> {
+    val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
+    return harmonics
+        .mapIndexed{ i, harmonic ->
+            harmonic to ( (100-floor) * (1-decayRate).pow(i) ).toInt() + floor
+        }
+        .toMap()
+        .also{Log.d("m_harmonics","$it")}
+}
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
@@ -33,12 +61,12 @@ class EventPianoKeySet{
 /**
  * Stores information about each key in the [PianoView].
  * @param note   The fundamental [Note] associated with the Key
- * @param color  The key's [Color], which is either black or white
+ * @param color  The key's [Paints], which is either black or white
  * @param audio The [CircularIntArray] that will play when the note is pressed
  */
 data class PianoKey(
     var note: Note,
-    val color: Color,
+    val color: Paints,
     var audio: CircularIntArray
 )
 
@@ -81,8 +109,9 @@ class PianoGrid(
         pianoKeys =  Note.toList(octave).map { note ->
                 PianoKey(
                     note,
-                    if (note.name[1] == '_') Color.WHITE else Color.BLACK,
-                    CircularIntArray.harmonicSignalSlow( note, overtones, sine)
+                    if (note.name[1] == '_') Paints.WHITE else Paints.BLACK,
+                    CircularIntArray.harmonicSignal( note, overtones, sine)
+                        .apply { volume = 100/12 }
                 )
             }
 
@@ -123,7 +152,7 @@ class PianoGrid(
         var bottomRowIndex = 0
 
         for (key in pianoKeys) {
-            if (key.color == Color.WHITE) {
+            if (key.color == Paints.WHITE) {
                 rectToPianoKey[topRow[topRowIndex]]       = key
                 rectToPianoKey[bottomRow[bottomRowIndex]] = key
                 topRowIndex++
@@ -167,9 +196,9 @@ class PianoView(context: Context, attrs: AttributeSet)
 
     val pressedKeys = EventPianoKeySet()
     lateinit var pianoGrid: PianoGrid
-    var noise: Int = 0
+    var noise: Int = 1
         set(value){
-            if (value >= 0){
+            if (value > 0){
                 pianoGrid.pianoKeys.forEach{ it.audio.noiseAmount = value }
                 field = value
             }
@@ -180,7 +209,9 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.audio = CircularIntArray.harmonicSignalSlow( k.note, overtones, sine)
+                    k.audio = CircularIntArray
+                        .harmonicSignal( k.note, overtones, sine)
+                        .apply { volume = 100/12 }
                 }
                 field = newOctave
             }
@@ -190,6 +221,7 @@ class PianoView(context: Context, attrs: AttributeSet)
         rootView.doOnNextLayout {
             pianoGrid = PianoGrid(width, height, octave)
         }
+
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -200,10 +232,10 @@ class PianoView(context: Context, attrs: AttributeSet)
             val k = pianoGrid.rectToPianoKey[r]!!
             canvas.apply {
                 drawRect(r, k.color.paint)
-                if (k.color == Color.WHITE)
-                    drawLine(r.left, r.top, r.left, r.bottom, Color.BLACK.paint)
+                if (k.color == Paints.WHITE)
+                    drawLine(r.left, r.top, r.left, r.bottom, Paints.BLACK.paint)
                 if (k in pressedKeys.pianoKeys)
-                    drawRect(r, Color.PURPLE.paint)
+                    drawRect(r, Paints.PURPLE.paint)
             }
         }
     }

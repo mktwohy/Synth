@@ -5,9 +5,9 @@ import android.util.Rational
 import kotlin.math.absoluteValue
 
 /** The [Paint]s used in the UI */
-enum class Color(val paint: Paint){
+enum class Paints(val paint: Paint){
     WHITE   ( Paint().apply { setARGB(255, 255, 255, 255) } ),
-    PURPLE  ( Paint().apply { setARGB(100, 255, 0, 255) } ),
+    PURPLE  ( Paint().apply { setARGB(100, 255, 0, 255); strokeWidth = 4f } ),
     BLACK   ( Paint().apply { setARGB(255, 0, 0, 0); strokeWidth = 2f } );
 }
 
@@ -25,11 +25,6 @@ enum class Interval(val ratio: Rational){
     MIN_7   (Rational(9,5)),
     MAJ_7   (Rational(15,8)),
     OCTAVE  (Rational(2,1));
-
-    companion object {
-        fun Int.harmonic(n: Int) = this * n
-
-    }
 }
 
 

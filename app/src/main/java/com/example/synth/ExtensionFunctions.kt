@@ -84,3 +84,30 @@ fun String.repeat(times: Int): String{
 }
 
 val logTab = "\t" * 152
+
+
+fun FloatArray.normalize(
+    lowerBound: Float = -1f,
+    upperBound: Float = 1f
+) {
+    //Check that array isn't empty
+    if (isEmpty()) return
+
+    val minValue   = this.minByOrNull { it }!!
+    val maxValue   = this.maxByOrNull { it }!!
+    val valueRange = (maxValue - minValue).toFloat()
+    val boundRange = (upperBound - lowerBound).toFloat()
+
+    //Check that array isn't already normalized
+    // (I would use in range, but this produces excess memory)
+    if ((minValue == 0f && maxValue == 0f)
+        || (maxValue <= upperBound && maxValue > upperBound
+                && minValue >= lowerBound && minValue < lowerBound)) {
+        return
+    }
+
+    //Normalize
+    for (i in indices) {
+        this[i] = ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound
+    }
+}

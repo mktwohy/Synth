@@ -3,9 +3,7 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.util.Log
-import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
-import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
+import kotlin.reflect.KFunction0
 
 /**
  * A wrapper class for [AudioTrack] that plays audio (represented by [CircularIntArray]s) on a loop.
@@ -28,7 +26,7 @@ import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
  * ```
  * @property currentAudio the audio to be played on a loop by the [AudioEngine]
  */
-class AudioEngine{
+class AudioEngine(private val main: MainActivity){
     companion object{
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 256
@@ -38,15 +36,16 @@ class AudioEngine{
         set(newAudio) {
             field =
                 if(newAudio.isEmpty()) setOf()
-                else newAudio.onEach{
-                        it.data.normalize(
-                            MIN_16BIT_VALUE/newAudio.size,
-                            MAX_16BIT_VALUE/newAudio.size
-                        )
-                    }
+                else newAudio
+//                    .onEach{
+//                        it.data.normalize(
+//                            MIN_16BIT_VALUE/newAudio.size,
+//                            MAX_16BIT_VALUE/newAudio.size
+//                        )
+//                    }
         }
     private var runMainLoop = false
-    private val intBuffer = IntArray(BUFFER_SIZE)
+    val intBuffer = IntArray(BUFFER_SIZE)
     private val shortBuffer = ShortArray(BUFFER_SIZE)
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -88,7 +87,7 @@ class AudioEngine{
                         audio.addValuesOfNextChunkTo(intBuffer)
                     }
                 }
-                Log.d("m_chunk","${intBuffer.contentToString()}")
+                main.updatePlot(intBuffer)
                 intBuffer.toShortArray(shortBuffer)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }

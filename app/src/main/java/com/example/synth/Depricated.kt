@@ -302,5 +302,159 @@ fun List<Signal>.sum(): Signal{
 
  */
 
+/*
+package com.example.synth
+
+import kotlin.math.PI
+import kotlin.math.sin
+import kotlin.math.cos
+
+class CircularFloatArray{
+    companion object{
+        const val TWO_PI              = 2.0 * PI
+        const val MIN_16BIT_VALUE     = -32_768
+        const val MAX_16BIT_VALUE     = 32_767
+
+        val sine = { i: Int, period: Int ->
+            sin(TWO_PI * i / period).toFloat()
+        }
+        val cosine = { i: Int, period: Int ->
+            cos(TWO_PI * i / period).toFloat()
+        }
+
+        fun signal(size: Int, func: (Int, Int) -> Float) =
+            CircularFloatArray(size) { i -> func(i, size) }
+
+
+        fun sinSignal(freq: Float, func: (Int, Int) -> Float) =
+            signal(calculatePeriod(freq), sine)
+
+        fun harmonicSignal(
+            fundamental: Float,
+            harmonics: Map<Int, Float>,
+            func: (Int, Int) -> Float
+        ): CircularFloatArray {
+            val ret = sinSignal(fundamental, func)
+            harmonics.filter { it.key != 1 }.forEach {
+                ret += sinSignal(fundamental * it.key, func).apply{ volume = it.value }
+            }
+            return ret
+        }
+
+//        fun calculateCommonInterval(freqs: Set<Float>) =
+//            freqs.map { calculatePeriod(it) }.lcm()
+
+        fun calculatePeriod(freq: Float) = (AudioEngine.SAMPLE_RATE / freq).toInt()
+    }
+
+    var volume: Float = 1f
+        set(value) {
+            if (value in 0f..1f){
+                data.normalize(value*-1, value)
+                field = value
+            }
+
+        }
+    val size: Int
+        get() = data.size
+    var noiseAmount: Int = 0
+    var data: FloatArray
+    private var index: CircularIndex
+
+    constructor(size: Int, init: (Int) -> Float = {0f} ){
+        this.data = FloatArray(size, init).also{ it.normalize() }
+        this.index = CircularIndex(size)
+    }
+
+    constructor(data: FloatArray){
+        this.data = data.also{ it.normalize() }
+        this.index = CircularIndex(size)
+    }
+
+    /** Ensures that the chunk returned from getNextChunk() starts from the beginning of data */
+    fun reset(){ index.reset() }
+
+    fun normalize(){ data.normalize() }
+
+    fun nextElement() = data[index.getIndexAndIterate()]
+
+    /**
+     * Builds and returns a chunk of data by circularly iterating over and appending
+     * CircularFloatArray's data to an IntArray of size [chunkSize].
+     *
+     *  The next time this method is called, its starting point will be where
+     * the previous chunk ended.
+     * @param chunkSize size of the returned IntArray
+     * @return a looped chunk of values from data
+     */
+    fun nextChunk(chunkSize: Int): FloatArray {
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        return FloatArray(chunkSize){ data[index.getIndexAndIterate(step, (noiseAmount > 0))] }
+    }
+
+    /** Does the same as [nextChunk], but writes to an existing array
+     * @param destination array that chunk is written to */
+    fun nextChunkTo(destination: FloatArray) {
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in destination.indices){
+            destination[i] = data[index.getIndexAndIterate(step, (noiseAmount > 0))]
+        }
+    }
+
+    fun addValuesOfNextChunkTo(destination: FloatArray){
+        val step = if (noiseAmount == 0) 1 else noiseAmount
+        for (i in destination.indices){
+            destination[i] += data[index.getIndexAndIterate(step, (noiseAmount > 0))]
+        }
+    }
+
+    operator fun plusAssign(that: CircularFloatArray){
+        for (i in this.data.indices) {
+            this[i] += that.data[that.index.getIndexAndIterate(1, (noiseAmount > 0))]
+        }
+        this.normalize()
+    }
+
+    operator fun get(index: Int): Float{ return data[index] }
+    operator fun set(index: Int, value: Float){ data[index] = value }
+
+    override fun toString() = data.contentToString()
+
+
+}
+
+fun main() {
+    val note = 261.63f
+    val overtones = mapOf(
+        1 to 1f,
+        2 to 0.0f,
+        6 to 0f
+    )
+    val signal = CircularFloatArray.harmonicSignal(note, overtones, CircularFloatArray.sine)
+    print("interval: ${CircularFloatArray.calculatePeriod(note)} $signal")
+}
+
+ */
+
+/*
+        fun harmonicSignal(
+            fundamental: Note,
+            harmonics: Set<Int>,
+            func: (Int, Int) -> Int
+        ): CircularIntArray {
+            val interval = calculatePeriod(fundamental.freq)
+            val harmonicToPeriod = mutableMapOf<Int, Int>().apply {
+                harmonics.forEach{ harmonic ->
+                    this[harmonic] = interval/harmonic
+                }
+            }
+
+            return CircularIntArray(interval){ i ->
+                harmonics.fold(0){
+                        sumAtIndex, harmonic -> sumAtIndex + func(i, harmonicToPeriod[harmonic]!!)
+                }
+            }
+        }
+ */
 
 
