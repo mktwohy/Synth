@@ -9,7 +9,10 @@
 
 ## Changelogs 
 ### Note: these will only contain changes noticable to the user
-- **8-2-2021 (Latest Build):**
+- **8-3-2021 (Latest Build):**
+  - Added audio visualizer 
+  - Fixed bug that caused noise level indicator to display incorrectly
+- **8-2-2021:**
   - Excessive memory allocation bug finally fixed. This results in significant performance improvements
 - **7-27-2021:**
   - Added harmonic white-noise effect
