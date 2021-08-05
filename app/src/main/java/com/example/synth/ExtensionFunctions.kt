@@ -111,3 +111,15 @@ fun FloatArray.normalize(
         this[i] = ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound
     }
 }
+
+fun FloatArray.plotInConsole(width: Float = 50f){
+    this
+        .also { it.normalize(0f, width) }
+        .forEach {
+            repeat(it.toInt()){
+                print(" ")
+            }
+            println("#")
+        }
+
+}

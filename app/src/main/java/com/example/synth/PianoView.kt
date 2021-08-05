@@ -20,8 +20,8 @@ val none        = { _: Int -> false }
 
 
 val overtones =
-    harmonicSeries(1, 10, 0.75f, 1)
-    { i -> fundamental(i) || none(i) }
+    harmonicSeries(1, 15, 0.75f, 10)
+    { i -> fundamental(i) || even(i) }
 
 /** produces a harmonic series with exponential decay*/
 fun harmonicSeries(
@@ -37,7 +37,6 @@ fun harmonicSeries(
             harmonic to ( (100-floor) * (1-decayRate).pow(i) ).toInt() + floor
         }
         .toMap()
-        .also{Log.d("m_harmonics","$it")}
 }
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener

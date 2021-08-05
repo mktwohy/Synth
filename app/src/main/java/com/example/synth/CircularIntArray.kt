@@ -1,38 +1,26 @@
 package com.example.synth
 
-import android.util.Log
-import com.example.synth.CircularIntArray.Companion.sine
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.cos
 import kotlin.random.Random
 
 /** Index for circularly navigating an array */
-class CircularIndex{
-    private var leftBound: Int
-    private var rightBound: Int
-
-    constructor(loopSize: Int){
-        leftBound = 0
-        rightBound = loopSize -1
-    }
-
-    constructor(leftBound: Int, rightBound: Int){
-        this.leftBound  = leftBound
-        this.rightBound = rightBound
-    }
-
+class CircularIndex(
+    private var maxValue: Int,
+    private var offset: Int = 0
+){
     /** Current index value */
     var i: Int = 0
 
-    /** Circularly moves the underlying index inside the bounds of loopSize. */
+    /** Circularly moves the underlying index inside the bounds of period. */
     fun iterate(step: Int = 1){
-        i = ( (i + step) % (rightBound + 1) ) + leftBound
+        i = ( (i + step) % (maxValue + 1) ) + offset
     }
 
-    fun getIndexAndIterate(step: Int = 1, noise: Boolean = false) =
+    fun getIndexAndIterate(step: Int = 1, random: Boolean = false) =
         i.also {
-            if (noise) iterate(Random.nextInt(1, step+1))
+            if (random) iterate(Random.nextInt(1, step+1))
             else iterate(step)
         }
 
