@@ -43,8 +43,8 @@ abstract class Signal{
 
 class FuncSignal(var func: (Int, Int) -> Float,
                  var freq: Int = 440,
-                 var offset: Int = 0,
-                 override var amp: Float = 1f
+                 override var amp: Float = 1f,
+                 var offset: Int = 0
 ): Signal() {
     override val index: CircularIndex
     init{
@@ -56,7 +56,7 @@ class FuncSignal(var func: (Int, Int) -> Float,
     override fun reset() { index.reset() }
 
     override fun evaluateNext() =
-        func(index.getIndexAndIterate()+offset, period)
+        func(index.getIndexAndIterate()+offset, period) * amp
 
 
     override fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
@@ -98,7 +98,7 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
     }
 
     override fun evaluateNext() =
-        signals.fold(0f){ sum, signal -> sum + signal.evaluateNext() }
+        signals.fold(0f){ sum, signal -> sum + signal.evaluateNext() * amp }
 
     override fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
         if (startFromBeginning) reset()
@@ -114,10 +114,25 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
 }
 
 fun main(){
-    FuncSignal(Signal.sine)
-        .evaluate(1, true)
+    val s1 = FuncSignal(Signal.sine, 440, 0.5f)
+    val s2 = FuncSignal(Signal.sine, 880,0.5f)
+    val sum = SumSignal(s1, s2)
+
+    println(s1.period)
+    println(s2.period)
+    println(sum.period)
+
+    sum.evaluate(4, true)
         .plotInConsole()
 
+    s1.evaluate(1, true)
+        .plotInConsole()
+
+    s2.evaluate(2, true)
+        .plotInConsole()
+
+
+    println(sum.evaluate(1,true).contentToString())
 //    FloatArray(20){ i -> Signal.sine(i, 20) }
 //        .plotInConsole()
 //
