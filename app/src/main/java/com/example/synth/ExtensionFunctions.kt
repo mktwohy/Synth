@@ -4,6 +4,8 @@ import android.util.Rational
 import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
 import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
 import java.lang.StringBuilder
+import kotlin.math.abs
+import kotlin.math.floor
 
 //----- Rational ----- //
 fun Rational.times(that: Int) = Rational(numerator*that, numerator)
@@ -117,66 +119,4 @@ fun FloatArray.normalize(
     }
 }
 
-fun FloatArray.plotInConsoleEfficient(width: Float = 50f){
-    this
-        .also { it.normalize(0f, width) }
-        .forEach {
-            repeat(it.toInt()){
-                print(" ")
-            }
-            println("#")
-        }
 
-}
-fun FloatArray.plotInConsole(plotHeight: Int = 20, displayVertical: Boolean = false){
-    val min     = this.minOrNull() ?: 0f
-    val max     = this.maxOrNull() ?: 0f
-    val middle  = (min + max) / 2
-
-    val topRatio    = (max - middle) / (max - min)
-    val bottomRatio = (middle - min) / (max - min)
-
-    val scaledValues = this.map {
-        if(it >= middle)
-            it * topRatio * (plotHeight -1)
-        else
-            it * bottomRatio * (plotHeight -1)
-    }
-
-    val scaledMin = min * topRatio * (plotHeight-1)
-    val shiftUp = if (min *topRatio * (plotHeight-1)  < 0) scaledMin*-1 else 0f
-
-    val plotValues = scaledValues.map { it + shiftUp }
-
-    val valueToString = plotValues.map { it to CharArray(plotHeight){ i -> ' ' } }
-    for((value, string) in valueToString){
-
-        string[0]              = '-'
-        string[plotHeight/2]   = '-'
-        string[plotHeight -1]  = '-'
-
-        when{
-            value > (plotHeight-1)   -> string[plotHeight-1] = 'C'
-            value < 0                -> string[0] = 'C'
-            else                     -> string[value.toInt()] = '#'
-        }
-    }
-
-
-    if(displayVertical){
-        for((_, string) in valueToString) {
-            println(string)
-        }
-    }else{
-        for(i in (0 until plotHeight).reversed()){
-            for((value, string) in valueToString){
-                print(string[i])
-            }
-            println()
-
-        }
-    }
-
-
-
-}

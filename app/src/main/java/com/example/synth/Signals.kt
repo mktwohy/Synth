@@ -38,7 +38,50 @@ abstract class Signal{
     abstract fun evaluate(periods: Int, startFromBeginning: Boolean = false): FloatArray
     abstract fun evaluate(destination: FloatArray, startFromBeginning: Boolean = false)
     operator fun plus(that: Signal) = SumSignal(this, that)
-    override fun toString() = evaluate(1).contentToString()
+    override fun toString() = "Signal \nperiod: $period, amp: $amp"
+
+    fun plotInConsole(allowClipping: Boolean = true, periods: Int = 1, scale: Int = 23){
+        val lowerBound = 0
+        val upperBound = (scale.toFloat()+1).toInt()
+        val middle = (upperBound + lowerBound) / 2
+
+        val values = evaluate(periods)
+        var min = values.minOrNull()!!
+        var max = values.maxOrNull()!!
+
+        val valueToString = values
+            .apply {
+                if (!allowClipping && (min < -1f || max > 1f)){
+                    min = -1f
+                    max = 1f
+                    normalize(min, max)
+                }
+                normalize(middle + min*scale/2, (middle + max*scale/2))
+            }
+            .map { value -> value to CharArray(scale+2){ ' ' } } // move up one
+
+        for((value, string) in valueToString){
+            string[lowerBound]      = '='
+            string[upperBound/2]    = '-'
+            string[upperBound]      = '='
+
+            when{
+                value >= upperBound  -> string[upperBound] = '!'
+                value <= lowerBound  -> string[lowerBound] = '!'
+                else                 -> string[value.toInt()] = '#'
+
+            }
+        }
+
+        println(this)
+        for(i in (scale+1 downTo 0)){
+            for((_, string) in valueToString){
+                print(string[i])
+            }
+            println()
+        }
+        println("\n\n")
+    }
 }
 
 class FuncSignal(var func: (Int, Int) -> Float,
@@ -70,6 +113,9 @@ class FuncSignal(var func: (Int, Int) -> Float,
             destination[i] = evaluateNext()
         }
     }
+
+    override fun toString() = "FuncSignal \nperiod: $period, amp: $amp, freq: $freq, offset: $offset"
+
 }
 
 /** Combines two or more Signals into one Signal. */
@@ -118,25 +164,13 @@ fun main(){
     val s2 = FuncSignal(Signal.sine, 880,0.5f)
     val sum = SumSignal(s1, s2)
 
-    println(s1.period)
-    println(s2.period)
-    println(sum.period)
+    sum.plotInConsole()
 
-    sum.evaluate(4, true)
-        .plotInConsole()
+    s1.plotInConsole()
 
-    s1.evaluate(1, true)
-        .plotInConsole()
+    s2.plotInConsole()
 
-    s2.evaluate(2, true)
-        .plotInConsole()
+    FuncSignal(Signal.sine, 200,2f).plotInConsole(false, 1, 43)
 
-
-    println(sum.evaluate(1,true).contentToString())
-//    FloatArray(20){ i -> Signal.sine(i, 20) }
-//        .plotInConsole()
-//
-//    val s = FuncSignal(Signal.sine)
-//    repeat(20) { println(s.evaluateNext()) }
 
 }
