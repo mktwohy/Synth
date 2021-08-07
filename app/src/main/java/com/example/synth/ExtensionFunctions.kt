@@ -19,6 +19,12 @@ fun IntArray.mapInPlace(transform: (Int) -> Int){
     }
 }
 
+fun IntArray.mapInPlaceIndexed(transform: (Int, Int) -> Int){
+    for(i in indices){
+        this[i] = transform(i, this[i])
+    }
+}
+
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
 //https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
 fun IntArray.normalize(
@@ -90,6 +96,14 @@ val logTab = "\t" * 152
 fun FloatArray.mapInPlace(transform: (Float) -> Float){
     for(i in indices){
         this[i] = transform(this[i])
+    }
+}
+
+fun FloatArray.toIntArray(destination: IntArray, scalar: Int){
+    if (this.size != destination.size)
+        throw Exception("Cannot clone to array of different size")
+    for (i in destination.indices){
+        destination[i] = (this[i] * scalar).toInt()
     }
 }
 

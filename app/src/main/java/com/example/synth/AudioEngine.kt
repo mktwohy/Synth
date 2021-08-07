@@ -3,7 +3,6 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import kotlin.reflect.KFunction0
 
 /**
  * A wrapper class for [AudioTrack] that plays audio (represented by [CircularIntArray]s) on a loop.
@@ -24,7 +23,8 @@ import kotlin.reflect.KFunction0
  * ...
  * audioEngine.stop()
  * ```
- * @property currentAudio the audio to be played on a loop by the [AudioEngine]
+ * .0
+ * @property signal the audio to be played on a loop by the [AudioEngine]
  */
 class AudioEngine(private val main: MainActivity){
     companion object{
@@ -32,19 +32,10 @@ class AudioEngine(private val main: MainActivity){
         const val BUFFER_SIZE = 256
     }
 
-    var currentAudio = setOf<CircularIntArray>()
-        set(newAudio) {
-            field =
-                if(newAudio.isEmpty()) setOf()
-                else newAudio
-//                    .onEach{
-//                        it.data.normalize(
-//                            MIN_16BIT_VALUE/newAudio.size,
-//                            MAX_16BIT_VALUE/newAudio.size
-//                        )
-//                    }
-        }
+    val signal = SumSignal()
+
     private var runMainLoop = false
+    val floatBuffer = FloatArray(BUFFER_SIZE)
     val intBuffer = IntArray(BUFFER_SIZE)
     private val shortBuffer = ShortArray(BUFFER_SIZE)
     private val audioTrack = AudioTrack.Builder()
@@ -82,14 +73,13 @@ class AudioEngine(private val main: MainActivity){
             audioTrack.play()
             while (runMainLoop) {
                 intBuffer.indices.forEach{ i -> intBuffer[i] = 0 }
-                if(currentAudio.isNotEmpty()){
-                    for(audio in currentAudio){
-                        audio.addValuesOfNextChunkTo(intBuffer)
-                    }
-                }
+                signal.evaluateTo(floatBuffer)
+                floatBuffer.normalize()
+                floatBuffer.toIntArray(intBuffer, Constants.MAX_16BIT_VALUE)
                 main.updatePlot(intBuffer)
                 intBuffer.toShortArray(shortBuffer)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
+
             }
             audioTrack.stop()
             audioTrack.flush()

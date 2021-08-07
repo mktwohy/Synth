@@ -1,6 +1,8 @@
 package com.example.synth
 
 
+import android.util.Log
+import com.example.synth.Constants.MAX_16BIT_VALUE
 import com.example.synth.Constants.TWO_PI
 import kotlin.math.PI
 import kotlin.math.cos
@@ -34,7 +36,7 @@ abstract class Signal{
     abstract fun reset()
     abstract fun evaluateNext(): Float
     abstract fun evaluate(periods: Int, startFromBeginning: Boolean = false): FloatArray
-    abstract fun evaluate(destination: FloatArray, startFromBeginning: Boolean = false)
+    abstract fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean = false)
     operator fun plus(that: Signal) = SumSignal(this, that)
     override fun toString() = "Signal \nperiod: $period, amp: $amp"
 
@@ -102,8 +104,10 @@ class FuncSignal(var func: (Int, Int) -> Float,
 
     override fun reset() { index.reset() }
 
-    override fun evaluateNext() =
-        func(index.getIndexAndIterate()+offset, period) * amp
+    override fun evaluateNext(): Float {
+        return func(index.getIndexAndIterate()+offset, period) * amp
+    }
+
 
 
     override fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
@@ -111,7 +115,7 @@ class FuncSignal(var func: (Int, Int) -> Float,
         return FloatArray(period * periods){ evaluateNext() }
     }
 
-    override fun evaluate(destination: FloatArray, startFromBeginning: Boolean) {
+    override fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean) {
         if (startFromBeginning) reset()
         for(i in destination.indices){
             destination[i] = evaluateNext()
@@ -138,12 +142,26 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
     override fun reset() {
         signals.forEach { it.index.reset() }
     }
+    fun clear(){
+        signals.clear()
+    }
 
     fun addSignal(newSignal: Signal){
         when(newSignal){
             is FuncSignal -> signals.add(newSignal)
             is SumSignal  -> signals.addAll(newSignal.signals)
         }
+        period = signals.map{ it.period }.lcm()
+    }
+
+    fun addSignals(newSignals: Collection<Signal>){
+        for(signal in newSignals){
+            when(signal){
+                is FuncSignal -> signals.add(signal)
+                is SumSignal  -> signals.addAll(signal.signals)
+            }
+        }
+
         period = signals.map{ it.period }.lcm()
     }
 
@@ -155,7 +173,7 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
         return FloatArray(period * periods){ evaluateNext() }
     }
 
-    override fun evaluate(destination: FloatArray, startFromBeginning: Boolean) {
+    override fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean) {
         if (startFromBeginning) reset()
         for (i in destination.indices) {
             destination[i] = evaluateNext() }

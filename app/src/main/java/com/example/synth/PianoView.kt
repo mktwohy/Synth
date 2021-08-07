@@ -4,11 +4,9 @@ package com.example.synth
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
-import com.example.synth.CircularIntArray.Companion.sine
 import com.example.synth.Note.Companion.transpose
 import kotlin.math.pow
 
@@ -61,12 +59,12 @@ class EventPianoKeySet{
  * Stores information about each key in the [PianoView].
  * @param note   The fundamental [Note] associated with the Key
  * @param color  The key's [Paints], which is either black or white
- * @param audio The [CircularIntArray] that will play when the note is pressed
+ * @param signal The [CircularIntArray] that will play when the note is pressed
  */
 data class PianoKey(
     var note: Note,
     val color: Paints,
-    var audio: CircularIntArray
+    var signal: Signal
 )
 
 /**
@@ -109,8 +107,7 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Paints.WHITE else Paints.BLACK,
-                    CircularIntArray.harmonicSignal( note, overtones, sine)
-                        .apply { volume = 100/12 }
+                    FuncSignal(Signal.sine, note.freq)
                 )
             }
 
@@ -195,22 +192,13 @@ class PianoView(context: Context, attrs: AttributeSet)
 
     val pressedKeys = EventPianoKeySet()
     lateinit var pianoGrid: PianoGrid
-    var noise: Int = 1
-        set(value){
-            if (value > 0){
-                pianoGrid.pianoKeys.forEach{ it.audio.noiseAmount = value }
-                field = value
-            }
-        }
     var octave = 4
         set(newOctave){
             if (newOctave in 0..8) {
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.audio = CircularIntArray
-                        .harmonicSignal( k.note, overtones, sine)
-                        .apply { volume = 100/12 }
+                    k.signal = FuncSignal(Signal.sine, k.note.freq)
                 }
                 field = newOctave
             }

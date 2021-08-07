@@ -47,7 +47,10 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     }
 
     override fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) {
-        audioEngine.currentAudio = pressedPianoKeys.map { it.audio }.toSet()
+        audioEngine.signal.apply {
+            clear()
+            addSignals(pressedPianoKeys.map { it.signal }.toSet())
+        }
     }
 
     fun octaveDown(view: View){
@@ -59,18 +62,4 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
         bind.piano.octave = (bind.piano.octave + 1)
         bind.currentOctave.text = bind.piano.octave.toString()
     }
-
-    fun noiseDown(view: View){
-        bind.piano.noise -= 1
-        val noise = bind.piano.noise
-        bind.noiseLevel.text = (bind.piano.noise - 1).toString()
-
-    }
-
-    fun noiseUp(view: View){
-        bind.piano.noise += 1
-        bind.noiseLevel.text = (bind.piano.noise - 1).toString()
-    }
-
-
 }
