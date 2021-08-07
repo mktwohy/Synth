@@ -36,7 +36,6 @@ class AudioEngine(private val main: MainActivity){
 
     private var runMainLoop = false
     val floatBuffer = FloatArray(BUFFER_SIZE)
-    val intBuffer = IntArray(BUFFER_SIZE)
     private val shortBuffer = ShortArray(BUFFER_SIZE)
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -72,14 +71,14 @@ class AudioEngine(private val main: MainActivity){
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                intBuffer.indices.forEach{ i -> intBuffer[i] = 0 }
+                floatBuffer.indices.forEach{ i -> floatBuffer[i] = 0f }
                 signal.evaluateTo(floatBuffer)
-                floatBuffer.normalize()
-                floatBuffer.toIntArray(intBuffer, Constants.MAX_16BIT_VALUE)
-                main.updatePlot(intBuffer)
-                intBuffer.toShortArray(shortBuffer)
+                floatBuffer.apply {
+                    normalize()
+                    toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
+                }
+                main.updatePlot(floatBuffer)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
-
             }
             audioTrack.stop()
             audioTrack.flush()

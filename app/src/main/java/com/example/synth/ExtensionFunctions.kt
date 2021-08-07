@@ -99,11 +99,11 @@ fun FloatArray.mapInPlace(transform: (Float) -> Float){
     }
 }
 
-fun FloatArray.toIntArray(destination: IntArray, scalar: Int){
+fun FloatArray.toShortArray(destination: ShortArray, scalar: Int){
     if (this.size != destination.size)
         throw Exception("Cannot clone to array of different size")
     for (i in destination.indices){
-        destination[i] = (this[i] * scalar).toInt()
+        destination[i] = (this[i] * scalar).toInt().toShort()
     }
 }
 

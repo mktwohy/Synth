@@ -29,8 +29,8 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
         audioEngine.start()
     }
 
-    fun updatePlot(buffer: IntArray){
-        audioEngine.intBuffer.forEachIndexed{ i, value ->
+    fun updatePlot(buffer: FloatArray){
+        buffer.forEachIndexed{ i, value ->
             bind.plot.buffer[i] = value
         }
         bind.plot.postInvalidate()

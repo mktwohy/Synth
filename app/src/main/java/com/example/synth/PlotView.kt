@@ -10,15 +10,16 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import com.google.android.material.transition.MaterialSharedAxis
 import java.text.Normalizer.normalize
 
 
 class PlotView(context: Context, attrs: AttributeSet)
     : View(context, attrs) {
 
-    var buffer = IntArray(AudioEngine.BUFFER_SIZE){ i -> i }
-    val xValues = FloatArray(buffer.size){ i -> i.toFloat() }
-    val yValues = FloatArray(buffer.size)
+    var buffer = FloatArray(AudioEngine.BUFFER_SIZE)
+    private val xValues = FloatArray(buffer.size){ i -> i.toFloat() }
+    private val yValues = FloatArray(buffer.size)
 
 
 
@@ -28,11 +29,14 @@ class PlotView(context: Context, attrs: AttributeSet)
 
 
         buffer.forEachIndexed { i, value ->
-            yValues[i] = this.height - value.toFloat()
+            yValues[i] = value
         }
         yValues.normalize(0f, this.height.toFloat())
         xValues.normalize(0f, this.width.toFloat())
 
+        Log.d("m_plot", "${buffer.contentToString()}")
+        Log.d("m_plot", " x: ${xValues.contentToString()}")
+        Log.d("m_plot", " y: ${yValues.contentToString()}")
         for(i in 0 until xValues.size - 1){
             canvas.drawLine(
                 xValues[i], yValues[i],
