@@ -13,8 +13,7 @@ object Constants{
 }
 
 /** Represents a time-varying signal.
- * Inspired by Allen Downey's ThinkDSP Python module
- * */
+ * Inspired by Allen Downey's ThinkDSP Python module */
 abstract class Signal{
     companion object Functions{
         val sine = { i: Int, p: Int ->
@@ -32,7 +31,6 @@ abstract class Signal{
     open var amp: Float = 1f
     abstract val index: CircularIndex
 
-
     abstract fun reset()
     abstract fun evaluateNext(): Float
     abstract fun evaluate(periods: Int, startFromBeginning: Boolean = false): FloatArray
@@ -40,7 +38,13 @@ abstract class Signal{
     operator fun plus(that: Signal) = SumSignal(this, that)
     override fun toString() = "Signal \nperiod: $period, amp: $amp"
 
-    fun plotInConsole(allowClipping: Boolean = true, periods: Int = 1, scale: Int = 23){
+    fun plotInConsole(
+        allowClipping: Boolean = true,
+        startFromBeginning: Boolean = true,
+        periods: Int = 1,
+        scale: Int = 17
+    ){
+        if(startFromBeginning) this.reset()
         val lowerBound = 0
         val upperBound = (scale.toFloat()+1).toInt()
         val middle = (upperBound + lowerBound) / 2
@@ -126,7 +130,7 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
     init{
         signals.addAll(signal)
         this.amp = amp
-        period = signals.maxByOrNull { it.period }?.period ?: 1
+        period = signals.map{ it.period }.lcm()
         index = CircularIndex(period)
     }
 
@@ -136,11 +140,11 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
     }
 
     fun addSignal(newSignal: Signal){
-        signals.add(newSignal)
-    }
-
-    fun addSignals(newSignals: Collection<Signal>){
-        signals.addAll(signals)
+        when(newSignal){
+            is FuncSignal -> signals.add(newSignal)
+            is SumSignal  -> signals.addAll(newSignal.signals)
+        }
+        period = signals.map{ it.period }.lcm()
     }
 
     override fun evaluateNext() =
@@ -157,6 +161,7 @@ class SumSignal(vararg signal: Signal, amp: Float = 1f) : Signal() {
             destination[i] = evaluateNext() }
         }
 
+    operator fun plusAssign(that: Signal){ addSignal(that) }
 }
 
 fun main(){
@@ -170,7 +175,9 @@ fun main(){
 
     s2.plotInConsole()
 
-    FuncSignal(Signal.sine, 200,2f).plotInConsole(false, 1, 43)
+    sum += FuncSignal(Signal.sine, 157,2f)
+
+    sum.plotInConsole(false)
 
 
 }
