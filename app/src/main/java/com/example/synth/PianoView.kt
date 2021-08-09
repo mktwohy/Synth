@@ -107,7 +107,7 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Paints.WHITE else Paints.BLACK,
-                    FuncSignal(Signal.sine, note.freq)
+                    FuncSignal(Signal.sine, note.freq, 1/12f)
                 )
             }
 
@@ -198,7 +198,7 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.signal = FuncSignal(Signal.sine, k.note.freq)
+                    k.signal = FuncSignal(Signal.sine, k.note.freq, 1/12f)
                 }
                 field = newOctave
             }

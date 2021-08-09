@@ -3,6 +3,8 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.util.Log
+import java.util.*
 
 /**
  * A wrapper class for [AudioTrack] that plays audio (represented by [CircularIntArray]s) on a loop.
@@ -33,6 +35,7 @@ class AudioEngine(private val main: MainActivity){
     }
 
     val signal = SumSignal()
+    val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false
     val floatBuffer = FloatArray(BUFFER_SIZE)
@@ -71,12 +74,14 @@ class AudioEngine(private val main: MainActivity){
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                floatBuffer.indices.forEach{ i -> floatBuffer[i] = 0f }
-                signal.evaluateTo(floatBuffer)
-                floatBuffer.apply {
-                    normalize()
-                    toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
+                signal.apply {
+                    if(signalBuffer.isNotEmpty()){
+                        clear()
+                        addSignals(signalBuffer.poll()!!)
+                    }
+                    evaluateTo(floatBuffer)
                 }
+                floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 main.updatePlot(floatBuffer)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }

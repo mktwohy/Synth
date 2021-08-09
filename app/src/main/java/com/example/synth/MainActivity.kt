@@ -2,6 +2,7 @@ package com.example.synth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
@@ -47,10 +48,12 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     }
 
     override fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) {
-        audioEngine.signal.apply {
-            clear()
-            addSignals(pressedPianoKeys.map { it.signal }.toSet())
-        }
+        audioEngine.signalBuffer.offer(
+            if (pressedPianoKeys.isEmpty())
+                setOf(SilentSignal)
+            else
+                pressedPianoKeys.map{ it.signal }.toSet()
+        )
     }
 
     fun octaveDown(view: View){

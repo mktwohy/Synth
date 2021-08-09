@@ -99,6 +99,10 @@ fun FloatArray.mapInPlace(transform: (Float) -> Float){
     }
 }
 
+fun FloatArray.clear(){
+    indices.forEach{ i -> this[i] = 0f }
+}
+
 fun FloatArray.toShortArray(destination: ShortArray, scalar: Int){
     if (this.size != destination.size)
         throw Exception("Cannot clone to array of different size")
@@ -134,3 +138,51 @@ fun FloatArray.normalize(
 }
 
 
+fun Signal.plotInConsole(
+    allowClipping: Boolean = true,
+    startFromBeginning: Boolean = true,
+    periods: Int = 1,
+    scale: Int = 17
+){
+    if(startFromBeginning) this.reset()
+    val lowerBound = 0
+    val upperBound = (scale.toFloat()+1).toInt()
+    val middle = (upperBound + lowerBound) / 2
+
+    val values = evaluate(periods)
+    var min = values.minOrNull()!!
+    var max = values.maxOrNull()!!
+
+    val valueToString = values
+        .apply {
+            if (!allowClipping && (min < -1f || max > 1f)){
+                min = -1f
+                max = 1f
+                normalize(min, max)
+            }
+            normalize(middle + min*scale/2, (middle + max*scale/2))
+        }
+        .map { value -> value to CharArray(scale+2){ ' ' } } // move up one
+
+    for((value, string) in valueToString){
+        string[lowerBound]      = '='
+        string[upperBound/2]    = '-'
+        string[upperBound]      = '='
+
+        when{
+            value >= upperBound  -> string[upperBound] = '!'
+            value <= lowerBound  -> string[lowerBound] = '!'
+            else                 -> string[value.toInt()] = '#'
+
+        }
+    }
+
+    println(this)
+    for(i in (scale+1 downTo 0)){
+        for((_, string) in valueToString){
+            print(string[i])
+        }
+        println()
+    }
+    println("\n\n")
+}

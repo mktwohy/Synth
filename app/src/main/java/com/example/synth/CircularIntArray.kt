@@ -7,8 +7,8 @@ import kotlin.random.Random
 
 /** Index for circularly navigating an array */
 class CircularIndex(
-    private var maxValue: Int,
-    private var offset: Int = 0
+    var maxValue: Int,
+    var offset: Int = 0
 ){
     /** Current index value */
     var i: Int = 0
