@@ -1,6 +1,7 @@
 package com.example.synth
 
 
+import android.util.Log
 import com.example.synth.Constants.TWO_PI
 import kotlin.math.*
 
@@ -95,14 +96,15 @@ object SilentSignal: Signal() {
 }
 
 
-class FuncSignal(var func: (Int, Int) -> Float,
-                 var freq: Int = 440,
-                 override var amp: Float = 1f,
+class FuncSignal(
+    var func: (Int, Int) -> Float,
+    var freq: Float = 440f,
+    override var amp: Float = 1f,
 ): Signal() {
     override var period: Int = 0
     private val index: CircularIndex
     init{
-        period = AudioEngine.SAMPLE_RATE / freq
+        period = (AudioEngine.SAMPLE_RATE / freq).toInt()
         index = CircularIndex(period)
     }
 
@@ -111,9 +113,7 @@ class FuncSignal(var func: (Int, Int) -> Float,
     override fun evaluateNext() =
         func(index.getIndexAndIterate(), period) * amp
 
-
     override fun toString() = "FuncSignal(p: $period, a: $amp, f: $freq)"
-
 }
 
 /** Combines two or more Signals into one Signal. */
@@ -191,8 +191,8 @@ class SumSignal(
 }
 
 fun main(){
-    val s1 = FuncSignal(Signal.sine, 440, 1f)
-    val s2 = FuncSignal(Signal.sine, 880,1f)
+    val s1 = FuncSignal(Signal.sine, Note.A_4.freq, 1f)
+    val s2 = FuncSignal(Signal.sine, Note.A_5.freq,1f)
     val sum = SumSignal(s1, s2)
 
 //    s1.plotInConsole()

@@ -40,41 +40,6 @@ class CircularIntArray: Collection<Int>{
         const val TWO_PI              = 2.0 * PI
         const val MIN_16BIT_VALUE     = -32_768
         const val MAX_16BIT_VALUE     = 32_767
-
-        val sine = { i: Int, period: Int ->
-            (sin(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt()
-        }
-        val cosine = { i: Int, period: Int ->
-            (cos(TWO_PI * i / period) * MAX_16BIT_VALUE).toInt()
-        }
-
-        fun signal(size: Int, func: (Int, Int) -> Int) =
-             CircularIntArray(size) { i -> func(i, size) }
-
-
-        fun sinSignal(freq: Int, func: (Int, Int) -> Int) =
-            signal(calculatePeriod(freq), sine)
-
-
-        fun harmonicSignal(
-            fundamental: Note,
-            harmonicSeries: Map<Int, Int>,
-            func: (Int, Int) -> Int
-        ): CircularIntArray {
-            val ret = sinSignal(fundamental.freq, func)
-            harmonicSeries
-                .filter { it.key != 1 }
-                .forEach {
-                    ret += sinSignal(fundamental.freq * it.key, func)
-                        .apply{ volume = it.value }
-                }
-            return ret
-        }
-
-        fun calculateCommonInterval(freqs: Set<Int>) =
-            freqs.map { calculatePeriod(it) }.lcm()
-
-        fun calculatePeriod(freq: Int) = AudioEngine.SAMPLE_RATE / freq
     }
 
     var volume: Int = 100

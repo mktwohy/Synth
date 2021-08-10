@@ -8,15 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.color
-import com.example.synth.Note.Companion.transpose
-import com.example.synth.Signal.Functions.even
-import com.example.synth.Signal.Functions.fundamental
-import com.example.synth.Signal.Functions.harmonicSeries
-import com.example.synth.Signal.Functions.odd
-import com.example.synth.Signal.Functions.signalsFromHarmonicSeries
-import com.example.synth.Signal.Functions.sine
-
-
 
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener

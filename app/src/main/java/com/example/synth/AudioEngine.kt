@@ -30,7 +30,7 @@ import java.util.*
  */
 class AudioEngine(private val main: MainActivity){
     companion object{
-        const val SAMPLE_RATE = 44100
+        const val SAMPLE_RATE = 48000
         const val BUFFER_SIZE = 512
     }
 

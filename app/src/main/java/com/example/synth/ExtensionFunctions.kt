@@ -4,8 +4,6 @@ import android.util.Rational
 import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
 import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
 import java.lang.StringBuilder
-import kotlin.math.abs
-import kotlin.math.floor
 
 //----- Rational ----- //
 fun Rational.times(that: Int) = Rational(numerator*that, numerator)
