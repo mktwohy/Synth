@@ -11,7 +11,6 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding
     private val audioEngine = AudioEngine(this)
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

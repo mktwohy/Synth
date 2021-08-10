@@ -1,11 +1,8 @@
 package com.example.synth
 
 
-import android.util.Log
 import com.example.synth.Constants.TWO_PI
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 object Constants{
     const val TWO_PI              = 2.0 * PI.toFloat()
@@ -26,6 +23,43 @@ abstract class Signal{
         val silence = { _: Int, _: Int ->
             0f
         }
+
+        val fundamental = { i: Int -> i == 1 }
+        val odd         = { i: Int -> i % 2 != 0 }
+        val even        = { i: Int -> i % 2 == 0 }
+        val all         = { _: Int -> true }
+        val none        = { _: Int -> false }
+
+
+        /** produces a harmonic series with exponential decay
+         * (represented as a map of overtones to amplitude) */
+        fun harmonicSeries(
+            start: Int,
+            end: Int,
+            decayRate: Float,
+            floor: Float,
+            filter: (Int) -> Boolean
+        ): Map<Int, Float> {
+            val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
+            return harmonics
+                .mapIndexed{ i, harmonic ->
+                    harmonic to  ((1f-floor) * (1f-decayRate).pow(i) + floor)
+                }
+                .toMap()
+        }
+
+        fun signalsFromHarmonicSeries(
+            harmonicSeries: Map<Int, Float>,
+            fundamentalFreq: Int,
+            func: (Int, Int) -> Float
+        ): MutableSet<Signal> =
+            harmonicSeries
+                .map { (overtone, amplitude) ->
+                    FuncSignal(func, fundamentalFreq*overtone, amplitude)
+                }
+                .toMutableSet()
+
+
     }
 
     abstract var period: Int
@@ -102,11 +136,18 @@ class SumSignal(
 
     fun clear(){ signals.clear() }
 
-    fun calculatePeriod(){
+    fun normalize(upperBound: Float) {
+        if (signals.isEmpty()) return
+
+        val ampSum = signals.map { it.amp }.sum()
+        signals.forEach { it.amp = (it.amp / ampSum) * upperBound  }
+    }
+
+    private fun calculatePeriod(){
         period = signals.map{ it.period }.lcm()
     }
 
-    fun addSignal(newSignal: Signal){
+    private fun addSignal(newSignal: Signal){
         when(newSignal){
             is FuncSignal -> signals.add(newSignal)
             is SumSignal  -> signals.addAll(newSignal.signals)
@@ -138,9 +179,30 @@ fun main(){
     val s2 = FuncSignal(Signal.sine, 880,1f)
     val sum = SumSignal(s1, s2)
 
-    println(sum.evaluate(2, true).contentToString())
-    s1.plotInConsole()
-    s2.plotInConsole()
-    sum.plotInConsole()
+//    s1.plotInConsole()
+//    s2.plotInConsole()
+//    sum.plotInConsole(false)
+//    sum.normalize(1f)
+//    sum.plotInConsole()
 
+    val sums = listOf(
+        SumSignal(s1, s2),
+        SumSignal(s1, s2, FuncSignal(Signal.sine, Note.B_4.freq)),
+//        SumSignal(
+//            Signal.signalsFromHarmonicSeries(
+//                Signal.harmonicSeries(1, 20, 0.8f, 0.1f, Signal.odd),
+//                Note.C_4.freq,
+//                Signal.sine
+//            )
+//        )
+    )
+    for(s in sums){
+        s.plotInConsole(false)
+        s.normalize(1f)
+        s.plotInConsole()
+
+    }
+
+    val hs = Signal.harmonicSeries(1, 15, 0.5f, 0.01f, Signal.odd)
+    println(hs)
 }

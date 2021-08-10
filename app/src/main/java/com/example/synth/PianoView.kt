@@ -8,34 +8,20 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.transpose
-import kotlin.math.pow
+import com.example.synth.Signal.Functions.even
+import com.example.synth.Signal.Functions.fundamental
+import com.example.synth.Signal.Functions.harmonicSeries
+import com.example.synth.Signal.Functions.odd
+import com.example.synth.Signal.Functions.signalsFromHarmonicSeries
+import com.example.synth.Signal.Functions.sine
 
-val fundamental = { i: Int -> i == 1 }
-val odd         = { i: Int -> i % 2 != 1 }
-val even        = { i: Int -> i % 2 == 1 }
-val all         = { _: Int -> true }
-val none        = { _: Int -> false }
 
 
 val overtones =
-    harmonicSeries(1, 15, 0.75f, 0.1f)
-    { i -> fundamental(i) || even(i) }
+    harmonicSeries(1, 5, 0.4f, 0.1f)
+    { i -> fundamental(i) || odd(i) }
 
-/** produces a harmonic series with exponential decay*/
-fun harmonicSeries(
-    start: Int,
-    end: Int,
-    decayRate: Float,
-    floor: Float,
-    filter: (Int) -> Boolean
-): Map<Int, Float> {
-    val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
-    return harmonics
-        .mapIndexed{ i, harmonic ->
-            harmonic to ( (1-floor) * (1-decayRate).pow(i) ).toInt() + floor
-        }
-        .toMap()
-}
+
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) }
@@ -107,7 +93,8 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Paints.WHITE else Paints.BLACK,
-                    FuncSignal(Signal.sine,note.freq, 1/12f)
+                    SumSignal(signalsFromHarmonicSeries(overtones,note.freq, sine))
+                        .also { it.normalize(1/12f) }
                 )
             }
 
@@ -198,7 +185,10 @@ class PianoView(context: Context, attrs: AttributeSet)
                 val step = (newOctave - octave) * 12
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
-                    k.signal = FuncSignal(Signal.sine, k.note.freq, 1/12f)
+//                    k.signal = FuncSignal(Signal.sine, k.note.freq, 1/12f)
+                    k.signal = SumSignal(signalsFromHarmonicSeries(overtones, k.note.freq, sine))
+                        .also { it.normalize(1/12f) }
+
 
                 }
                 field = newOctave
