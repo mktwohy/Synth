@@ -18,7 +18,7 @@ val none        = { _: Int -> false }
 
 
 val overtones =
-    harmonicSeries(1, 15, 0.75f, 10)
+    harmonicSeries(1, 15, 0.75f, 0.1f)
     { i -> fundamental(i) || even(i) }
 
 /** produces a harmonic series with exponential decay*/
@@ -26,13 +26,13 @@ fun harmonicSeries(
     start: Int,
     end: Int,
     decayRate: Float,
-    floor: Int = 1,
+    floor: Float,
     filter: (Int) -> Boolean
-): Map<Int, Int> {
+): Map<Int, Float> {
     val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
     return harmonics
         .mapIndexed{ i, harmonic ->
-            harmonic to ( (100-floor) * (1-decayRate).pow(i) ).toInt() + floor
+            harmonic to ( (1-floor) * (1-decayRate).pow(i) ).toInt() + floor
         }
         .toMap()
 }
@@ -107,7 +107,7 @@ class PianoGrid(
                 PianoKey(
                     note,
                     if (note.name[1] == '_') Paints.WHITE else Paints.BLACK,
-                    FuncSignal(Signal.sine, note.freq, 1/12f)
+                    FuncSignal(Signal.sine,note.freq, 1/12f)
                 )
             }
 
@@ -199,6 +199,7 @@ class PianoView(context: Context, attrs: AttributeSet)
                 for (k in pianoGrid.pianoKeys){
                     k.note = k.note.transpose(step)
                     k.signal = FuncSignal(Signal.sine, k.note.freq, 1/12f)
+
                 }
                 field = newOctave
             }

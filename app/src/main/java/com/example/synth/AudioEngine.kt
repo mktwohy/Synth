@@ -7,7 +7,7 @@ import android.util.Log
 import java.util.*
 
 /**
- * A wrapper class for [AudioTrack] that plays audio (represented by [CircularIntArray]s) on a loop.
+ * A wrapper class for [AudioTrack] that plays audio [Signal]s on a loop.
  *
  *
  * Example Usage:
@@ -34,11 +34,11 @@ class AudioEngine(private val main: MainActivity){
         const val BUFFER_SIZE = 256
     }
 
-    val signal = SumSignal()
+    private val signal = SumSignal()
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false
-    val floatBuffer = FloatArray(BUFFER_SIZE)
+    private val floatBuffer = FloatArray(BUFFER_SIZE)
     private val shortBuffer = ShortArray(BUFFER_SIZE)
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -79,7 +79,7 @@ class AudioEngine(private val main: MainActivity){
                         clear()
                         addSignals(signalBuffer.poll()!!)
                     }
-                    evaluateTo(floatBuffer)
+                    evaluateTo(floatBuffer, false)
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 main.updatePlot(floatBuffer)

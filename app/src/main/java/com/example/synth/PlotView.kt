@@ -34,9 +34,6 @@ class PlotView(context: Context, attrs: AttributeSet)
         yValues.normalize(0f, this.height.toFloat())
         xValues.normalize(0f, this.width.toFloat())
 
-        Log.d("m_plot", "${buffer.contentToString()}")
-        Log.d("m_plot", " x: ${xValues.contentToString()}")
-        Log.d("m_plot", " y: ${yValues.contentToString()}")
         for(i in 0 until xValues.size - 1){
             canvas.drawLine(
                 xValues[i], yValues[i],

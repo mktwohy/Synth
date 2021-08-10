@@ -2,11 +2,9 @@ package com.example.synth
 
 
 import android.util.Log
-import com.example.synth.Constants.MAX_16BIT_VALUE
 import com.example.synth.Constants.TWO_PI
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.sign
 import kotlin.math.sin
 
 object Constants{
@@ -17,7 +15,7 @@ object Constants{
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
-interface Signal{
+abstract class Signal{
     companion object Functions{
         val sine = { i: Int, p: Int ->
             sin(TWO_PI * i / p).toFloat()
@@ -30,36 +28,35 @@ interface Signal{
         }
     }
 
-    var period: Int
-    var amp: Float
+    abstract var period: Int
+    abstract var amp: Float
 
     /** Guarantees that [evaluate] and [evaluateTo] start at the beginning*/
-    fun reset()
+    abstract fun reset()
     /** Returns the next value in the Signal's sequence */
-    fun evaluateNext(): Float
+    abstract fun evaluateNext(): Float
+
     /** Evaluates the next n periods of the signal as a new array */
-    fun evaluate(periods: Int, startFromBeginning: Boolean = false): FloatArray
+    fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
+        if (startFromBeginning) reset()
+        return FloatArray(period * periods){ evaluateNext() }
+    }
+
     /** Evaluates the next n periods of the signal to an existing array */
-    fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean = false)
-    fun plus(that: Signal) = SumSignal(this, that)
+    fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean) {
+        if (startFromBeginning) reset()
+        destination.indices.forEach { i -> destination[i] = evaluateNext() }
+    }
+
+    fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))
 }
 
-object SilentSignal: Signal {
+object SilentSignal: Signal() {
     override var period: Int = AudioEngine.BUFFER_SIZE
     override var amp: Float = 0f
 
     override fun reset() { }
     override fun evaluateNext() = 0f
-    override fun evaluate(size: Int, startFromBeginning: Boolean): FloatArray {
-        if(startFromBeginning) reset()
-        return FloatArray(size){ 0f }
-    }
-    override fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean) {
-        if(startFromBeginning) reset()
-        for(i in destination.indices){
-            destination[i] = 0f
-        }
-    }
     override fun toString() = "SilentSignal"
 }
 
@@ -67,8 +64,7 @@ object SilentSignal: Signal {
 class FuncSignal(var func: (Int, Int) -> Float,
                  var freq: Int = 440,
                  override var amp: Float = 1f,
-                 var offset: Int = 0
-): Signal {
+): Signal() {
     override var period: Int = 0
     private val index: CircularIndex
     init{
@@ -78,49 +74,36 @@ class FuncSignal(var func: (Int, Int) -> Float,
 
     override fun reset() { index.reset() }
 
-    override fun evaluateNext(): Float {
-        return func(index.getIndexAndIterate()+offset, period) * amp
-    }
+    override fun evaluateNext() =
+        func(index.getIndexAndIterate(), period) * amp
 
 
-
-    override fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
-        if (startFromBeginning) reset()
-        return FloatArray(period * periods){ evaluateNext() }
-    }
-
-    override fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean) {
-        if (startFromBeginning) reset()
-        for(i in destination.indices){
-            destination[i] = evaluateNext()
-        }
-    }
-
-    override fun toString() = "FuncSignal(p: $period, a: $amp, f: $freq, o: $offset)"
+    override fun toString() = "FuncSignal(p: $period, a: $amp, f: $freq)"
 
 }
 
 /** Combines two or more Signals into one Signal. */
-open class SumSignal(vararg signal: Signal, override var amp: Float = 1f) : Signal {
-    private val signals = mutableSetOf<Signal>()
-    private val index: CircularIndex
+class SumSignal(
+    private val signals: MutableSet<Signal> = mutableSetOf(),
+    override var amp: Float = 1f
+) : Signal() {
+    private val index = CircularIndex(1)
     override var period: Int = 0
+        set(value){
+            index.maxValue = value
+            field = value
+        }
 
-    init{
-        this.amp = amp
-        signals.addAll(signal)
+    init { calculatePeriod() }
+
+    constructor(vararg signal: Signal, amp: Float = 1f)
+            : this(signal.toMutableSet(), amp)
+
+
+    fun clear(){ signals.clear() }
+
+    fun calculatePeriod(){
         period = signals.map{ it.period }.lcm()
-        index = CircularIndex(period)
-    }
-
-
-
-    override fun reset() {
-        signals.forEach { it.reset() }
-    }
-
-    fun clear(){
-        signals.clear()
     }
 
     fun addSignal(newSignal: Signal){
@@ -128,8 +111,7 @@ open class SumSignal(vararg signal: Signal, override var amp: Float = 1f) : Sign
             is FuncSignal -> signals.add(newSignal)
             is SumSignal  -> signals.addAll(newSignal.signals)
         }
-        period = signals.map{ it.period }.lcm()
-        index.maxValue = period
+        calculatePeriod()
     }
 
     fun addSignals(newSignals: Collection<Signal>){
@@ -139,43 +121,16 @@ open class SumSignal(vararg signal: Signal, override var amp: Float = 1f) : Sign
                 is SumSignal  -> signals.addAll(signal.signals)
             }
         }
-
-        period = signals.map{ it.period }.lcm()
-        index.maxValue = period
+        calculatePeriod()
     }
+
+    override fun reset() { signals.forEach { it.reset() } }
 
     override fun evaluateNext() =
         signals.fold(0f){ sum, signal -> sum + signal.evaluateNext() * amp }
 
-    override fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
-        if (startFromBeginning) reset()
-        return FloatArray(period * periods){ evaluateNext() }
-    }
-
-    override fun evaluateTo(destination: FloatArray, startFromBeginning: Boolean) {
-        if (startFromBeginning) reset()
-        for (i in destination.indices) {
-            destination[i] = evaluateNext() }
-        }
 
     operator fun plusAssign(that: Signal){ addSignal(that) }
-}
-
-class HarmonicSignal(
-    val func: (Int, Int) -> Float,
-    var fundamental: Int,
-    val harmonicSeries: Map<Int, Int>
-): SumSignal() {
-    private val signals = mutableSetOf<Signal>()
-    private val index: CircularIndex
-
-    init{
-        this.amp = amp
-        signals.add(FuncSignal(func, fundamental))
-        period = signals.map{ it.period }.lcm()
-        index = CircularIndex(period)
-    }
-
 }
 
 fun main(){
@@ -183,11 +138,9 @@ fun main(){
     val s2 = FuncSignal(Signal.sine, 880,1f)
     val sum = SumSignal(s1, s2)
 
+    println(sum.evaluate(2, true).contentToString())
     s1.plotInConsole()
     s2.plotInConsole()
     sum.plotInConsole()
-
-
-
 
 }
