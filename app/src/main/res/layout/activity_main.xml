@@ -55,17 +55,17 @@
         android:layout_marginBottom="3dp"
         app:layout_constraintBottom_toTopOf="@+id/piano"
         app:layout_constraintEnd_toStartOf="@+id/octaveUp"
-        app:layout_constraintStart_toEndOf="@+id/noiseDown"
+        app:layout_constraintStart_toEndOf="@+id/overtoneDown"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/noiseDown"
+        android:id="@+id/overtoneDown"
         android:text="-"
         android:textColor="@color/black"
         android:backgroundTint="@color/white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="noiseDown"
+        android:onClick="decreaseOvertoneRange"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/piano"
@@ -75,7 +75,7 @@
 
 
     <TextView
-        android:id="@+id/noiseLevel"
+        android:id="@+id/overtoneRange"
         android:textColor="@color/black"
         android:textAlignment="center"
         android:background="@color/white"
@@ -84,19 +84,19 @@
         android:layout_marginHorizontal="5sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/piano"
-        app:layout_constraintStart_toEndOf="@+id/noiseDown"
+        app:layout_constraintStart_toEndOf="@+id/overtoneDown"
         />
 
     <Button
-        android:id="@+id/noiseUp"
+        android:id="@+id/overtoneUp"
         android:text="+"
         android:textColor="@color/black"
         android:backgroundTint="@color/white"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="5sp"
-        android:onClick="noiseUp"
-        app:layout_constraintStart_toEndOf="@id/noiseLevel"
+        android:onClick="increaseOvertoneRange"
+        app:layout_constraintStart_toEndOf="@id/overtoneRange"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/piano"
         />

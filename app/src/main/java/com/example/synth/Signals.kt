@@ -50,12 +50,12 @@ abstract class Signal{
 
         fun signalsFromHarmonicSeries(
             harmonicSeries: Map<Int, Float>,
-            fundamentalFreq: Int,
+            fundamental: Note,
             func: (Int, Int) -> Float
         ): MutableSet<Signal> =
             harmonicSeries
                 .map { (overtone, amplitude) ->
-                    FuncSignal(func, fundamentalFreq*overtone, amplitude)
+                    FuncSignal(func, fundamental.freq*overtone, amplitude)
                 }
                 .toMutableSet()
 
@@ -119,28 +119,42 @@ class FuncSignal(var func: (Int, Int) -> Float,
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
     private val signals: MutableSet<Signal> = mutableSetOf(),
-    override var amp: Float = 1f
+    amp: Float = 1f,
+    private val autoNormalize: Boolean = true
 ) : Signal() {
+
     private val index = CircularIndex(1)
+    override var amp: Float = 1f
+        set(value){
+            if(value >= 0) field = value
+            if (autoNormalize) normalize()
+        }
     override var period: Int = 0
         set(value){
             index.maxValue = value
             field = value
         }
 
-    init { calculatePeriod() }
+    init {
+        this.amp = amp
+        calculatePeriod()
+    }
 
-    constructor(vararg signal: Signal, amp: Float = 1f)
-            : this(signal.toMutableSet(), amp)
+    constructor(vararg signal: Signal, amp: Float = 1f, autoNormalize: Boolean = true)
+            : this(signal.toMutableSet(), amp, autoNormalize)
 
 
-    fun clear(){ signals.clear() }
+    fun clear(){
+        if (autoNormalize) normalize()
+        calculatePeriod()
+        signals.clear()
+    }
 
-    fun normalize(upperBound: Float) {
+    private fun normalize() {
         if (signals.isEmpty()) return
 
         val ampSum = signals.map { it.amp }.sum()
-        signals.forEach { it.amp = (it.amp / ampSum) * upperBound  }
+        signals.forEach { it.amp = (it.amp / ampSum) * this.amp  }
     }
 
     private fun calculatePeriod(){
@@ -152,6 +166,7 @@ class SumSignal(
             is FuncSignal -> signals.add(newSignal)
             is SumSignal  -> signals.addAll(newSignal.signals)
         }
+        if (autoNormalize) normalize()
         calculatePeriod()
     }
 
@@ -162,6 +177,7 @@ class SumSignal(
                 is SumSignal  -> signals.addAll(signal.signals)
             }
         }
+        if (autoNormalize) normalize()
         calculatePeriod()
     }
 
@@ -170,7 +186,7 @@ class SumSignal(
     override fun evaluateNext() =
         signals.fold(0f){ sum, signal -> sum + signal.evaluateNext() * amp }
 
-
+    override fun toString() = "SumSignal(a: $amp s: \n\t$signals)"
     operator fun plusAssign(that: Signal){ addSignal(that) }
 }
 
@@ -186,8 +202,10 @@ fun main(){
 //    sum.plotInConsole()
 
     val sums = listOf(
-        SumSignal(s1, s2),
-        SumSignal(s1, s2, FuncSignal(Signal.sine, Note.B_4.freq)),
+        SumSignal(
+            SumSignal(s1, s2),
+            FuncSignal(Signal.sine, Note.C_4.freq),
+        ),
 //        SumSignal(
 //            Signal.signalsFromHarmonicSeries(
 //                Signal.harmonicSeries(1, 20, 0.8f, 0.1f, Signal.odd),
@@ -198,7 +216,6 @@ fun main(){
     )
     for(s in sums){
         s.plotInConsole(false)
-        s.normalize(1f)
         s.plotInConsole()
 
     }

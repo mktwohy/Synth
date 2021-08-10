@@ -10,6 +10,37 @@ import com.example.synth.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding
     private val audioEngine = AudioEngine(this)
+    private val noteToSignal = mutableMapOf<Note, Signal>()
+    private val overtones = mutableMapOf<Int, Float>()
+    private var filter = Signal.even
+        set(value){
+
+            field = value
+        }
+    private var overtoneRange = 1
+        set(value){
+            if(value in 1..24){
+                bind.overtoneRange.text = value.toString()
+                overtones.clear()
+                overtones.putAll(
+                    Signal.harmonicSeries(1, value, 0.5f, 0.1f)
+                    { i -> Signal.fundamental(i) || Signal.even(i) }
+                )
+                assignNotesToSignals()
+                field = value
+                onKeyUpdatedEvent(bind.piano.pressedKeys.pianoKeys)
+            }
+        }
+    private var octave = 4
+        set(value){
+            if(value in 0..8){
+                bind.piano.octave = value
+                bind.currentOctave.text = value.toString()
+                field = value
+                assignNotesToSignals()
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,9 +56,29 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
 
         bind.piano.pressedKeys.addPianoKeyListener(this)
         bind.currentOctave.text = bind.piano.octave.toString()
-        bind.noiseLevel.text = "0"
+        overtoneRange = 1
+        assignNotesToSignals()
         audioEngine.start()
     }
+
+    private fun assignNotesToSignals(){
+        noteToSignal.clear()
+        Note.toList(octave).forEach { note ->
+            noteToSignal[note] = SumSignal(
+                Signal.signalsFromHarmonicSeries(
+                    overtones, note,
+                    Signal.sine
+                )
+            )
+        }
+        Log.d("m_tag","\noctave: $octave \novertones: $overtones \nnoteToSignal: $noteToSignal")
+    }
+
+    fun increaseOvertoneRange(view: View){ overtoneRange++ }
+    fun decreaseOvertoneRange(view: View){ overtoneRange-- }
+
+    fun octaveUp(view: View){ octave++ }
+    fun octaveDown(view: View){ octave-- }
 
     fun updatePlot(buffer: FloatArray){
         buffer.forEachIndexed{ i, value ->
@@ -46,26 +97,17 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
         audioEngine.stop()
     }
 
-    override fun onKeyUpdatedEvent(pressedPianoKeys: Set<PianoKey>) {
+    override fun onKeyUpdatedEvent(pressedPianoKeys: Set<Note>) {
         audioEngine.signalBuffer
             .also{
-                Log.d("m_signalBuffer","${pressedPianoKeys.map { it.signal }}")
+                Log.d("m_signalBuffer","$pressedPianoKeys")
             }
             .offer(
             if (pressedPianoKeys.isEmpty())
                 setOf(SilentSignal)
             else
-                pressedPianoKeys.map{ it.signal }.toSet()
+                pressedPianoKeys.map{ noteToSignal[it] ?: SilentSignal }.toSet()
         )
     }
 
-    fun octaveDown(view: View){
-        bind.piano.octave = (bind.piano.octave - 1)
-        bind.currentOctave.text = bind.piano.octave.toString()
-    }
-
-    fun octaveUp(view: View){
-        bind.piano.octave = (bind.piano.octave + 1)
-        bind.currentOctave.text = bind.piano.octave.toString()
-    }
 }

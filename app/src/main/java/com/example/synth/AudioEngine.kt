@@ -34,7 +34,7 @@ class AudioEngine(private val main: MainActivity){
         const val BUFFER_SIZE = 256
     }
 
-    private val signal = SumSignal()
+    private val signal = SumSignal(SilentSignal, amp = 1f)
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false

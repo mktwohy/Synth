@@ -152,6 +152,8 @@ enum class Note(val freq: Int) {
     B_8 (7902);
 
     companion object{
+        fun Note.color() = if(this.name[1] == '_') Paints.WHITE else Paints.BLACK
+
         fun toList() = values().toList()
 
         fun toList(start: Int, end: Int) =
@@ -172,5 +174,7 @@ enum class Note(val freq: Int) {
 
         val Note.octave
             get() = name[2].toString().toInt()
+
+
     }
 }
