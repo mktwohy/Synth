@@ -1,7 +1,7 @@
 package com.example.synth
 
 
-import android.util.Log
+import com.example.synth.AudioEngine.Companion.SAMPLE_RATE
 import com.example.synth.Constants.TWO_PI
 import kotlin.math.*
 
@@ -15,11 +15,11 @@ object Constants{
  * Inspired by Allen Downey's ThinkDSP Python module */
 abstract class Signal{
     companion object Functions{
-        val sine = { i: Int, p: Int ->
-            sin(TWO_PI * i / p).toFloat()
+        val sine = { i: Int, freq: Float ->
+            sin(TWO_PI * i * freq / SAMPLE_RATE).toFloat()
         }
-        val cosine = { i: Int, p: Int ->
-            cos(TWO_PI * i / p).toFloat()
+        val cosine = { i: Int, freq: Float ->
+            cos(TWO_PI * i * freq / SAMPLE_RATE).toFloat()
         }
         val silence = { _: Int, _: Int ->
             0f
@@ -52,15 +52,13 @@ abstract class Signal{
         fun signalsFromHarmonicSeries(
             harmonicSeries: Map<Int, Float>,
             fundamental: Note,
-            func: (Int, Int) -> Float
+            func: (Int, Float) -> Float
         ): MutableSet<Signal> =
             harmonicSeries
                 .map { (overtone, amplitude) ->
-                    FuncSignal(func, fundamental.freq*overtone, amplitude)
+                    PeriodicSignal(fundamental.freq*overtone, amplitude, func)
                 }
                 .toMutableSet()
-
-
     }
 
     abstract var period: Int
@@ -96,22 +94,22 @@ object SilentSignal: Signal() {
 }
 
 
-class FuncSignal(
-    var func: (Int, Int) -> Float,
+class PeriodicSignal(
     var freq: Float = 440f,
     override var amp: Float = 1f,
+    var func: (Int, Float) -> Float = sine
 ): Signal() {
     override var period: Int = 0
     private val index: CircularIndex
     init{
-        period = (AudioEngine.SAMPLE_RATE / freq).toInt()
+        period = (SAMPLE_RATE / freq).toInt()
         index = CircularIndex(period)
     }
 
     override fun reset() { index.reset() }
 
     override fun evaluateNext() =
-        func(index.getIndexAndIterate(), period) * amp
+        func(index.getIndexAndIterate(), freq) * amp
 
     override fun toString() = "FuncSignal(p: $period, a: $amp, f: $freq)"
 }
@@ -163,7 +161,7 @@ class SumSignal(
 
     private fun addSignal(newSignal: Signal){
         when(newSignal){
-            is FuncSignal -> signals.add(newSignal)
+            is PeriodicSignal -> signals.add(newSignal)
             is SumSignal  -> signals.addAll(newSignal.signals)
         }
         if (autoNormalize) normalize()
@@ -173,7 +171,7 @@ class SumSignal(
     fun addSignals(newSignals: Collection<Signal>){
         for(signal in newSignals){
             when(signal){
-                is FuncSignal -> signals.add(signal)
+                is PeriodicSignal -> signals.add(signal)
                 is SumSignal  -> signals.addAll(signal.signals)
             }
         }
@@ -191,35 +189,17 @@ class SumSignal(
 }
 
 fun main(){
-    val s1 = FuncSignal(Signal.sine, Note.A_4.freq, 1f)
-    val s2 = FuncSignal(Signal.sine, Note.A_5.freq,1f)
+    val s1 = PeriodicSignal(Note.A_4.freq, 1f)
+    val s2 = PeriodicSignal(Note.A_5.freq,1f)
     val sum = SumSignal(s1, s2)
 
-//    s1.plotInConsole()
-//    s2.plotInConsole()
-//    sum.plotInConsole(false)
-//    sum.normalize(1f)
-//    sum.plotInConsole()
+    println(s1.evaluate(1, true).contentToString())
 
-    val sums = listOf(
-        SumSignal(
-            SumSignal(s1, s2),
-            FuncSignal(Signal.sine, Note.C_4.freq),
-        ),
-//        SumSignal(
-//            Signal.signalsFromHarmonicSeries(
-//                Signal.harmonicSeries(1, 20, 0.8f, 0.1f, Signal.odd),
-//                Note.C_4.freq,
-//                Signal.sine
-//            )
-//        )
-    )
-    for(s in sums){
-        s.plotInConsole(false)
-        s.plotInConsole()
+    s1.plotInConsole()
+    s2.plotInConsole()
+    sum.plotInConsole(false)
+    sum.plotInConsole()
 
-    }
+    println(Signal.sine(0, Note.A_4.freq))
 
-    val hs = Signal.harmonicSeries(1, 15, 0.5f, 0.01f, Signal.odd)
-    println(hs)
 }

@@ -66,7 +66,6 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
                 )
             )
         }
-        Log.d("m_tag","\noctave: $octave \novertones: $overtones \nnoteToSignal: $noteToSignal")
     }
 
     fun increaseOvertoneRange(view: View){ overtoneRange++ }
