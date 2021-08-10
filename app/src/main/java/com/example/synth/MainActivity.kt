@@ -12,19 +12,14 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private val audioEngine = AudioEngine(this)
     private val noteToSignal = mutableMapOf<Note, Signal>()
     private val overtones = mutableMapOf<Int, Float>()
-    private var filter = Signal.even
-        set(value){
-
-            field = value
-        }
     private var overtoneRange = 1
         set(value){
             if(value in 1..24){
                 bind.overtoneRange.text = value.toString()
                 overtones.clear()
                 overtones.putAll(
-                    Signal.harmonicSeries(1, value, 0.5f, 0.1f)
-                    { i -> Signal.fundamental(i) || Signal.even(i) }
+                    Signal.harmonicSeries(1, value, 0.45f, 0f)
+                    { i -> Signal.fundamental(i) || Signal.odd(i) }
                 )
                 assignNotesToSignals()
                 field = value
