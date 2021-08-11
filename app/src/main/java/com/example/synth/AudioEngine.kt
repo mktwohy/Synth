@@ -3,7 +3,6 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.util.Log
 import java.util.*
 
 /**
@@ -26,15 +25,15 @@ import java.util.*
  * audioEngine.stop()
  * ```
  * .0
- * @property signal the audio to be played on a loop by the [AudioEngine]
+ * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
 class AudioEngine(private val main: MainActivity){
     companion object{
-        const val SAMPLE_RATE = 48000
+        const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 256
     }
 
-    private val signal = SumSignal(autoNormalize = false)
+    private val masterSignal = SumSignal(autoNormalize = false)
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false
@@ -74,10 +73,11 @@ class AudioEngine(private val main: MainActivity){
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                signal.apply {
+                masterSignal.apply {
                     if(signalBuffer.isNotEmpty()){
                         clear()
                         addSignals(signalBuffer.poll()!!)
+                        evaluateTo(floatBuffer, false)
                     }
                     evaluateTo(floatBuffer, false)
                 }

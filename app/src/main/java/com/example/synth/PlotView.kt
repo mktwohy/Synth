@@ -21,18 +21,16 @@ class PlotView(context: Context, attrs: AttributeSet)
     private val xValues = FloatArray(buffer.size){ i -> i.toFloat() }
     private val yValues = FloatArray(buffer.size)
 
-
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if(canvas == null) return
 
 
         buffer.forEachIndexed { i, value ->
-            yValues[i] = value
+            yValues[i] = (value * this.height) + (this.height/2)
         }
-        yValues.normalize(0f, this.height.toFloat())
         xValues.normalize(0f, this.width.toFloat())
+//        yValues.normalize(0f, this.height.toFloat())
 
         for(i in 0 until xValues.size - 1){
             canvas.drawLine(

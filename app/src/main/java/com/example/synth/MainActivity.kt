@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.*
 import com.example.synth.databinding.ActivityMainBinding
 
+
 /** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     private lateinit var bind: ActivityMainBinding
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
                     overtones, note,
                     Signal.sine
                 ),
-                1/12f
+                1/8f
             )
         }
     }
@@ -76,9 +77,10 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
     fun octaveDown(view: View){ octave-- }
 
     fun updatePlot(buffer: FloatArray){
-        buffer.forEachIndexed{ i, value ->
-            bind.plot.buffer[i] = value
-        }
+//        buffer.forEachIndexed{ i, value ->
+//            bind.plot.buffer[i] = value
+//        }
+        bind.plot.buffer = buffer
         bind.plot.postInvalidate()
     }
 
