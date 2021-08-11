@@ -96,9 +96,9 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
 
     override fun onKeyUpdatedEvent(pressedPianoKeys: Set<Note>) {
         audioEngine.signalBuffer
-            .also{
-                Log.d("m_signalBuffer","$pressedPianoKeys")
-            }
+//            .also{
+//                Log.d("m_signalBuffer","$pressedPianoKeys")
+//            }
             .offer(
             if (pressedPianoKeys.isEmpty())
                 setOf(SilentSignal)

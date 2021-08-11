@@ -3,6 +3,7 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import android.util.Log
 import java.util.*
 
 /**
@@ -30,7 +31,7 @@ import java.util.*
 class AudioEngine(private val main: MainActivity){
     companion object{
         const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 256
+        const val BUFFER_SIZE = 512
     }
 
     private val masterSignal = SumSignal(autoNormalize = false)
@@ -73,6 +74,7 @@ class AudioEngine(private val main: MainActivity){
         Thread {
             audioTrack.play()
             while (runMainLoop) {
+                //Log.d("m_signalBuffer","signalBufferSize: ${signalBuffer.size}")
                 masterSignal.apply {
                     if(signalBuffer.isNotEmpty()){
                         clear()
