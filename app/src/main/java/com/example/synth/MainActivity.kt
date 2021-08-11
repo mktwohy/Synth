@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
                 overtones.clear()
                 overtones.putAll(
                     Signal.harmonicSeries(1, value, 0.45f, 0f)
-                    { i -> Signal.fundamental(i) || Signal.odd(i) }
+                    { i -> Signal.fundamental(i) || Signal.all(i) }
                 )
                 assignNotesToSignals()
                 field = value

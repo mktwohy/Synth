@@ -30,7 +30,7 @@ class PlotView(context: Context, attrs: AttributeSet)
             yValues[i] = (value * this.height) + (this.height/2)
         }
         xValues.normalize(0f, this.width.toFloat())
-//        yValues.normalize(0f, this.height.toFloat())
+        yValues.normalize(0f, this.height.toFloat())
 
         for(i in 0 until xValues.size - 1){
             canvas.drawLine(

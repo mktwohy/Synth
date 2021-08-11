@@ -156,7 +156,8 @@ class SumSignal(
     }
 
     private fun calculatePeriod(){
-        period = signals.map{ it.period }.lcm()
+        //TODO a temporary fix, essentially disabling period since it doesn't seem to be necessary
+//        period = signals.map{ it.period }.lcm()
     }
 
     private fun addSignal(newSignal: Signal){
