@@ -31,10 +31,10 @@ import java.util.*
 class AudioEngine(private val main: MainActivity){
     companion object{
         const val SAMPLE_RATE = 48000
-        const val BUFFER_SIZE = 512
+        const val BUFFER_SIZE = 256
     }
 
-    private val signal = SumSignal(SilentSignal, amp = 1f)
+    private val signal = SumSignal(autoNormalize = false)
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false

@@ -63,7 +63,8 @@ class MainActivity : AppCompatActivity(), PianoKeyEventListener {
                 Signal.signalsFromHarmonicSeries(
                     overtones, note,
                     Signal.sine
-                )
+                ),
+                1/12f
             )
         }
     }
