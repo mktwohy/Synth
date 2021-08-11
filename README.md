@@ -3,7 +3,7 @@ An Android app for creating and playing sounds using additive synthesis
 
 # App Architecture
 ### note: this is now outdated
- - CircularIntArray is no longer used, as Signals generate data in realtime now
+ - CircularIntArray is no longer used, as Signals have been restructured to generate data in realtime
     - Signal still uses CircularIndex to keep track of its current position though
  - PianoKey does not reference a Signal. Instead, PianoView tells MainActivity what Notes are being played, and it creates the associated Signal
  
