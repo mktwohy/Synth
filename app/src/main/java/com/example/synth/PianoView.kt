@@ -4,10 +4,13 @@ package com.example.synth
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.color
+import kotlin.system.measureTimeMillis
 
 
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
@@ -186,22 +189,24 @@ class PianoView(context: Context, attrs: AttributeSet)
         if (event == null) return false
 
         val newPressedKeys = mutableSetOf<Note>()
+
         for (i in 0 until event.pointerCount) {
             val key = pianoGrid.findKeyAt(event.getX(i), event.getY(i))
             if (key != null) {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN,
-                    MotionEvent.ACTION_POINTER_DOWN,
-                    MotionEvent.ACTION_MOVE ->
-                        newPressedKeys.add(key)
+                if(i == event.actionIndex){
+                    when (event.actionMasked) {
+                        MotionEvent.ACTION_DOWN,
+                        MotionEvent.ACTION_MOVE ->
+                            newPressedKeys.add(key)
 
-                    MotionEvent.ACTION_UP,
-                    MotionEvent.ACTION_POINTER_UP,
-                    MotionEvent.ACTION_CANCEL ->
-                        newPressedKeys.remove(key)
+                        MotionEvent.ACTION_UP,
+                        MotionEvent.ACTION_CANCEL ->
+                            newPressedKeys.remove(key)
+                    }
+                }else{
+                    newPressedKeys.add(key)
                 }
             }
-
         }
 
         if (pressedKeys.pianoKeys != newPressedKeys){
