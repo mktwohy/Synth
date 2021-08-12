@@ -3,7 +3,6 @@ package com.example.synth
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -11,20 +10,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 
 
-@Preview(showBackground = true)
 @Composable
 fun XYPlot(
     modifier: Modifier = Modifier,
-    data: FloatArray = PeriodicSignal(440f).evaluate(1, true),
-    normalizeValues: Boolean = false
+    data: FloatArray,
+    normalizeValues: Boolean = false,
+    color: Color = Color.Green,
+    strokeWidth: Float = 3f
 ) {
-    var buffer = remember { FloatArray(AudioEngine.BUFFER_SIZE) }
-    val xPlot = FloatArray(buffer.size){ i -> i.toFloat() }
-    val yPlot = FloatArray(buffer.size)
+    val xPlot = remember { FloatArray(data.size){ i -> i.toFloat() } }
+    val yPlot = remember { FloatArray(data.size) }
 
     Canvas(modifier = modifier.fillMaxSize()) {
         //convert buffer to x and y values for plotting
-        buffer.forEachIndexed { i, value ->
+        data.forEachIndexed { i, value ->
             yPlot[i] = (value * size.height) + (size.width/2)
         }
 
@@ -37,8 +36,8 @@ fun XYPlot(
             drawLine(
                 start = Offset(x = xPlot[i], y = yPlot[i]),
                 end = Offset(x = xPlot[i+1], y = yPlot[i+1]),
-                color = Color.Blue,
-                strokeWidth = 3f
+                color = color,
+                strokeWidth = strokeWidth
             )
         }
     }
