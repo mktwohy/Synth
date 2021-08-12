@@ -1,4 +1,4 @@
-package com.example.synthjetpackcompose.ui.theme
+package com.example.synth.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

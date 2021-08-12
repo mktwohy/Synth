@@ -3,7 +3,6 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.util.Log
 import java.util.*
 
 /**
@@ -28,7 +27,7 @@ import java.util.*
  * .0
  * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
-class AudioEngine(private val main: MainActivity){
+class AudioEngine(private val main: MainActivity_OLD){
     companion object{
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 512

@@ -1,4 +1,4 @@
-package com.example.synthjetpackcompose
+package com.example.synth
 
 import org.junit.Test
 

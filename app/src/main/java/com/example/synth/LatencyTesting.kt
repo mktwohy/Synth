@@ -36,21 +36,5 @@ val calculateLcm = { l: List<Int> -> l.lcm() }
 
 val threadSleep = { d: Long -> run{Thread.sleep(d)} }
 
-fun main(){
 
-    val numCases = 50
-
-
-
-    val cases = listOf(
-        listOf(123, 1200, 40301, 123, 12445,23,88,12355,303,1003),
-        listOf(25, 457, 40301, 23),
-        listOf(123, 1200, 235, 123),
-        listOf(123, 1200, 234, 123),
-        listOf(123, 1200, 4031401, 123),
-        listOf(123, 1200, 40301, 123)
-    )
-    measureAvgRunTime(cases, "test"){ l: List<Int> -> }
-
-}
 

@@ -1,22 +1,21 @@
-package com.example.synthjetpackcompose
+package com.example.synth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import com.example.synth.databinding.ActivityMainBinding
 
 
 /** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
-    private lateinit var bind: ActivityMainBinding
+//    private lateinit var bind: ActivityMainBinding
     private val audioEngine = AudioEngine(this)
     private val noteToSignal = mutableMapOf<Note, Signal>()
     private val overtones = mutableMapOf<Int, Float>()
     private var overtoneRange = 1
         set(value){
             if(value in 1..24){
-                bind.overtoneRange.text = value.toString()
+//                bind.overtoneRange.text = value.toString()
                 overtones.clear()
                 overtones.putAll(
                     Signal.harmonicSeries(1, value, 0.45f, 0f)
@@ -24,14 +23,14 @@ class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
                 )
                 assignNotesToSignals()
                 field = value
-                onKeyUpdatedEvent(bind.piano.pressedKeys.pianoKeys)
+//                onKeyUpdatedEvent(bind.piano.pressedKeys.pianoKeys)
             }
         }
     private var octave = 4
         set(value){
             if(value in 0..8){
-                bind.piano.octave = value
-                bind.currentOctave.text = value.toString()
+//                bind.piano.octave = value
+//                bind.currentOctave.text = value.toString()
                 field = value
                 assignNotesToSignals()
             }
@@ -47,11 +46,11 @@ class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
         //Set up data binding with views
-        bind = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(bind.root)
+//        bind = ActivityMainBinding.inflate(layoutInflater)
+//        setContentView(bind.root)
 
-        bind.piano.pressedKeys.addPianoKeyListener(this)
-        bind.currentOctave.text = bind.piano.octave.toString()
+//        bind.piano.pressedKeys.addPianoKeyListener(this)
+//        bind.currentOctave.text = bind.piano.octave.toString()
         overtoneRange = 1
         assignNotesToSignals()
         audioEngine.start()
@@ -80,8 +79,8 @@ class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
 //        buffer.forEachIndexed{ i, value ->
 //            bind.plot.buffer[i] = value
 //        }
-        bind.plot.buffer = buffer
-        bind.plot.postInvalidate()
+//        bind.plot.buffer = buffer
+//        bind.plot.postInvalidate()
     }
 
     override fun onResume() {
