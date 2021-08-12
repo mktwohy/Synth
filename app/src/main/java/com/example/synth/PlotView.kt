@@ -1,44 +1,45 @@
 package com.example.synth
 
-import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.drawable.Drawable
-import android.provider.MediaStore
-import android.text.TextPaint
-import android.util.AttributeSet
-import android.util.Log
-import android.view.View
-import com.google.android.material.transition.MaterialSharedAxis
-import java.text.Normalizer.normalize
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 
 
-class PlotView(context: Context, attrs: AttributeSet)
-    : View(context, attrs) {
+@Preview(showBackground = true)
+@Composable
+fun XYPlot(
+    modifier: Modifier = Modifier,
+    data: FloatArray = PeriodicSignal(440f).evaluate(1, true),
+    normalizeValues: Boolean = false
+) {
+    var buffer = remember { FloatArray(AudioEngine.BUFFER_SIZE) }
+    val xPlot = FloatArray(buffer.size){ i -> i.toFloat() }
+    val yPlot = FloatArray(buffer.size)
 
-    var buffer = FloatArray(AudioEngine.BUFFER_SIZE)
-    private val xValues = FloatArray(buffer.size){ i -> i.toFloat() }
-    private val yValues = FloatArray(buffer.size)
-
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        if(canvas == null) return
-
-
+    Canvas(modifier = modifier.fillMaxSize()) {
+        //convert buffer to x and y values for plotting
         buffer.forEachIndexed { i, value ->
-            yValues[i] = (value * this.height) + (this.height/2)
+            yPlot[i] = (value * size.height) + (size.width/2)
         }
-        xValues.normalize(0f, this.width.toFloat())
-//        yValues.normalize(0f, this.height.toFloat())
 
-        for(i in 0 until xValues.size - 1){
-            canvas.drawLine(
-                xValues[i], yValues[i],
-                xValues[i+1], yValues[i+1],
-                Paints.PURPLE.paint
+        //normalize each axis to fit inside bounds
+        xPlot.normalize(0f, size.width)
+        if(normalizeValues) yPlot.normalize(0f, size.height)
+
+        //draw plot
+        for(i in 0 until xPlot.size - 1){
+            drawLine(
+                start = Offset(x = xPlot[i], y = yPlot[i]),
+                end = Offset(x = xPlot[i+1], y = yPlot[i+1]),
+                color = Color.Blue,
+                strokeWidth = 3f
             )
         }
     }
-
 }
