@@ -1,41 +1,95 @@
 package com.example.synth
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+
+fun log(text: String){ Log.d("m_compose",text) }
+
+@Composable
+fun XYPlotScreen(){
+    val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
+    var data by remember {
+        mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
+    }
+    var signal: Signal by remember { mutableStateOf(PeriodicSignal()) }
+
+    fun generateRandomSignal(){
+        signal = SumSignal(
+            Signal.signalsFromHarmonicSeries(
+                Signal.harmonicSeries(
+                    1,
+                    15,
+                    0.5f,
+                    0.1f
+                ),
+                Note.random()
+            )
+        )
+    }
+
+    fun evaluateBuffer(){
+        signal.evaluateTo(buffer,false)
+        data = buffer
+    }
+
+    Column {
+        XYPlot(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(.80f)
+                .background(Color.White),
+            data = data,
+        )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement =  Arrangement.SpaceEvenly)
+        {
+            Button(
+                onClick = { evaluateBuffer() }
+            ){ Text("Update Signal") }
+
+            Button(
+                onClick = {
+                    generateRandomSignal()
+                    evaluateBuffer()
+                }
+            ){ Text("Generate New Signal") }
+        }
+    }
+
+
+}
+
 
 
 @Composable
 fun XYPlot(
     modifier: Modifier = Modifier,
     data: FloatArray,
-    normalizeValues: Boolean = false,
     color: Color = Color.Green,
-    strokeWidth: Float = 3f
+    strokeWidth: Float = 3f,
 ) {
-    val xPlot = remember { FloatArray(data.size){ i -> i.toFloat() } }
-    val yPlot = remember { FloatArray(data.size) }
+    log("Compose xyplot")
 
-    Canvas(modifier = modifier.fillMaxSize()) {
-        //convert buffer to x and y values for plotting
-        data.forEachIndexed { i, value ->
-            yPlot[i] = (value * size.height) + (size.width/2)
-        }
-
-        //normalize each axis to fit inside bounds
-        xPlot.normalize(0f, size.width)
-        if(normalizeValues) yPlot.normalize(0f, size.height)
-
-        //draw plot
-        for(i in 0 until xPlot.size - 1){
+    Canvas(modifier = modifier) {
+        for(i in 0..data.size-2){
             drawLine(
-                start = Offset(x = xPlot[i], y = yPlot[i]),
-                end = Offset(x = xPlot[i+1], y = yPlot[i+1]),
+                start = Offset(
+                    x = i * size.width / (data.size-1),
+                    y = (data[i] * size.height/2) + (size.height/2)
+                ),
+                end = Offset(
+                    x = (i+1) * size.width / (data.size-1),
+                    y = (data[i+1] * size.height/2) + (size.height/2)
+                ),
                 color = color,
                 strokeWidth = strokeWidth
             )

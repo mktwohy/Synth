@@ -75,7 +75,10 @@ fun List<Int>.lcm(): Int{
         0 -> 0
         1 -> this[0]
         2 -> lcm(this[0], this[1])
-        else -> this.reduce { lcm, value -> (lcm * value) / gcd(lcm, value) }
+        else -> this.reduce { lcm, value ->
+            if (value == 0) 1
+            else (lcm * value) / gcd(lcm, value)
+        }
     }
 }
 

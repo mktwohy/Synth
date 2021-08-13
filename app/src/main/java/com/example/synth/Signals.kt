@@ -39,7 +39,7 @@ abstract class Signal{
             end: Int,
             decayRate: Float,
             floor: Float,
-            filter: (Int) -> Boolean
+            filter: (Int) -> Boolean = all
         ): Map<Int, Float> {
             val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
             return harmonics
@@ -52,7 +52,7 @@ abstract class Signal{
         fun signalsFromHarmonicSeries(
             harmonicSeries: Map<Int, Float>,
             fundamental: Note,
-            func: (Int, Float) -> Float
+            func: (Int, Float) -> Float = sine
         ): MutableSet<Signal> =
             harmonicSeries
                 .map { (overtone, amplitude) ->
@@ -157,7 +157,7 @@ class SumSignal(
 
     private fun calculatePeriod(){
         //TODO a temporary fix, essentially disabling period since it doesn't seem to be necessary
-//        period = signals.map{ it.period }.lcm()
+        period = signals.map{ it.period }.lcm()
     }
 
     private fun addSignal(newSignal: Signal){
@@ -193,14 +193,19 @@ fun main(){
     val s1 = PeriodicSignal(Note.A_4.freq, 1f)
     val s2 = PeriodicSignal(Note.A_5.freq,1f)
     val sum = SumSignal(s1, s2)
-
-    println(s1.evaluate(1, true).contentToString())
-
-    s1.plotInConsole()
-    s2.plotInConsole()
-    sum.plotInConsole(false)
-    sum.plotInConsole()
-
-    println(Signal.sine(0, Note.A_4.freq))
+    val s = SumSignal(
+        mutableSetOf(s1,s2)
+    )
+    print(s.evaluate(1,true).contentToString())
+    s.plotInConsole()
+//
+//    println(s1.evaluate(1, true).contentToString())
+//
+//    s1.plotInConsole()
+//    s2.plotInConsole()
+//    sum.plotInConsole(false)
+//    sum.plotInConsole()
+//
+//    println(Signal.sine(0, Note.A_4.freq))
 
 }

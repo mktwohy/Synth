@@ -17,12 +17,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            XYPlot(
-                modifier = Modifier.fillMaxSize(),
-                data = PeriodicSignal(440f)
-                    .evaluate(1, true),
-                normalizeValues = true
-            )
+            XYPlotScreen()
         }
     }
 }
