@@ -13,9 +13,10 @@ import androidx.compose.ui.graphics.Color
 
 fun log(text: String){ Log.d("m_compose",text) }
 
+val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
+
 @Composable
 fun XYPlotScreen(){
-    val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
     var data by remember {
         mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
     }
@@ -30,7 +31,7 @@ fun XYPlotScreen(){
                     0.5f,
                     0.1f
                 ),
-                Note.random()
+                Note.A_4
             )
         )
     }
@@ -77,8 +78,6 @@ fun XYPlot(
     color: Color = Color.Green,
     strokeWidth: Float = 3f,
 ) {
-    log("Compose xyplot")
-
     Canvas(modifier = modifier) {
         for(i in 0..data.size-2){
             drawLine(

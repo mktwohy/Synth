@@ -1,6 +1,7 @@
 package com.example.synth
 
 
+import androidx.compose.runtime.toMutableStateMap
 import com.example.synth.AudioEngine.Companion.SAMPLE_RATE
 import com.example.synth.Constants.TWO_PI
 import kotlin.math.*
@@ -40,13 +41,13 @@ abstract class Signal{
             decayRate: Float,
             floor: Float,
             filter: (Int) -> Boolean = all
-        ): Map<Int, Float> {
+        ): MutableMap<Int, Float> {
             val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
             return harmonics
                 .mapIndexed{ i, harmonic ->
                     harmonic to  ((1f-floor) * (1f-decayRate).pow(i) + floor)
                 }
-                .toMap()
+                .toMutableStateMap()
         }
 
         fun signalsFromHarmonicSeries(
