@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 
-fun log(text: String){ Log.d("m_compose",text) }
+fun log(text: String){ Log.d("m_tag",text) }
 
 val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
 

@@ -12,13 +12,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 
+@Composable
+fun RowOfVolumeSliders(
+    modifier: Modifier = Modifier,
+    numSliders: Int = 1
+){
+    BoxWithConstraints(modifier = modifier){
+        val sliderWidth = this.maxWidth/numSliders
+        val sliderHeight = this.maxHeight
+
+        Row(modifier = Modifier) {
+            repeat(numSliders){
+                VolumeSliderScreen(modifier = Modifier.size(sliderWidth, sliderHeight))
+            }
+        }
+    }
+}
 
 @Composable
 fun VolumeSliderScreen(modifier: Modifier = Modifier, initialValue: Float = 0f){
     var amplitude by remember { mutableStateOf(initialValue) }
 
     VolumeSlider(
-        modifier = modifier.border(width = 2.dp, color = Color.Magenta),
+        modifier = modifier,
         value = amplitude,
         onValueChange = { amplitude = it }
     )
@@ -30,26 +46,29 @@ fun VolumeSlider(
     value: Float,
     onValueChange: (Float) -> Unit
 ){
-    Row(
-        modifier = modifier
-            .rotate(-90f)
-            .fillMaxHeight()
-            .wrapContentSize()
-            .border(width = 2.dp, color = Color.White),
-        verticalAlignment = Alignment.CenterVertically,
-    ){
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(0.1f)
-                .wrapContentWidth()
-                .rotate(90f),
-            text = (value * 100).toInt().toString(),
-            color = Color.White
-        )
-        Slider(
-            value = value,
-            onValueChange = onValueChange
-        )
+        Column(
+            modifier = modifier.border(width = 2.dp, color = Color.White),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
+        ){
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxHeight(0.9f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Slider(
+                    modifier = Modifier
+                        .requiredWidth(this.maxHeight)
+                        .requiredHeight(this.maxWidth)
+                        .rotate(-90f),
+                    value = value,
+                    onValueChange = onValueChange
+                )
+            }
+            Text(
+                text = (value * 100).toInt().toString(),
+                color = Color.White
+            )
     }
 }
-
