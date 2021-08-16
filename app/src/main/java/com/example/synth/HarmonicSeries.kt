@@ -12,18 +12,47 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 
+fun amplitudesBuilder(numSliders: Int) =
+    mutableMapOf<Int, Float>().apply {
+        (0 until numSliders).forEach{ slider ->
+            this[slider] = 0f
+        }
+    }
+
+
+@Composable
+fun RowOfVolumeSlidersScreen(
+    modifier: Modifier = Modifier,
+    numSliders: Int,
+){
+    var amplitudeState = remember { mutableStateMapOf<Int,Float>() }
+
+    RowOfVolumeSliders(
+        modifier = modifier,
+        numSliders = numSliders,
+        value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
+        onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
+    )
+}
+
 @Composable
 fun RowOfVolumeSliders(
     modifier: Modifier = Modifier,
-    numSliders: Int = 1
+    numSliders: Int = 1,
+    value: (Int) -> Float,
+    onValueChange: (Int, Float) -> Unit
 ){
     BoxWithConstraints(modifier = modifier){
         val sliderWidth = this.maxWidth/numSliders
         val sliderHeight = this.maxHeight
 
         Row(modifier = Modifier) {
-            repeat(numSliders){
-                VolumeSliderScreen(modifier = Modifier.size(sliderWidth, sliderHeight))
+            for(sliderIndex in 0 until numSliders){
+                VolumeSlider(
+                    modifier = Modifier.size(sliderWidth, sliderHeight),
+                    value = value(sliderIndex),
+                    onValueChange = { onValueChange(sliderIndex, it) }
+                )
             }
         }
     }
@@ -47,7 +76,7 @@ fun VolumeSlider(
     onValueChange: (Float) -> Unit
 ){
         Column(
-            modifier = modifier.border(width = 2.dp, color = Color.White),
+            modifier = modifier.border(width = 1.dp, color = Color.White),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ){
