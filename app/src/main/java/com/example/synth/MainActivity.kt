@@ -11,12 +11,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Row {
-                repeat(5){
-                    VolumeSliderScreen(modifier = Modifier.fillMaxHeight().width(50.dp))
-                }
+            VolumeSliderScreen(modifier = Modifier.fillMaxSize(0.5f))
 
-            }
+//            Row {
+//                repeat(5){
+//                    VolumeSliderScreen(modifier = Modifier.fillMaxHeight().width(50.dp))
+//                }
+//
+//            }
 
         }
     }
