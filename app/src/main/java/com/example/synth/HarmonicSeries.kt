@@ -19,7 +19,7 @@ val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
 fun HarmonicViewer(
     modifier: Modifier = Modifier,
     numSliders: Int,
-//    audioEngine: AudioEngine
+    numPeriods: Int = 1
 ){
     var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
 
@@ -30,13 +30,11 @@ fun HarmonicViewer(
     }
 
     fun evaluateBuffer(){
-        signal.evaluateTo(buffer,false)
-        signalData = buffer
+        signalData = signal.evaluate(numPeriods, true)
     }
 
     fun generateSignal(fundamental: Note = Note.A_4){
         signal = Signal.sumSignalFromHarmonicSeries(harmonicSeries, fundamental)
-//        audioEngine.signalBuffer.offer(Signal.signalsFromHarmonicSeries(harmonicSeries, Note.A_4))
         evaluateBuffer()
     }
 
@@ -50,34 +48,12 @@ fun HarmonicViewer(
                 generateSignal()
             }
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
-            XYPlot(
-                modifier = Modifier
-                    .fillMaxWidth(.80f)
-                    .fillMaxHeight()
-                    .background(Color.White),
-                data = signalData,
-            )
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = {
-                        generateSignal()
-                        evaluateBuffer()
-                    }
-                ){ Text("Apply Changes") }
-
-                Button(
-                    onClick = {
-                        evaluateBuffer()
-                    }
-                ) { Text(text = "Update Buffer") }
-            }
-
-        }
-
+        XYPlot(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            data = signalData,
+        )
     }
 }
 

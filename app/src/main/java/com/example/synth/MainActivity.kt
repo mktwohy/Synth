@@ -16,10 +16,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             HarmonicViewer(
                 modifier = Modifier.fillMaxSize(),
-                numSliders = 10,
+                numSliders = Constants.NUM_HARMONICS,
 //                audioEngine = audioEngine
             )
         }
 
     }
+}
+
+
+fun main(){
+    println(
+        HarmonicSignal(
+            Note.A_4,
+            Signal.harmonicSeries(1,20, 0.5f, 0.1f)
+        ).period
+    )
 }

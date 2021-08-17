@@ -5,6 +5,8 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import java.util.*
 
+
+
 /**
  * A wrapper class for [AudioTrack] that plays audio [Signal]s on a loop.
  *
@@ -29,11 +31,18 @@ import java.util.*
  */
 class AudioEngine(){
     companion object{
+        interface AudioEngineBufferListener{ fun onBufferUpdated(buffer: FloatArray) }
+
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 512
     }
 
-    private val masterSignal = SumSignal(autoNormalize = false)
+    private val listeners = mutableSetOf<AudioEngineBufferListener>()
+    private fun updateListeners(){
+        listeners.forEach { it.onBufferUpdated(floatBuffer) }
+    }
+
+    val masterSignal = SumSignal(autoNormalize = false)
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false
@@ -73,12 +82,12 @@ class AudioEngine(){
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                //Log.d("m_signalBuffer","signalBufferSize: ${signalBuffer.size}")
                 masterSignal.apply {
                     if(signalBuffer.isNotEmpty()){
                         clear()
                         addSignals(signalBuffer.poll()!!)
                         evaluateTo(floatBuffer, false)
+                        updateListeners()
                     }
                     evaluateTo(floatBuffer, false)
                 }

@@ -10,7 +10,11 @@ object Constants{
     const val TWO_PI              = 2.0 * PI.toFloat()
     const val MIN_16BIT_VALUE     = -32_768
     const val MAX_16BIT_VALUE     = 32_767
+    const val NUM_HARMONICS       = 25
 }
+
+interface SignalUpdatedListener{ fun onSignalUpdated(signal: Signal) }
+
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
@@ -122,6 +126,60 @@ class PeriodicSignal(
     override fun toString() = "FuncSignal(p: $period, a: $amp, f: $freq)"
 }
 
+class HarmonicSignal(
+    fundamental: Note,
+    harmonicSeries: Map<Int, Float> = mutableMapOf(),
+    private val autoNormalize: Boolean = true
+): Signal(){
+    override var amp: Float = 1f
+        set(value){
+            if(value >= 0) field = value
+            if (autoNormalize) normalize()
+        }
+
+    override var period: Int = 0
+
+    var fundamental: Note = Note.A_4
+        set(value){
+            for(i in signals.indices) {
+                signals[i].freq = fundamental.freq*(i+1)
+            }
+            field = value
+            calculatePeriod()
+        }
+
+    private val signals = List(Constants.NUM_HARMONICS){ i ->
+        PeriodicSignal(fundamental.freq*(i+1), 0f)
+    }
+
+    init {
+        this.fundamental = fundamental
+        calculatePeriod()
+        updateHarmonicSeries(harmonicSeries)
+    }
+
+    override fun reset() { signals.forEach { it.reset() } }
+
+    fun updateHarmonicSeries(harmonicSeries: Map<Int, Float>){
+        for((overtone, amplitude) in harmonicSeries) {
+            signals[overtone-1].amp = amplitude
+        }
+        calculatePeriod()
+    }
+
+    fun calculatePeriod() = signals.minOfOrNull { it.period } ?: 1
+
+    override fun evaluateNext() =
+        signals.fold(0f){ sum, signal -> sum + signal.evaluateNext() * amp }
+
+    private fun normalize() {
+        if (signals.isEmpty()) return
+
+        val ampSum = signals.map { it.amp }.sum()
+        signals.forEach { it.amp = (it.amp / ampSum) * this.amp  }
+    }
+}
+
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
     private val signals: MutableSet<Signal> = mutableSetOf(),
@@ -129,17 +187,12 @@ class SumSignal(
     private val autoNormalize: Boolean = true
 ) : Signal() {
 
-    private val index = CircularIndex(1)
     override var amp: Float = 1f
         set(value){
             if(value >= 0) field = value
             if (autoNormalize) normalize()
         }
-    override var period: Int = 0
-        set(value){
-            index.maxValue = value
-            field = value
-        }
+    override var period: Int = 1
 
     init {
         this.amp = amp
@@ -164,7 +217,6 @@ class SumSignal(
     }
 
     private fun calculatePeriod(){
-        //TODO a temporary fix, essentially disabling period since it doesn't seem to be necessary
         period = signals.map{ it.period }.lcm()
     }
 
@@ -179,10 +231,7 @@ class SumSignal(
 
     fun addSignals(newSignals: Collection<Signal>){
         for(signal in newSignals){
-            when(signal){
-                is PeriodicSignal -> signals.add(signal)
-                is SumSignal  -> signals.addAll(signal.signals)
-            }
+            addSignal(signal)
         }
         if (autoNormalize) normalize()
         calculatePeriod()
