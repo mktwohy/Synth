@@ -36,7 +36,7 @@ fun XYPlotScreen(){
     }
 
     fun evaluateBuffer(){
-        signal.evaluateTo(buffer,false)
+        signal.evaluateToBuffer(buffer,false)
         data = buffer
     }
 

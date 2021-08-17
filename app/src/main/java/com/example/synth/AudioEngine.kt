@@ -84,12 +84,12 @@ class AudioEngine(){
             while (runMainLoop) {
                 masterSignal.apply {
                     if(signalBuffer.isNotEmpty()){
-                        clear()
-                        addSignals(signalBuffer.poll()!!)
-                        evaluateTo(floatBuffer, false)
+                        this.signals.clear()
+                        this.signals.addAll(signalBuffer.poll()!!)
+                        evaluateToBuffer(floatBuffer, false)
                         updateListeners()
                     }
-                    evaluateTo(floatBuffer, false)
+                    evaluateToBuffer(floatBuffer, false)
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
