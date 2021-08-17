@@ -44,12 +44,13 @@ abstract class Signal{
             end: Int = 20,
             decayRate: Float = 0.75f,
             floor: Float = 0.1f,
+            ceiling: Float = 1.0f,
             filter: (Int) -> Boolean = all
         ): MutableMap<Int, Float> {
             val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
             return harmonics
                 .mapIndexed{ i, harmonic ->
-                    harmonic to  ((1f-floor) * (1f-decayRate).pow(i) + floor)
+                    harmonic to  ((ceiling-floor) * (1f-decayRate).pow(i) + floor)
                 }
                 .toMutableStateMap()
         }
@@ -102,13 +103,12 @@ abstract class SignalCollection: Signal(){
 
     override var amp: Float = 1f
         set(value){
-            if(value >= 0) field = value
+            if(value >= 0f) field = value
             if (autoNormalize) normalize()
         }
 
-    fun normalize() {
+    open fun normalize() {
         if (signals.isEmpty()) return
-
         val ampSum = signals.map { it.amp }.sum()
         signals.forEach { it.amp = (it.amp / ampSum) * this.amp  }
     }
@@ -126,18 +126,18 @@ abstract class SignalCollection: Signal(){
         val s = StringBuilder()
         s.append(
             when(this){
-                is SumSignal        -> ">SumSignal: "
-                is HarmonicSignal   -> ">HarmonicSignal: "
-                else                -> ">SignalCollection: "
+                is SumSignal        -> ">SumSignal"
+                is HarmonicSignal   -> ">HarmonicSignal"
+                else                -> ">SignalCollection"
             }
         )
+        s.append("(total amp = $amp):")
         signals.forEach{
             s.append("\n\t")
             s.append("$it".replace("\n\t", "\n\t\t"))
         }
         return s.toString()
     }
-
 }
 
 object SilentSignal: Signal() {
@@ -152,9 +152,17 @@ object SilentSignal: Signal() {
 
 class PeriodicSignal(
     var freq: Float = 440f,
-    override var amp: Float = 1f,
+    amp: Float = 1f,
     var func: (Int, Float) -> Float = sine
 ): Signal() {
+    override var amp: Float = 1f
+        set(value) {
+            when{
+                value >= 0f -> field = value
+                value.isNaN() -> field = 0f
+            }
+
+        }
     private val index: CircularIndex
     override val period
         get() = (SAMPLE_RATE / freq).toInt()
@@ -173,10 +181,9 @@ class PeriodicSignal(
             silence -> "silence"
             else    -> "custom function"
         }
-        return "FuncSignal:\n\tfreq = $freq \n\tamp = $amp \n\tfunc = $funcName"
+        return "FuncSignal:\n\tfreq = $freq \n\tamp  = $amp \n\tfunc = $funcName"
     }
 }
-
 
 
 class HarmonicSignal(
@@ -185,13 +192,13 @@ class HarmonicSignal(
     amp: Float = 1f,
     autoNormalize: Boolean = true
 ): SignalCollection() {
-
     override val signals = List(Constants.NUM_HARMONICS){ i ->
         PeriodicSignal(fundamental.freq*(i+1), 0f)
     }
 
     override val period: Int
         get() = signals.minOfOrNull { it.period } ?: 1
+
 
     var fundamental: Note = Note.A_4
         set(value){
@@ -223,7 +230,7 @@ class SumSignal(
 ) : SignalCollection() {
 
     constructor(vararg signal: Signal, amp: Float = 1f, autoNormalize: Boolean = true)
-            : this(signal.toMutableSet(), amp, autoNormalize)
+            : this(signal.toSet(), amp, autoNormalize)
 
     override val signals = mutableSetOf<Signal>()
 
@@ -247,13 +254,14 @@ class SumSignal(
 fun main(){
     val s1 = PeriodicSignal(Note.A_4.freq, 1f)
     val s2 = PeriodicSignal(Note.A_5.freq,1f)
-    val sum1 = SumSignal(s1, s2)
-    val sum2 = SumSignal(s1, s2)
+    val sum = SumSignal(s1, s2)
     val harm = HarmonicSignal(Note.C_4, Signal.harmonicSeries())
-    val sum3 = SumSignal(s1, s2, sum2, harm)
+    val sum3 = SumSignal(sum, harm)
 
+//    println(sum3)
     println(harm)
-    println(sum3)
+    harm.amp = 0.5f
+    println(harm)
 //    sum3.plotInConsole()
 //
 //    println(s1.evaluate(1, true).contentToString())
