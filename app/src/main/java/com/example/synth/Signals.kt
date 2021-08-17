@@ -50,6 +50,13 @@ abstract class Signal{
                 .toMutableStateMap()
         }
 
+        fun sumSignalFromHarmonicSeries(
+            harmonicSeries: Map<Int, Float>,
+            fundamental: Note,
+            func: (Int, Float) -> Float = sine
+        ) = SumSignal(signalsFromHarmonicSeries(harmonicSeries, fundamental, func))
+            .also{log("sumsignal: $it")}
+
         fun signalsFromHarmonicSeries(
             harmonicSeries: Map<Int, Float>,
             fundamental: Note,

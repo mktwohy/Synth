@@ -27,7 +27,7 @@ import java.util.*
  * .0
  * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
-class AudioEngine(private val main: MainActivity_OLD){
+class AudioEngine(){
     companion object{
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 512
@@ -83,7 +83,6 @@ class AudioEngine(private val main: MainActivity_OLD){
                     evaluateTo(floatBuffer, false)
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
-                main.updatePlot(floatBuffer)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }
             audioTrack.stop()

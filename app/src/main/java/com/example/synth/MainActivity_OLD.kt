@@ -9,7 +9,7 @@ import android.view.*
 /** A full-screen PianoView activity. Also manages the AudioEngine */
 class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
 //    private lateinit var bind: ActivityMainBinding
-    private val audioEngine = AudioEngine(this)
+    private val audioEngine = AudioEngine()
     private val noteToSignal = mutableMapOf<Note, Signal>()
     private val overtones = mutableMapOf<Int, Float>()
     private var overtoneRange = 1

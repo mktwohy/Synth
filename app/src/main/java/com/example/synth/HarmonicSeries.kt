@@ -1,7 +1,9 @@
 package com.example.synth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -11,14 +13,66 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
 
-fun amplitudesBuilder(numSliders: Int) =
-    mutableMapOf<Int, Float>().apply {
-        (0 until numSliders).forEach{ slider ->
-            this[slider] = 0f
-        }
+@Composable
+fun HarmonicViewer(
+    modifier: Modifier = Modifier,
+    numSliders: Int,
+//    audioEngine: AudioEngine
+){
+    var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
+
+    var signal: Signal by remember { mutableStateOf(PeriodicSignal()) }
+
+    var signalData by remember {
+        mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
     }
 
+    fun generateSignal(fundamental: Note = Note.A_4){
+        signal = Signal.sumSignalFromHarmonicSeries(harmonicSeries, fundamental)
+//        audioEngine.signalBuffer.offer(Signal.signalsFromHarmonicSeries(harmonicSeries, Note.A_4))
+    }
+
+    fun evaluateBuffer(){
+        signal.evaluateTo(buffer,false)
+        signalData = buffer
+    }
+
+    Column(modifier) {
+        RowOfVolumeSliders(
+            modifier = Modifier.fillMaxHeight(0.50f),
+            numSliders = numSliders,
+            value = { sliderIndex -> harmonicSeries[sliderIndex+1] ?: 0f },
+            onValueChange = { sliderIndex, value -> harmonicSeries[sliderIndex+1] = value }
+        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            XYPlot(
+                modifier = Modifier
+                    .fillMaxWidth(.80f)
+                    .fillMaxHeight()
+                    .background(Color.White),
+                data = signalData,
+            )
+            Column(verticalArrangement = Arrangement.SpaceEvenly) {
+                Button(
+                    onClick = {
+                        generateSignal()
+                        evaluateBuffer()
+                    }
+                ){ Text("Apply Changes") }
+
+                Button(
+                    onClick = {
+                        evaluateBuffer()
+                    }
+                ) { Text(text = "Update Buffer") }
+            }
+
+        }
+
+    }
+}
 
 @Composable
 fun RowOfVolumeSlidersScreen(
@@ -27,12 +81,22 @@ fun RowOfVolumeSlidersScreen(
 ){
     var amplitudeState = remember { mutableStateMapOf<Int,Float>() }
 
-    RowOfVolumeSliders(
-        modifier = modifier,
-        numSliders = numSliders,
-        value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
-        onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
-    )
+    Column(modifier) {
+        RowOfVolumeSliders(
+            modifier = Modifier.fillMaxHeight(0.9f),
+            numSliders = numSliders,
+            value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
+            onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
+        )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly){
+            for(sliderIndex in 0 until numSliders){
+                Text(
+                    text = ((amplitudeState[sliderIndex] ?: 0f) * 100).toInt().toString(),
+                    color = Color.White
+                )
+            }
+        }
+    }
 }
 
 @Composable
