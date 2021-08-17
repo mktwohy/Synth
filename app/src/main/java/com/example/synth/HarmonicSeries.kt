@@ -29,14 +29,15 @@ fun HarmonicViewer(
         mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
     }
 
-    fun generateSignal(fundamental: Note = Note.A_4){
-        signal = Signal.sumSignalFromHarmonicSeries(harmonicSeries, fundamental)
-//        audioEngine.signalBuffer.offer(Signal.signalsFromHarmonicSeries(harmonicSeries, Note.A_4))
-    }
-
     fun evaluateBuffer(){
         signal.evaluateTo(buffer,false)
         signalData = buffer
+    }
+
+    fun generateSignal(fundamental: Note = Note.A_4){
+        signal = Signal.sumSignalFromHarmonicSeries(harmonicSeries, fundamental)
+//        audioEngine.signalBuffer.offer(Signal.signalsFromHarmonicSeries(harmonicSeries, Note.A_4))
+        evaluateBuffer()
     }
 
     Column(modifier) {
@@ -44,7 +45,10 @@ fun HarmonicViewer(
             modifier = Modifier.fillMaxHeight(0.50f),
             numSliders = numSliders,
             value = { sliderIndex -> harmonicSeries[sliderIndex+1] ?: 0f },
-            onValueChange = { sliderIndex, value -> harmonicSeries[sliderIndex+1] = value }
+            onValueChange = { sliderIndex, value ->
+                harmonicSeries[sliderIndex+1] = value
+                generateSignal()
+            }
         )
         Row(modifier = Modifier.fillMaxWidth()) {
             XYPlot(
@@ -54,7 +58,10 @@ fun HarmonicViewer(
                     .background(Color.White),
                 data = signalData,
             )
-            Column(verticalArrangement = Arrangement.SpaceEvenly) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
                 Button(
                     onClick = {
                         generateSignal()
