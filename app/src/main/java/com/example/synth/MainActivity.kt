@@ -8,28 +8,21 @@ import androidx.compose.ui.Modifier
 
 
 class MainActivity : ComponentActivity() {
-//    private val audioEngine = AudioEngine()
+    private val audioEngine = AudioEngine()
+    private val signal = HarmonicSignal(Note.C_3)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        audioEngine.start()
+        audioEngine.start()
+        audioEngine.masterSignal.signals.add(signal)
         setContent {
             HarmonicViewer(
                 modifier = Modifier.fillMaxSize(),
                 numSliders = Constants.NUM_HARMONICS,
-//                audioEngine = audioEngine
+                signal = signal,
             )
         }
 
     }
-}
 
-
-fun main(){
-    println(
-        HarmonicSignal(
-            Note.A_4,
-            Signal.harmonicSeries(1,20, 0.5f, 0.1f)
-        ).period
-    )
 }

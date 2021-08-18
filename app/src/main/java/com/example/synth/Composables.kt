@@ -49,10 +49,11 @@ fun HarmonicViewer(
     modifier: Modifier = Modifier,
     numSliders: Int,
     fundamental: Note = Note.A_4,
+    signal: HarmonicSignal = HarmonicSignal(fundamental),
 ){
     var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
 
-    var signal by remember { mutableStateOf(HarmonicSignal(fundamental)) }
+    var signal by remember { mutableStateOf(signal) }
 
     var signalData by remember {
         mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
