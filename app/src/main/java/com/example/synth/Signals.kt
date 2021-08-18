@@ -21,10 +21,10 @@ interface SignalUpdatedListener{ fun onSignalUpdated(signal: Signal) }
 abstract class Signal{
     companion object{
         val sine = { i: Int, freq: Float ->
-            sin(TWO_PI * i * freq / SAMPLE_RATE).toFloat()
+            sin(TWO_PI * i / (SAMPLE_RATE/freq)).toFloat()
         }
         val cosine = { i: Int, freq: Float ->
-            cos(TWO_PI * i * freq / SAMPLE_RATE).toFloat()
+            cos(TWO_PI * i / (SAMPLE_RATE/freq)).toFloat()
         }
         val silence = { _: Int, _: Int ->
             0f
@@ -56,7 +56,7 @@ abstract class Signal{
         }
     }
 
-    abstract val period: Int
+    abstract val period: Float
     abstract var amp: Float
 
     /** Guarantees that [evaluate] and [evaluateToBuffer] start at the beginning*/
@@ -67,7 +67,7 @@ abstract class Signal{
     /** Evaluates the next n periods of the signal as a new array */
     fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
         if (startFromBeginning) reset()
-        return FloatArray(period * periods){ evaluateNext() }
+        return FloatArray(period.toInt() * periods){ evaluateNext() }
     }
 
     /** Evaluates the next n periods of the signal to an existing array */
@@ -123,7 +123,7 @@ abstract class SignalCollection: Signal(){
 }
 
 object SilentSignal: Signal() {
-    override var period: Int = AudioEngine.BUFFER_SIZE
+    override var period: Float = 1f
     override var amp: Float = 0f
 
     override fun reset() { }
@@ -143,21 +143,19 @@ class PeriodicSignal(
                 value >= 0f -> field = value
                 value.isNaN() -> field = 0f
             }
-
         }
-    private val index: CircularIndex
+    private var index: Int = 0
     override val period
-        get() = (SAMPLE_RATE / freq).toInt()
+        get() = SAMPLE_RATE / freq
 
     init{
         this.amp = amp
-        index = CircularIndex(period) //*1000 lessens signal artifacts
     }
 
-    override fun reset() { index.reset() }
+    override fun reset() { index = 0 }
 
     override fun evaluateNext() =
-        func(index.getIndexAndIterate(), freq) * amp
+        func(index++, freq) * amp
 
     override fun toString(): String {
         val funcName = when(func){
@@ -181,8 +179,8 @@ class HarmonicSignal(
         PeriodicSignal(fundamental.freq*(i+1), 0f)
     }
 
-    override val period: Int
-        get() = signals.maxOfOrNull { it.period } ?: 1
+    override val period: Float
+        get() = signals.maxOfOrNull { it.period } ?: 1f
 
     var fundamental = Note.A_4
         set(value){
@@ -219,7 +217,7 @@ class SumSignal(
     override val signals = mutableSetOf<Signal>()
 
     override val period
-        get() = signals.map{ it.period }.lcm()
+        get() = signals.map{ it.period.toInt() }.lcm().toFloat()
 
     init {
         this.signals.addAll(signals)
