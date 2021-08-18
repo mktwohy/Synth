@@ -58,15 +58,15 @@ class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
 
     private fun assignNotesToSignals(){
         noteToSignal.clear()
-        Note.toList(octave).forEach { note ->
-            noteToSignal[note] = SumSignal(
-                Signal.signalsFromHarmonicSeries(
-                    overtones, note,
-                    Signal.sine
-                ),
-                1/8f
-            )
-        }
+//        Note.toList(octave).forEach { note ->
+//            noteToSignal[note] = SumSignal(
+//                Signal.signalsFromHarmonicSeries(
+//                    overtones, note,
+//                    Signal.sine
+//                ),
+//                1/8f
+//            )
+//        }
     }
 
     fun increaseOvertoneRange(view: View){ overtoneRange++ }

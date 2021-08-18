@@ -54,24 +54,6 @@ abstract class Signal{
                 }
                 .toMutableStateMap()
         }
-
-        fun sumSignalFromHarmonicSeries(
-            harmonicSeries: Map<Int, Float>,
-            fundamental: Note,
-            func: (Int, Float) -> Float = sine
-        ) = SumSignal(signalsFromHarmonicSeries(harmonicSeries, fundamental, func))
-            .also{log("sumsignal: $it")}
-
-        fun signalsFromHarmonicSeries(
-            harmonicSeries: Map<Int, Float>,
-            fundamental: Note,
-            func: (Int, Float) -> Float = sine
-        ): MutableSet<Signal> =
-            harmonicSeries
-                .map { (overtone, amplitude) ->
-                    PeriodicSignal(fundamental.freq*overtone, amplitude, func)
-                }
-                .toMutableSet()
     }
 
     abstract val period: Int
@@ -169,7 +151,7 @@ class PeriodicSignal(
 
     init{
         this.amp = amp
-        index = CircularIndex(period*1000) //*1000 lessens signal artifacts
+        index = CircularIndex(period) //*1000 lessens signal artifacts
     }
 
     override fun reset() { index.reset() }
