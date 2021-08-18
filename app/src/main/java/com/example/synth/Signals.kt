@@ -30,30 +30,6 @@ abstract class Signal{
             0f
         }
 
-        val fundamental = { i: Int -> i == 1 }
-        val odd         = { i: Int -> i % 2 != 0 }
-        val even        = { i: Int -> i % 2 == 0 }
-        val all         = { _: Int -> true }
-        val none        = { _: Int -> false }
-
-
-        /** produces a harmonic series with exponential decay
-         * (represented as a map of overtones to amplitude) */
-        fun harmonicSeries(
-            start: Int = 1,
-            end: Int = 20,
-            decayRate: Float = 0.75f,
-            floor: Float = 0.1f,
-            ceiling: Float = 1.0f,
-            filter: (Int) -> Boolean = all
-        ): MutableMap<Int, Float> {
-            val harmonics = (start..end).filter{ harmonic -> filter(harmonic)}
-            return harmonics
-                .mapIndexed{ i, harmonic ->
-                    harmonic to  ((ceiling-floor) * (1f-decayRate).pow(i) + floor)
-                }
-                .toMutableStateMap()
-        }
     }
 
     abstract val period: Float
@@ -237,7 +213,6 @@ fun main(){
     val s1 = PeriodicSignal(Note.A_4.freq, 1f)
     val s2 = PeriodicSignal(Note.A_5.freq,1f)
     val sum = SumSignal(s1, s2)
-    val harm = HarmonicSignal(Note.C_4, Signal.harmonicSeries())
 //    val sum3 = SumSignal(sum, harm)
 
 //    println(sum3)
@@ -245,8 +220,6 @@ fun main(){
 //    harm.amp = 0.5f
 //    println(harm)
 
-    println(harm.period)
-    harm.plotInConsole()
 
 //    sum3.plotInConsole()
 //

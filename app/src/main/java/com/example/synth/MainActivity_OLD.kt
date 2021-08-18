@@ -17,10 +17,10 @@ class MainActivity_OLD : AppCompatActivity(), PianoKeyEventListener {
             if(value in 1..24){
 //                bind.overtoneRange.text = value.toString()
                 overtones.clear()
-                overtones.putAll(
-                    Signal.harmonicSeries(1, value, 0.45f, 0f)
-                    { i -> Signal.fundamental(i) || Signal.all(i) }
-                )
+//                overtones.putAll(
+//                    Signal.harmonicSeries(1, value, 0.45f, 0f)
+//                    { i -> Signal.fundamental(i) || Signal.all(i) }
+//                )
                 assignNotesToSignals()
                 field = value
 //                onKeyUpdatedEvent(bind.piano.pressedKeys.pianoKeys)
