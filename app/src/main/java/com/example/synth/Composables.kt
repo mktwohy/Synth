@@ -1,34 +1,64 @@
 package com.example.synth
 
+import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+
+fun log(text: String){ Log.d("m_tag",text) }
+
+@Composable
+fun XYPlot(
+    modifier: Modifier = Modifier,
+    data: FloatArray,
+    color: Color = Color.Green,
+    strokeWidth: Float = 3f,
+) {
+    Canvas(modifier = modifier) {
+        for(i in 0..data.size-2){
+            drawLine(
+                start = Offset(
+                    x = i * size.width / (data.size-1),
+                    y = (data[i] * size.height/2) + (size.height/2)
+                ),
+                end = Offset(
+                    x = (i+1) * size.width / (data.size-1),
+                    y = (data[i+1] * size.height/2) + (size.height/2)
+                ),
+                color = color,
+                strokeWidth = strokeWidth
+            )
+        }
+    }
+}
 
 
 @Composable
 fun HarmonicViewer(
     modifier: Modifier = Modifier,
     numSliders: Int,
-    numPeriods: Int = 1
+    fundamental: Note = Note.A_4,
 ){
-
     var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
 
-    var signal by remember { mutableStateOf(HarmonicSignal(Note.A_4)) }
+    var signal by remember { mutableStateOf(HarmonicSignal(fundamental)) }
 
     var signalData by remember {
         mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
     }
 
-    fun updateSignal(fundamental: Note = Note.A_4){
+    fun updateSignal(){
         signal.updateHarmonicSeries(harmonicSeries)
         signal.evaluateToBuffer(signalData, true)
 //        signalData = signal.evaluate(numPeriods, true)
@@ -118,29 +148,29 @@ fun VolumeSlider(
     value: Float,
     onValueChange: (Float) -> Unit
 ){
-        Column(
-            modifier = modifier.border(width = 1.dp, color = Color.White),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ){
-            BoxWithConstraints(
+    Column(
+        modifier = modifier.border(width = 1.dp, color = Color.White),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ){
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxHeight(0.9f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Slider(
                 modifier = Modifier
-                    .fillMaxHeight(0.9f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Slider(
-                    modifier = Modifier
-                        .requiredWidth(this.maxHeight)
-                        .requiredHeight(this.maxWidth)
-                        .rotate(-90f),
-                    value = value,
-                    onValueChange = onValueChange
-                )
-            }
-            Text(
-                text = (value * 100).toInt().toString(),
-                color = Color.White
+                    .requiredWidth(this.maxHeight)
+                    .requiredHeight(this.maxWidth)
+                    .rotate(-90f),
+                value = value,
+                onValueChange = onValueChange
             )
+        }
+        Text(
+            text = (value * 100).toInt().toString(),
+            color = Color.White
+        )
     }
 }
