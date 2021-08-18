@@ -62,25 +62,29 @@ fun XYPlot(
 //    )
 //}
 
+class HarmonicSignalViewModel(
+    signal: HarmonicSignal,
+    buffer: FloatArray
+) : ViewModel(){
+    val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
+    var buffer: MutableState<FloatArray> = mutableStateOf(buffer)
+    val numBuffersPlayed: MutableState<Int> = mutableStateOf(0)
+}
 
 @Composable
 fun HarmonicSignalEditor(
     modifier: Modifier = Modifier,
-    signal: HarmonicSignal,
-    audioEngine: AudioEngine
+    viewModel: HarmonicSignalViewModel
 ){
-    var recompose by remember { mutableStateOf(0) } //horrible fix, but forces it to recompose
-    val signalData by remember { mutableStateOf(audioEngine.floatBuffer) }
 
-    Text(text = recompose.toString())
     Column(modifier) {
+        Text(text = viewModel.numBuffersPlayed.value.toString(), color = Color.White)
         RowOfVolumeSliders(
             modifier = Modifier.fillMaxHeight(0.50f),
             numSliders = Constants.NUM_HARMONICS,
-            value = { sliderIndex -> signal.harmonicSeries[sliderIndex+1]},
+            value = { sliderIndex -> viewModel.signal.component1().harmonicSeries[sliderIndex+1]},
             onValueChange = { sliderIndex, sliderValue ->
-                signal.harmonicSeries[sliderIndex+1] = if(sliderValue < 0.01f) 0f else sliderValue
-                recompose++
+                viewModel.signal.component1().harmonicSeries[sliderIndex+1] = if(sliderValue < 0.01f) 0f else sliderValue
             }
         )
         Row {
@@ -88,21 +92,21 @@ fun HarmonicSignalEditor(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.9f)
-                    .background(Color.White),
-                data = signalData,
+                    .background(Color.Black),
+                data = viewModel.buffer.value,
             )
             Column {
                 VolumeSliderScreen(
                     modifier = Modifier
                         .fillMaxHeight(0.8f)
                         .fillMaxWidth(),
-                    initialValue = signal.amp,
-                    onValueChange = { signal.amp = it }
+                    initialValue = viewModel.signal.component1().amp,
+                    onValueChange = { viewModel.signal.component1().amp = it }
                 )
                 Button(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
-                        signal.harmonicSeries.reset()
+                        viewModel.signal.component1().harmonicSeries.reset()
                     }
                 ) { Text("Reset") }
             }
@@ -140,26 +144,18 @@ fun RowOfVolumeSliders(
 @Composable
 fun RowOfVolumeSlidersScreen(
     modifier: Modifier = Modifier,
+    amplitudes: List<Float>,
     numSliders: Int,
 ){
     var amplitudeState = remember { mutableStateMapOf<Int,Float>() }
 
-    Column(modifier) {
-        RowOfVolumeSliders(
-            modifier = Modifier.fillMaxHeight(0.9f),
-            numSliders = numSliders,
-            value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
-            onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
-        )
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly){
-            for(sliderIndex in 0 until numSliders){
-                Text(
-                    text = ((amplitudeState[sliderIndex] ?: 0f) * 100).toInt().toString(),
-                    color = Color.White
-                )
-            }
-        }
-    }
+    RowOfVolumeSliders(
+        modifier = Modifier.fillMaxHeight(0.9f),
+        numSliders = numSliders,
+        value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
+        onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
+    )
+
 }
 
 @Composable

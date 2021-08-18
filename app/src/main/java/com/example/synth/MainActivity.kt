@@ -8,18 +8,24 @@ import androidx.compose.ui.Modifier
 
 
 class MainActivity : ComponentActivity() {
-    private val audioEngine = AudioEngine()
     private val signal = HarmonicSignal(Note.B_1)
+    private val viewModel = HarmonicSignalViewModel(
+        signal = signal,
+        buffer = FloatArray(AudioEngine.BUFFER_SIZE)
+    )
+    private val audioEngine = AudioEngine()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         audioEngine.start()
         audioEngine.masterSignal.signals.add(signal)
+        audioEngine.registerListener { viewModel.numBuffersPlayed.value++ }
+        audioEngine.registerListener { viewModel.buffer.value = it }
+
         setContent {
             HarmonicSignalEditor(
                 modifier = Modifier.fillMaxSize(),
-                signal = signal,
-                audioEngine = audioEngine
+                viewModel = viewModel
             )
 //            HarmonicSeriesScreen(
 //                modifier = Modifier.fillMaxSize()

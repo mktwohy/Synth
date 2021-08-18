@@ -3,6 +3,7 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import java.nio.FloatBuffer
 import java.util.*
 
 
@@ -29,17 +30,16 @@ import java.util.*
  * .0
  * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
-class AudioEngine(){
+class AudioEngine{
     companion object{
-        interface AudioEngineBufferListener{ fun onBufferUpdated(buffer: FloatArray) }
-
         const val SAMPLE_RATE = 44100
         const val BUFFER_SIZE = 512
     }
 
-    private val listeners = mutableSetOf<AudioEngineBufferListener>()
-    private fun updateListeners(){
-        listeners.forEach { it.onBufferUpdated(floatBuffer) }
+    private var numBuffersPlayed = 0
+    private val callbacks = mutableSetOf<(FloatArray) -> Unit>()
+    fun registerListener(onBufferUpdate: (FloatArray) -> Unit){
+        callbacks.add(onBufferUpdate)
     }
 
     val masterSignal = SumSignal(autoNormalize = false)
@@ -86,13 +86,14 @@ class AudioEngine(){
                     if(signalBuffer.isNotEmpty()){
                         this.signals.clear()
                         this.signals.addAll(signalBuffer.poll()!!)
-                        evaluateToBuffer(floatBuffer, false)
-                        updateListeners()
+//                        evaluateToBuffer(floatBuffer, false)
                     }
+                    callbacks.forEach { it.invoke(floatBuffer) }
                     evaluateToBuffer(floatBuffer, false)
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
+                numBuffersPlayed++
             }
             audioTrack.stop()
             audioTrack.flush()

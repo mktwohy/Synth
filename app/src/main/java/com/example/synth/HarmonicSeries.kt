@@ -5,9 +5,7 @@ import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
 
-class HarmonicSeries(
-    onHarmonicSeriesUpdated: () -> Unit = {  }
-) : Iterable<Pair<Int, Float>>{
+class HarmonicSeries() : Iterable<Pair<Int, Float>>{
     companion object{
         val fundamental = { i: Int -> i == 1 }
         val odd         = { i: Int -> i % 2 != 0 }
@@ -17,13 +15,14 @@ class HarmonicSeries(
     }
 
     //indices refer to overtone-1. for example, index 0 refers to the first overtone
-    private var harmonicSeries = FloatArray(Constants.NUM_HARMONICS){ 0f }
+    private val harmonicSeries = FloatArray(Constants.NUM_HARMONICS){ 0f }
 
     private val callbacks = mutableListOf<() -> Unit>()
     private fun invokeCallbacks(){ callbacks.forEach { it.invoke() } }
     fun registerCallback(onHarmonicSeriesUpdated: () -> Unit){
         callbacks.add(onHarmonicSeriesUpdated)
     }
+
 
     operator fun get(overtone: Int) = harmonicSeries[overtone-1]
     operator fun set(overtone: Int, amplitude: Float){
