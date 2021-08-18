@@ -167,7 +167,10 @@ class PeriodicSignal(
     override val period
         get() = (SAMPLE_RATE / freq).toInt()
 
-    init{ index = CircularIndex(period) }
+    init{
+        this.amp = amp
+        index = CircularIndex(period*1000) //*1000 lessens signal artifacts
+    }
 
     override fun reset() { index.reset() }
 
@@ -197,10 +200,9 @@ class HarmonicSignal(
     }
 
     override val period: Int
-        get() = signals.minOfOrNull { it.period } ?: 1
+        get() = signals.maxOfOrNull { it.period } ?: 1
 
-
-    var fundamental: Note = Note.A_4
+    var fundamental = Note.A_4
         set(value){
             for(i in signals.indices) {
                 signals[i].freq = fundamental.freq*(i+1)
@@ -256,12 +258,16 @@ fun main(){
     val s2 = PeriodicSignal(Note.A_5.freq,1f)
     val sum = SumSignal(s1, s2)
     val harm = HarmonicSignal(Note.C_4, Signal.harmonicSeries())
-    val sum3 = SumSignal(sum, harm)
+//    val sum3 = SumSignal(sum, harm)
 
 //    println(sum3)
-    println(harm)
-    harm.amp = 0.5f
-    println(harm)
+//    println(harm)
+//    harm.amp = 0.5f
+//    println(harm)
+
+    println(harm.period)
+    harm.plotInConsole()
+
 //    sum3.plotInConsole()
 //
 //    println(s1.evaluate(1, true).contentToString())

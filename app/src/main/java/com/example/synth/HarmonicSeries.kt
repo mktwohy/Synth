@@ -3,7 +3,6 @@ package com.example.synth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -13,7 +12,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-val buffer = FloatArray(AudioEngine.BUFFER_SIZE)
 
 @Composable
 fun HarmonicViewer(
@@ -21,21 +19,19 @@ fun HarmonicViewer(
     numSliders: Int,
     numPeriods: Int = 1
 ){
+
     var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
 
-    var signal: Signal by remember { mutableStateOf(PeriodicSignal()) }
+    var signal by remember { mutableStateOf(HarmonicSignal(Note.A_4)) }
 
     var signalData by remember {
         mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
     }
 
-    fun evaluateBuffer(){
-        signalData = signal.evaluate(numPeriods, true)
-    }
-
-    fun generateSignal(fundamental: Note = Note.A_4){
-        signal = Signal.sumSignalFromHarmonicSeries(harmonicSeries, fundamental)
-        evaluateBuffer()
+    fun updateSignal(fundamental: Note = Note.A_4){
+        signal.updateHarmonicSeries(harmonicSeries)
+        signal.evaluateToBuffer(signalData, true)
+//        signalData = signal.evaluate(numPeriods, true)
     }
 
     Column(modifier) {
@@ -44,8 +40,8 @@ fun HarmonicViewer(
             numSliders = numSliders,
             value = { sliderIndex -> harmonicSeries[sliderIndex+1] ?: 0f },
             onValueChange = { sliderIndex, value ->
-                harmonicSeries[sliderIndex+1] = value
-                generateSignal()
+                harmonicSeries[sliderIndex+1] = if(value < 0.01f) 0f else value
+                updateSignal()
             }
         )
         XYPlot(

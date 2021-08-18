@@ -16,6 +16,8 @@ fun log(text: String){ Log.d("m_tag",text) }
 
 @Composable
 fun XYPlotScreen(){
+//    val buffer = remember { FloatArray(AudioEngine.BUFFER_SIZE) }
+
     var data by remember {
         mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
     }
@@ -36,8 +38,8 @@ fun XYPlotScreen(){
     }
 
     fun evaluateBuffer(){
-        signal.evaluateToBuffer(buffer,false)
-        data = buffer
+        signal.evaluateToBuffer(data,false)
+//        data = buffer
     }
 
     Column {
