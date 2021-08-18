@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 
 class MainActivity : ComponentActivity() {
     private val audioEngine = AudioEngine()
-    private val signal = HarmonicSignal(Note.C_3)
+    private val signal = HarmonicSignal(Note.B_1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

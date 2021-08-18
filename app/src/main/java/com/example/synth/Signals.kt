@@ -10,7 +10,7 @@ object Constants{
     const val TWO_PI              = 2.0 * PI.toFloat()
     const val MIN_16BIT_VALUE     = -32_768
     const val MAX_16BIT_VALUE     = 32_767
-    const val NUM_HARMONICS       = 25
+    const val NUM_HARMONICS       = 15
 }
 
 interface SignalUpdatedListener{ fun onSignalUpdated(signal: Signal) }

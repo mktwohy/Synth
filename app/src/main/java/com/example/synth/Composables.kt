@@ -48,8 +48,7 @@ fun XYPlot(
 fun HarmonicViewer(
     modifier: Modifier = Modifier,
     numSliders: Int,
-    fundamental: Note = Note.A_4,
-    signal: HarmonicSignal = HarmonicSignal(fundamental),
+    signal: HarmonicSignal = HarmonicSignal(Note.A_4),
 ){
     var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
 
@@ -75,12 +74,35 @@ fun HarmonicViewer(
                 updateSignal()
             }
         )
-        XYPlot(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            data = signalData,
-        )
+        Row {
+            XYPlot(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.9f)
+                    .background(Color.White),
+                data = signalData,
+            )
+            Column {
+                VolumeSliderScreen(
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .fillMaxWidth(),
+                    initialValue = signal.amp,
+                    onValueChange = { signal.amp = it }
+                )
+                Button(
+                    modifier = Modifier.fillMaxSize(),
+                    onClick = {
+                        for((harmonic, amplitude) in harmonicSeries){
+                            harmonicSeries[harmonic] = 0f
+                            updateSignal()
+                        }
+                    }
+                ) { Text("Reset") }
+            }
+
+        }
+
     }
 }
 
@@ -133,13 +155,20 @@ fun RowOfVolumeSliders(
 }
 
 @Composable
-fun VolumeSliderScreen(modifier: Modifier = Modifier, initialValue: Float = 0f){
+fun VolumeSliderScreen(
+    modifier: Modifier = Modifier,
+    initialValue: Float = 0f,
+    onValueChange: (Float) -> Unit
+){
     var amplitude by remember { mutableStateOf(initialValue) }
 
     VolumeSlider(
         modifier = modifier,
         value = amplitude,
-        onValueChange = { amplitude = it }
+        onValueChange = {
+            amplitude = it
+            onValueChange(it)
+        }
     )
 }
 
