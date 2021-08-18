@@ -16,11 +16,14 @@ class MainActivity : ComponentActivity() {
         audioEngine.start()
         audioEngine.masterSignal.signals.add(signal)
         setContent {
-            HarmonicViewer(
+            HarmonicSignalEditor(
                 modifier = Modifier.fillMaxSize(),
-                numSliders = Constants.NUM_HARMONICS,
                 signal = signal,
+                audioEngine = audioEngine
             )
+//            HarmonicSeriesScreen(
+//                modifier = Modifier.fillMaxSize()
+//            )
         }
 
     }

@@ -147,7 +147,7 @@ class PeriodicSignal(
 
 class HarmonicSignal(
     fundamental: Note,
-    harmonicSeries: Map<Int, Float> = mutableMapOf(),
+    val harmonicSeries: HarmonicSeries = HarmonicSeries(),
     amp: Float = 1f,
     autoNormalize: Boolean = true
 ): SignalCollection() {
@@ -170,12 +170,11 @@ class HarmonicSignal(
         this.fundamental = fundamental
         this.amp = amp
         this.autoNormalize = autoNormalize
-        updateHarmonicSeries(harmonicSeries)
-    }
-
-    fun updateHarmonicSeries(harmonicSeries: Map<Int, Float>){
-        for((overtone, amplitude) in harmonicSeries) {
-            signals[overtone-1].amp = amplitude
+        harmonicSeries.registerCallback {
+            for((overtone, amplitude) in harmonicSeries){
+                signals[overtone-1].amp = amplitude
+            }
+            log("harmonicSeries:\n$harmonicSeries")
         }
     }
 }

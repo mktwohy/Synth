@@ -15,6 +15,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
 fun log(text: String){ Log.d("m_tag",text) }
 
@@ -43,35 +46,41 @@ fun XYPlot(
     }
 }
 
+//@Composable
+//fun HarmonicSeriesScreen(
+//    modifier: Modifier = Modifier,
+//){
+//    val harmonicSeries by remember { mutableStateOf(HarmonicSeries()) }
+//    log("compose!")
+//    RowOfVolumeSliders(
+//        modifier = modifier.fillMaxHeight(0.50f),
+//        numSliders = Constants.NUM_HARMONICS,
+//        value = { sliderIndex -> harmonicSeries[sliderIndex+1]},
+//        onValueChange = { sliderIndex, value ->
+//            harmonicSeries[sliderIndex+1] = if(value < 0.01f) 0f else value
+//        }
+//    )
+//}
+
 
 @Composable
-fun HarmonicViewer(
+fun HarmonicSignalEditor(
     modifier: Modifier = Modifier,
-    numSliders: Int,
-    signal: HarmonicSignal = HarmonicSignal(Note.A_4),
+    signal: HarmonicSignal,
+    audioEngine: AudioEngine
 ){
-    var harmonicSeries = remember { mutableStateMapOf<Int,Float>() }
+    var recompose by remember { mutableStateOf(0) } //horrible fix, but forces it to recompose
+    val signalData by remember { mutableStateOf(audioEngine.floatBuffer) }
 
-    var signal by remember { mutableStateOf(signal) }
-
-    var signalData by remember {
-        mutableStateOf(FloatArray(AudioEngine.BUFFER_SIZE))
-    }
-
-    fun updateSignal(){
-        signal.updateHarmonicSeries(harmonicSeries)
-        signal.evaluateToBuffer(signalData, true)
-//        signalData = signal.evaluate(numPeriods, true)
-    }
-
+    Text(text = recompose.toString())
     Column(modifier) {
         RowOfVolumeSliders(
             modifier = Modifier.fillMaxHeight(0.50f),
-            numSliders = numSliders,
-            value = { sliderIndex -> harmonicSeries[sliderIndex+1] ?: 0f },
-            onValueChange = { sliderIndex, value ->
-                harmonicSeries[sliderIndex+1] = if(value < 0.01f) 0f else value
-                updateSignal()
+            numSliders = Constants.NUM_HARMONICS,
+            value = { sliderIndex -> signal.harmonicSeries[sliderIndex+1]},
+            onValueChange = { sliderIndex, sliderValue ->
+                signal.harmonicSeries[sliderIndex+1] = if(sliderValue < 0.01f) 0f else sliderValue
+                recompose++
             }
         )
         Row {
@@ -93,16 +102,38 @@ fun HarmonicViewer(
                 Button(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
-                        for((harmonic, amplitude) in harmonicSeries){
-                            harmonicSeries[harmonic] = 0f
-                            updateSignal()
-                        }
+                        signal.harmonicSeries.reset()
                     }
                 ) { Text("Reset") }
             }
 
         }
 
+    }
+}
+
+
+
+@Composable
+fun RowOfVolumeSliders(
+    modifier: Modifier = Modifier,
+    numSliders: Int = 1,
+    value: (Int) -> Float,
+    onValueChange: (Int, Float) -> Unit
+){
+    BoxWithConstraints(modifier = modifier){
+        val sliderWidth = this.maxWidth/numSliders
+        val sliderHeight = this.maxHeight
+
+        Row(modifier = Modifier) {
+            for(sliderIndex in 0 until numSliders){
+                VolumeSlider(
+                    modifier = Modifier.size(sliderWidth, sliderHeight),
+                    value = value(sliderIndex),
+                    onValueChange = { onValueChange(sliderIndex, it) }
+                )
+            }
+        }
     }
 }
 
@@ -125,29 +156,6 @@ fun RowOfVolumeSlidersScreen(
                 Text(
                     text = ((amplitudeState[sliderIndex] ?: 0f) * 100).toInt().toString(),
                     color = Color.White
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun RowOfVolumeSliders(
-    modifier: Modifier = Modifier,
-    numSliders: Int = 1,
-    value: (Int) -> Float,
-    onValueChange: (Int, Float) -> Unit
-){
-    BoxWithConstraints(modifier = modifier){
-        val sliderWidth = this.maxWidth/numSliders
-        val sliderHeight = this.maxHeight
-
-        Row(modifier = Modifier) {
-            for(sliderIndex in 0 until numSliders){
-                VolumeSlider(
-                    modifier = Modifier.size(sliderWidth, sliderHeight),
-                    value = value(sliderIndex),
-                    onValueChange = { onValueChange(sliderIndex, it) }
                 )
             }
         }
