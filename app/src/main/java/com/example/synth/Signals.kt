@@ -1,9 +1,8 @@
 package com.example.synth
 
 
-import androidx.compose.runtime.toMutableStateMap
-import com.example.synth.AudioEngine.Companion.SAMPLE_RATE
 import com.example.synth.Constants.TWO_PI
+import com.example.synth.Constants.SAMPLE_RATE
 import kotlin.math.*
 
 object Constants{
@@ -11,10 +10,9 @@ object Constants{
     const val MIN_16BIT_VALUE     = -32_768
     const val MAX_16BIT_VALUE     = 32_767
     const val NUM_HARMONICS       = 15
+    const val SAMPLE_RATE = 44100
+    const val BUFFER_SIZE = 512
 }
-
-interface SignalUpdatedListener{ fun onSignalUpdated(signal: Signal) }
-
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
@@ -29,7 +27,6 @@ abstract class Signal{
         val silence = { _: Int, _: Int ->
             0f
         }
-
     }
 
     abstract val period: Float
@@ -37,25 +34,28 @@ abstract class Signal{
 
     /** Guarantees that [evaluate] and [evaluateToBuffer] start at the beginning*/
     abstract fun reset()
+
     /** Returns the next value in the Signal's sequence */
     abstract fun evaluateNext(): Float
 
+    /** Returns the value at a given index */
+    abstract fun evaluateAt(i: Int): Float
+
     /** Evaluates the next n periods of the signal as a new array */
-    fun evaluate(
-        periods: Int,
-        startFromBeginning: Boolean
-    ): FloatArray{
-        if (startFromBeginning) reset()
-        return FloatArray(period.toInt() * periods){ evaluateNext() }
-    }
+    fun evaluate(periods: Int) =
+         FloatArray(period.toInt() * periods){ i -> evaluateAt(i) }
 
     /** Evaluates the next n periods of the signal to an existing array */
     fun evaluateToBuffer(
         destination: FloatArray,
         startFromBeginning: Boolean,
+        isolated: Boolean = false
     ) {
         if (startFromBeginning) reset()
-        destination.indices.forEach { i -> destination[i] = evaluateNext() }
+        if(isolated)
+            destination.indices.forEach { i -> destination[i] = evaluateAt(i) }
+        else
+            destination.indices.forEach { i -> destination[i] = evaluateNext() }
     }
 
     fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))
@@ -78,6 +78,13 @@ abstract class SignalCollection: Signal(){
     }
 
     override fun reset() { signals.forEach { it.reset() } }
+
+    override fun evaluateAt(i: Int): Float {
+        if (autoNormalize) normalize()
+        return signals.fold(0f){ sum, signal ->
+            sum + signal.evaluateAt(i) * amp
+        }
+    }
 
     override fun evaluateNext(): Float{
         if (autoNormalize) normalize()
@@ -109,7 +116,9 @@ object SilentSignal: Signal() {
     override var amp: Float = 0f
 
     override fun reset() { }
+    override fun evaluateAt(i: Int) = 0f
     override fun evaluateNext() = 0f
+
     override fun toString() = "SilentSignal"
 }
 
@@ -130,14 +139,13 @@ class PeriodicSignal(
     override val period
         get() = SAMPLE_RATE / freq
 
-    init{
-        this.amp = amp
-    }
+    init{ this.amp = amp }
 
     override fun reset() { index = 0 }
 
-    override fun evaluateNext() =
-        func(index++, freq) * amp
+    override fun evaluateAt(i: Int) = func(i, freq) * amp
+
+    override fun evaluateNext() = evaluateAt(index++)
 
     override fun toString(): String {
         val funcName = when(func){
@@ -218,6 +226,8 @@ fun main(){
     val s1 = PeriodicSignal(Note.A_4.freq, 1f)
     val s2 = PeriodicSignal(Note.A_5.freq,1f)
     val sum = SumSignal(s1, s2)
+
+    sum.plotInConsole()
 //    val sum3 = SumSignal(sum, harm)
 
 //    println(sum3)

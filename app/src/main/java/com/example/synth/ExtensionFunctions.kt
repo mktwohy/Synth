@@ -150,7 +150,7 @@ fun Signal.plotInConsole(
     val upperBound = (scale.toFloat()+1).toInt()
     val middle = (upperBound + lowerBound) / 2
 
-    val values = evaluate(periods, true)
+    val values = evaluate(periods)
     if(values.isEmpty()) return
     var min = values.minOrNull()!!
     var max = values.maxOrNull()!!

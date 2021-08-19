@@ -5,13 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import com.example.synth.Constants.BUFFER_SIZE
 
 
 class MainActivity : ComponentActivity() {
     private val signal = HarmonicSignal(Note.A_3)
     private val viewModel = HarmonicSignalViewModel(
         signal = signal,
-        buffer = FloatArray(AudioEngine.BUFFER_SIZE)
+        buffer = FloatArray(BUFFER_SIZE)
     )
     private val audioEngine = AudioEngine()
 
@@ -19,18 +20,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         audioEngine.start()
         audioEngine.masterSignal.signals.add(signal)
-        audioEngine.registerListener { viewModel.numBuffersPlayed.value++ }
-        audioEngine.registerListener { viewModel.buffer.value = it }
-        audioEngine.registerListener { viewModel.bufferCopy.value = viewModel.signalCopy.value.evaluate(4, true)}
+        audioEngine.registerListener {
+            viewModel.soundBuffer.value = it
+            viewModel.signal.value.evaluateToBuffer(
+                viewModel.plotBuffer.value,
+                false,
+                isolated = true
+            )
+        }
 
         setContent {
             HarmonicSignalEditor(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel
             )
-//            HarmonicSeriesScreen(
-//                modifier = Modifier.fillMaxSize()
-//            )
+
         }
 
     }

@@ -15,8 +15,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 fun log(text: String){ Log.d("m_tag",text) }
@@ -67,12 +65,8 @@ class HarmonicSignalViewModel(
     buffer: FloatArray
 ) : ViewModel(){
     val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
-    val signalCopy: MutableState<HarmonicSignal> = mutableStateOf(
-        HarmonicSignal(signal.fundamental, signal.harmonicSeries)
-    )
-    var buffer: MutableState<FloatArray> = mutableStateOf(buffer)
-    var bufferCopy: MutableState<FloatArray> = mutableStateOf(buffer)
-    val numBuffersPlayed: MutableState<Int> = mutableStateOf(0)
+    var soundBuffer: MutableState<FloatArray> = mutableStateOf(buffer)
+    var plotBuffer: MutableState<FloatArray> = mutableStateOf(buffer.copyOf())
 }
 
 @Composable
@@ -87,7 +81,6 @@ fun HarmonicSignalEditor(
     }
 
     Column(modifier) {
-//        Text(text = viewModel.numBuffersPlayed.value.toString(), color = Color.White)
         RowOfVolumeSliders(
             modifier = Modifier.fillMaxHeight(0.50f),
             numSliders = Constants.NUM_HARMONICS,
@@ -105,7 +98,7 @@ fun HarmonicSignalEditor(
                     .fillMaxWidth(0.9f)
                     .background(Color.Black),
                 color = Color.White,
-                data = viewModel.bufferCopy.value,
+                data = viewModel.plotBuffer.value,
             )
             Column {
                 VolumeSliderScreen(
@@ -113,20 +106,19 @@ fun HarmonicSignalEditor(
                         .fillMaxHeight(0.8f)
                         .fillMaxWidth(),
                     initialValue = viewModel.signal.value.amp,
-                    onValueChange = {
-                        viewModel.signal.value.amp = it
-                        viewModel.signalCopy.value.amp = it
-                    }
+                    onValueChange = { viewModel.signal.value.amp = it }
                 )
                 Button(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
                         sliderState.indices.forEach { sliderState[it] = 0f }
                         viewModel.signal.value.harmonicSeries.reset()
+                        for(i in viewModel.plotBuffer.value.indices){
+                            viewModel.plotBuffer.value[i] = 0f
+                        }
                     }
                 ) { Text("Reset") }
             }
-
         }
     }
 }

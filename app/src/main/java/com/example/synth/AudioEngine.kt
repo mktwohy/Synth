@@ -3,7 +3,9 @@ package com.example.synth
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import java.nio.FloatBuffer
+import com.example.synth.Constants.BUFFER_SIZE
+import com.example.synth.Constants.SAMPLE_RATE
+
 import java.util.*
 
 
@@ -32,8 +34,7 @@ import java.util.*
  */
 class AudioEngine{
     companion object{
-        const val SAMPLE_RATE = 44100
-        const val BUFFER_SIZE = 512
+
     }
 
     private var numBuffersPlayed = 0
