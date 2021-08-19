@@ -67,7 +67,11 @@ class HarmonicSignalViewModel(
     buffer: FloatArray
 ) : ViewModel(){
     val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
+    val signalCopy: MutableState<HarmonicSignal> = mutableStateOf(
+        HarmonicSignal(signal.fundamental, signal.harmonicSeries)
+    )
     var buffer: MutableState<FloatArray> = mutableStateOf(buffer)
+    var bufferCopy: MutableState<FloatArray> = mutableStateOf(buffer)
     val numBuffersPlayed: MutableState<Int> = mutableStateOf(0)
 }
 
@@ -101,7 +105,7 @@ fun HarmonicSignalEditor(
                     .fillMaxWidth(0.9f)
                     .background(Color.Black),
                 color = Color.White,
-                data = viewModel.buffer.value,
+                data = viewModel.bufferCopy.value,
             )
             Column {
                 VolumeSliderScreen(
@@ -109,7 +113,10 @@ fun HarmonicSignalEditor(
                         .fillMaxHeight(0.8f)
                         .fillMaxWidth(),
                     initialValue = viewModel.signal.value.amp,
-                    onValueChange = { viewModel.signal.value.amp = it }
+                    onValueChange = {
+                        viewModel.signal.value.amp = it
+                        viewModel.signalCopy.value.amp = it
+                    }
                 )
                 Button(
                     modifier = Modifier.fillMaxSize(),

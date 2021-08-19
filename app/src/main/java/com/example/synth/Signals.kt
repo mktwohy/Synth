@@ -41,13 +41,19 @@ abstract class Signal{
     abstract fun evaluateNext(): Float
 
     /** Evaluates the next n periods of the signal as a new array */
-    fun evaluate(periods: Int, startFromBeginning: Boolean): FloatArray{
+    fun evaluate(
+        periods: Int,
+        startFromBeginning: Boolean
+    ): FloatArray{
         if (startFromBeginning) reset()
         return FloatArray(period.toInt() * periods){ evaluateNext() }
     }
 
     /** Evaluates the next n periods of the signal to an existing array */
-    fun evaluateToBuffer(destination: FloatArray, startFromBeginning: Boolean) {
+    fun evaluateToBuffer(
+        destination: FloatArray,
+        startFromBeginning: Boolean,
+    ) {
         if (startFromBeginning) reset()
         destination.indices.forEach { i -> destination[i] = evaluateNext() }
     }

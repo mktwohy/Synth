@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
         audioEngine.masterSignal.signals.add(signal)
         audioEngine.registerListener { viewModel.numBuffersPlayed.value++ }
         audioEngine.registerListener { viewModel.buffer.value = it }
+        audioEngine.registerListener { viewModel.bufferCopy.value = viewModel.signalCopy.value.evaluate(4, true)}
 
         setContent {
             HarmonicSignalEditor(
