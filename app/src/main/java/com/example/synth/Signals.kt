@@ -5,15 +5,6 @@ import com.example.synth.Constants.TWO_PI
 import com.example.synth.Constants.SAMPLE_RATE
 import kotlin.math.*
 
-object Constants{
-    const val TWO_PI           = 2.0 * PI.toFloat()
-    const val MIN_16BIT_VALUE  = -32_768
-    const val MAX_16BIT_VALUE  = 32_767
-    const val NUM_HARMONICS    = 15
-    const val SAMPLE_RATE      = 44100
-    const val BUFFER_SIZE      = 512
-}
-
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
 abstract class Signal{
@@ -140,17 +131,17 @@ class PeriodicSignal(
                 value.isNaN() -> field = 0f
             }
         }
-    private var index: Int = 0
+    private var internalIndex: Int = 0
     override val period
         get() = SAMPLE_RATE / freq
 
     init{ this.amp = amp }
 
-    override fun reset() { index = 0 }
+    override fun reset() { internalIndex = 0 }
 
     override fun evaluateAt(i: Int) = func(i, freq) * amp
 
-    override fun evaluateNext() = evaluateAt(index++)
+    override fun evaluateNext() = evaluateAt(internalIndex++)
 
     override fun toString(): String {
         val funcName = when(func){

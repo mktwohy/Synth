@@ -37,7 +37,6 @@ class AudioEngine{
 
     }
 
-    private var numBuffersPlayed = 0
     private val callbacks = mutableSetOf<(FloatArray) -> Unit>()
     fun registerListener(onBufferUpdate: (FloatArray) -> Unit){
         callbacks.add(onBufferUpdate)
@@ -87,14 +86,12 @@ class AudioEngine{
                     if(signalBuffer.isNotEmpty()){
                         this.signals.clear()
                         this.signals.addAll(signalBuffer.poll()!!)
-//                        evaluateToBuffer(floatBuffer, true)
                     }
                     callbacks.forEach { it.invoke(floatBuffer) }
                     evaluateToBuffer(floatBuffer, true)
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
-                numBuffersPlayed++
             }
             audioTrack.stop()
             audioTrack.flush()

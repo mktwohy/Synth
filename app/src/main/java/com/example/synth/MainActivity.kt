@@ -21,7 +21,6 @@ class MainActivity : ComponentActivity() {
         audioEngine.start()
         audioEngine.masterSignal.signals.add(signal)
         audioEngine.registerListener {
-            viewModel.soundBuffer.value = it
             viewModel.signal.value.evaluateToBuffer(
                 viewModel.plotBuffer.value,
                 false,

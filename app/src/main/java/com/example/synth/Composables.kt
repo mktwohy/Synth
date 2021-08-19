@@ -44,28 +44,11 @@ fun XYPlot(
     }
 }
 
-//@Composable
-//fun HarmonicSeriesScreen(
-//    modifier: Modifier = Modifier,
-//){
-//    val harmonicSeries by remember { mutableStateOf(HarmonicSeries()) }
-//    log("compose!")
-//    RowOfVolumeSliders(
-//        modifier = modifier.fillMaxHeight(0.50f),
-//        numSliders = Constants.NUM_HARMONICS,
-//        value = { sliderIndex -> harmonicSeries[sliderIndex+1]},
-//        onValueChange = { sliderIndex, value ->
-//            harmonicSeries[sliderIndex+1] = if(value < 0.01f) 0f else value
-//        }
-//    )
-//}
-
 class HarmonicSignalViewModel(
     signal: HarmonicSignal,
     buffer: FloatArray
 ) : ViewModel(){
     val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
-    var soundBuffer: MutableState<FloatArray> = mutableStateOf(buffer)
     var plotBuffer: MutableState<FloatArray> = mutableStateOf(buffer.copyOf())
 }
 

@@ -54,8 +54,6 @@ class HarmonicSeries() : Iterable<Pair<Int, Float>>{
         invokeCallbacks()
     }
 
-
-
     override fun toString(): String {
         fun Int.length() = when(this) {
             0 -> 1
