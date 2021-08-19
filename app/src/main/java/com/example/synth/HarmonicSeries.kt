@@ -5,7 +5,7 @@ import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
 
-class HarmonicSeries() : Iterable<Pair<Int, Float>>{
+class HarmonicSeries : Iterable<Pair<Int, Float>>{
     companion object{
         val fundamental = { i: Int -> i == 1 }
         val odd         = { i: Int -> i % 2 != 0 }

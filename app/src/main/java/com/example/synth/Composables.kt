@@ -78,10 +78,18 @@ fun HarmonicSignalEditor(
             XYPlot(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.7f)
                     .background(Color.Black),
                 color = Color.White,
                 data = viewModel.plotBuffer.value,
+            )
+            VolumeSliderScreen(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.5f),
+                initialValue = 1f,
+                valueRange = 0.5f..1.5f,
+                onValueChange = { viewModel.signal.value.bend(it).also { log(it.toString()) } }
             )
             Column {
                 VolumeSliderScreen(
@@ -152,13 +160,16 @@ fun RowOfVolumeSlidersScreen(
 fun VolumeSliderScreen(
     modifier: Modifier = Modifier,
     initialValue: Float = 0f,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+
 ){
     var amplitude by remember { mutableStateOf(initialValue) }
 
     VolumeSlider(
         modifier = modifier,
         value = amplitude,
+        valueRange = valueRange,
         onValueChange = {
             amplitude = it
             onValueChange(it)
@@ -170,7 +181,8 @@ fun VolumeSliderScreen(
 fun VolumeSlider(
     modifier: Modifier,
     value: Float,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
 ){
     Column(
         modifier = modifier.border(width = 1.dp, color = Color.White),
@@ -189,6 +201,7 @@ fun VolumeSlider(
                     .requiredHeight(this.maxWidth)
                     .rotate(-90f),
                 value = value,
+                valueRange = valueRange,
                 onValueChange = onValueChange
             )
         }

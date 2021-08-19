@@ -131,15 +131,18 @@ class PeriodicSignal(
                 value.isNaN() -> field = 0f
             }
         }
-    private var internalIndex: Int = 0
+
     override val period
         get() = SAMPLE_RATE / freq
+
+    var bendMultiplier: Float = 1f
+    private var internalIndex: Int = 0
 
     init{ this.amp = amp }
 
     override fun reset() { internalIndex = 0 }
 
-    override fun evaluateAt(i: Int) = func(i, freq) * amp
+    override fun evaluateAt(i: Int) = func(i, freq*bendMultiplier) * amp
 
     override fun evaluateNext() = evaluateAt(internalIndex++)
 
@@ -150,19 +153,19 @@ class PeriodicSignal(
             silence -> "silence"
             else    -> "custom function"
         }
-        return "FuncSignal:\n\tfreq = $freq \n\tamp  = $amp \n\tfunc = $funcName"
+        return "FuncSignal:\n\tnote = $freq \n\tamp  = $amp \n\tfunc = $funcName"
     }
 }
 
 
 class HarmonicSignal(
-    fundamental: Float,
+    fundamental: Note,
     val harmonicSeries: HarmonicSeries = HarmonicSeries(),
     amp: Float = 1f,
     autoNormalize: Boolean = true
 ): SignalCollection() {
     override val signals = List(Constants.NUM_HARMONICS){ i ->
-        PeriodicSignal(fundamental*(i+1), 0f)
+        PeriodicSignal(fundamental.freq*(i+1), 0f)
     }
 
     override val period: Float
@@ -171,10 +174,14 @@ class HarmonicSignal(
     var fundamental = fundamental
         set(value){
             for(i in signals.indices) {
-                signals[i].freq = fundamental*(i+1)
+                signals[i].freq = fundamental.freq*(i+1)
             }
             field = value
         }
+
+    fun bend(multiplier: Float){
+        signals.forEach { it.bendMultiplier = multiplier }
+    }
 
     init {
         this.fundamental = fundamental
