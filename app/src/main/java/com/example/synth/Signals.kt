@@ -39,7 +39,7 @@ abstract class Signal{
         useInternalIndex: Boolean = false
     ) =
         if(useInternalIndex)
-            FloatArray(period.toInt() * periods){ i -> evaluateNext() }
+            FloatArray(period.toInt() * periods){ evaluateNext() }
         else
             FloatArray(period.toInt() * periods){ i -> evaluateAt(i) }
 
@@ -156,13 +156,13 @@ class PeriodicSignal(
 
 
 class HarmonicSignal(
-    fundamental: Note,
+    fundamental: Float,
     val harmonicSeries: HarmonicSeries = HarmonicSeries(),
     amp: Float = 1f,
     autoNormalize: Boolean = true
 ): SignalCollection() {
     override val signals = List(Constants.NUM_HARMONICS){ i ->
-        PeriodicSignal(fundamental.freq*(i+1), 0f)
+        PeriodicSignal(fundamental*(i+1), 0f)
     }
 
     override val period: Float
@@ -171,7 +171,7 @@ class HarmonicSignal(
     var fundamental = fundamental
         set(value){
             for(i in signals.indices) {
-                signals[i].freq = fundamental.freq*(i+1)
+                signals[i].freq = fundamental*(i+1)
             }
             field = value
         }

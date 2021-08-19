@@ -7,9 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import com.example.synth.Constants.BUFFER_SIZE
 
-
 class MainActivity : ComponentActivity() {
-    private val signal = HarmonicSignal(Note.A_3)
+    private val signal = HarmonicSignal(Note.A_3.freq)
     private val viewModel = HarmonicSignalViewModel(
         signal = signal,
         buffer = FloatArray(BUFFER_SIZE)
