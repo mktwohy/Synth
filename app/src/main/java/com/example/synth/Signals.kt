@@ -6,12 +6,12 @@ import com.example.synth.Constants.SAMPLE_RATE
 import kotlin.math.*
 
 object Constants{
-    const val TWO_PI              = 2.0 * PI.toFloat()
-    const val MIN_16BIT_VALUE     = -32_768
-    const val MAX_16BIT_VALUE     = 32_767
-    const val NUM_HARMONICS       = 15
-    const val SAMPLE_RATE = 44100
-    const val BUFFER_SIZE = 512
+    const val TWO_PI           = 2.0 * PI.toFloat()
+    const val MIN_16BIT_VALUE  = -32_768
+    const val MAX_16BIT_VALUE  = 32_767
+    const val NUM_HARMONICS    = 15
+    const val SAMPLE_RATE      = 44100
+    const val BUFFER_SIZE      = 512
 }
 
 /** Represents a time-varying signal.
@@ -32,30 +32,35 @@ abstract class Signal{
     abstract val period: Float
     abstract var amp: Float
 
-    /** Guarantees that [evaluate] and [evaluateToBuffer] start at the beginning*/
+    /** Resets the internal index,
+     * which guarantees that [evaluate] and [evaluateToBuffer] start at the beginning */
     abstract fun reset()
-
-    /** Returns the next value in the Signal's sequence */
-    abstract fun evaluateNext(): Float
 
     /** Returns the value at a given index */
     abstract fun evaluateAt(i: Int): Float
 
-    /** Evaluates the next n periods of the signal as a new array */
-    fun evaluate(periods: Int) =
-         FloatArray(period.toInt() * periods){ i -> evaluateAt(i) }
+    /** Uses the Signal's internal index to evaluate the next value in the Signal's sequence */
+    abstract fun evaluateNext(): Float
 
-    /** Evaluates the next n periods of the signal to an existing array */
+    /** Evaluates the next n periods of the signal as a new array */
+    fun evaluate(
+        periods: Int,
+        useInternalIndex: Boolean = false
+    ) =
+        if(useInternalIndex)
+            FloatArray(period.toInt() * periods){ i -> evaluateNext() }
+        else
+            FloatArray(period.toInt() * periods){ i -> evaluateAt(i) }
+
+    /** Evaluates the signal fill an existing array */
     fun evaluateToBuffer(
         destination: FloatArray,
-        startFromBeginning: Boolean,
-        isolated: Boolean = false
+        useInternalIndex: Boolean = false
     ) {
-        if (startFromBeginning) reset()
-        if(isolated)
-            destination.indices.forEach { i -> destination[i] = evaluateAt(i) }
-        else
+        if(useInternalIndex)
             destination.indices.forEach { i -> destination[i] = evaluateNext() }
+        else
+            destination.indices.forEach { i -> destination[i] = evaluateAt(i) }
     }
 
     fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))

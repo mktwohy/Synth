@@ -25,7 +25,6 @@ class MainActivity : ComponentActivity() {
             viewModel.signal.value.evaluateToBuffer(
                 viewModel.plotBuffer.value,
                 false,
-                isolated = true
             )
         }
 
