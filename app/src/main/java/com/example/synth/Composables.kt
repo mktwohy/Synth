@@ -76,15 +76,21 @@ fun HarmonicSignalEditor(
     modifier: Modifier = Modifier,
     viewModel: HarmonicSignalViewModel
 ){
+    val sliderState = remember {
+        mutableStateListOf<Float>().apply {
+            repeat(Constants.NUM_HARMONICS){ this.add(0f) }
+        }
+    }
 
     Column(modifier) {
-        Text(text = viewModel.numBuffersPlayed.value.toString(), color = Color.White)
         RowOfVolumeSliders(
             modifier = Modifier.fillMaxHeight(0.50f),
             numSliders = Constants.NUM_HARMONICS,
-            value = { sliderIndex -> viewModel.signal.component1().harmonicSeries[sliderIndex+1]},
+            value = { sliderIndex -> sliderState[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
-                viewModel.signal.component1().harmonicSeries[sliderIndex+1] = if(sliderValue < 0.01f) 0f else sliderValue
+                val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue
+                sliderState[sliderIndex] = newSliderValue
+                viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue
             }
         )
         Row {
@@ -93,6 +99,7 @@ fun HarmonicSignalEditor(
                     .fillMaxHeight()
                     .fillMaxWidth(0.9f)
                     .background(Color.Black),
+                color = Color.White,
                 data = viewModel.buffer.value,
             )
             Column {
@@ -100,19 +107,19 @@ fun HarmonicSignalEditor(
                     modifier = Modifier
                         .fillMaxHeight(0.8f)
                         .fillMaxWidth(),
-                    initialValue = viewModel.signal.component1().amp,
-                    onValueChange = { viewModel.signal.component1().amp = it }
+                    initialValue = viewModel.signal.value.amp,
+                    onValueChange = { viewModel.signal.value.amp = it }
                 )
                 Button(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
-                        viewModel.signal.component1().harmonicSeries.reset()
+                        sliderState.indices.forEach { sliderState[it] = 0f }
+                        viewModel.signal.value.harmonicSeries.reset()
                     }
                 ) { Text("Reset") }
             }
 
         }
-
     }
 }
 
