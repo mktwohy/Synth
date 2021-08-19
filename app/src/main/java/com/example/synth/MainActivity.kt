@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 
 
 class MainActivity : ComponentActivity() {
-    private val signal = HarmonicSignal(Note.B_1)
+    private val signal = HarmonicSignal(Note.A_3)
     private val viewModel = HarmonicSignalViewModel(
         signal = signal,
         buffer = FloatArray(AudioEngine.BUFFER_SIZE)

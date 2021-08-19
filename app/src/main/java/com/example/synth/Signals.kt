@@ -158,7 +158,7 @@ class HarmonicSignal(
     override val period: Float
         get() = signals.maxOfOrNull { it.period } ?: 1f
 
-    var fundamental = Note.A_4
+    var fundamental = fundamental
         set(value){
             for(i in signals.indices) {
                 signals[i].freq = fundamental.freq*(i+1)

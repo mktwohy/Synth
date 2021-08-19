@@ -83,6 +83,7 @@ fun HarmonicSignalEditor(
     }
 
     Column(modifier) {
+//        Text(text = viewModel.numBuffersPlayed.value.toString(), color = Color.White)
         RowOfVolumeSliders(
             modifier = Modifier.fillMaxHeight(0.50f),
             numSliders = Constants.NUM_HARMONICS,
