@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import kotlin.math.pow
 
 fun log(text: String){ Log.d("m_tag",text) }
 
@@ -71,7 +72,7 @@ fun HarmonicSignalEditor(
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue
                 viewModel.harmonicSliders[sliderIndex] = newSliderValue
-                viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue
+                viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue.pow(3)
             }
         )
         Row(Modifier.border(1.dp, Color.White),) {
@@ -108,7 +109,7 @@ fun HarmonicSignalEditor(
                     value = viewModel.volume.value,
                     onValueChange = {
                         viewModel.volume.value = it
-                        viewModel.signal.value.amp = it
+                        viewModel.signal.value.amp = it.pow(3)
                     }
                 )
                 Button(
