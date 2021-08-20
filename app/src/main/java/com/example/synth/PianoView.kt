@@ -13,6 +13,7 @@ import com.example.synth.Note.Companion.color
 import kotlin.system.measureTimeMillis
 
 
+
 //https://stackoverflow.com/questions/49365350/java-create-a-custom-event-and-listener
 interface PianoKeyEventListener{ fun onKeyUpdatedEvent(pressedPianoKeys: Set<Note>) }
 

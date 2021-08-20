@@ -15,6 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import kotlin.math.pow
@@ -26,12 +29,55 @@ class PianoViewModel(): ViewModel(){
 
 }
 
+fun getTopWidths(chunkIndex: Int) =
+    when(chunkIndex){
+        0 -> listOf(3/28f to White, 1/28f to Black)
+        1 -> listOf(1/28f to Black, 1/14f to White, 1/28f to Black)
+        2 -> listOf(1/28f to Black, 3/28f to White)
+        3 -> listOf(3/28f to White, 1/28f to Black)
+        4 -> listOf(1/28f to Black, 1/14f to White, 1/28f to Black)
+        5 -> listOf(1/28f to Black, 1/14f to White, 1/28f to Black)
+        6 -> listOf(1/28f to Black, 3/28f to White)
+        else -> listOf()
+    }
+
+
+
 @Composable
 fun Piano(
     modifier: Modifier,
-
 ){
+    BoxWithConstraints(modifier.background(Color.Green)) {
+        val height = this.maxHeight
+        val width = this.maxWidth
+        Column{
+            Row(
+                modifier = Modifier.fillMaxHeight(0.5f),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                for(i in 0..6){
+                    for((widthMultiplier, color) in getTopWidths(i)){
+                        Box(modifier = Modifier
+                                .size(width * widthMultiplier, height)
+                                .background(color)
+                                .border(0.5.dp, Black)
+                        )
+                    }
+                }
+            }
+            Row{
+                repeat(7){
+                    Box(modifier = Modifier
+                            .size(width * 1/7f, height)
+                            .background(White)
+                            .border(0.5.dp, Black)
+                    )
+                }
+            }
+        }
 
+
+    }
 }
 
 @Composable
@@ -91,18 +137,18 @@ fun HarmonicSignalEditor(
         Row(Modifier.border(1.dp, Color.White),) {
             XYPlot(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.8f)
-                    .background(Color.Black)
-                    .border(1.dp, Color.White),
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.8f)
+                        .background(Color.Black)
+                        .border(1.dp, Color.White),
                 color = Color(0.4f, 0.0f, 1f, 1f),
                 strokeWidth = 5f,
                 data = viewModel.plotBuffer.value,
             )
             VerticalSlider(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.5f),
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.5f),
                 value = viewModel.bendAmount.value,
                 valueRange = 0.5f..1.5f,
                 onValueChange = {
@@ -117,8 +163,8 @@ fun HarmonicSignalEditor(
             Column {
                 VerticalSlider(
                     modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .fillMaxWidth(),
+                            .fillMaxHeight(0.8f)
+                            .fillMaxWidth(),
                     value = viewModel.volume.value,
                     onValueChange = {
                         viewModel.volume.value = it
@@ -222,8 +268,8 @@ fun VerticalValueSlider(
     ){
         VerticalSlider(
             modifier = Modifier
-                .fillMaxHeight(0.9f)
-                .fillMaxWidth(),
+                    .fillMaxHeight(0.9f)
+                    .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
@@ -247,9 +293,9 @@ fun VerticalSlider(
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
         Slider(
             modifier = Modifier
-                .requiredWidth(this.maxHeight)
-                .requiredHeight(this.maxWidth)
-                .rotate(-90f),
+                    .requiredWidth(this.maxHeight)
+                    .requiredHeight(this.maxWidth)
+                    .rotate(-90f),
             value = value,
             valueRange = valueRange,
             onValueChange = onValueChange,

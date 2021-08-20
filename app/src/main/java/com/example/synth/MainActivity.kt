@@ -31,33 +31,33 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            Column {
-                HarmonicSignalEditor(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.8f),
-                    viewModel = viewModel
-                )
-                BoxWithConstraints {
-                    val width = this.maxWidth
-                    val height = this.maxHeight
-                    Row {
-                        repeat(7){
-                            Button(
-                                modifier = Modifier
-                                    .size(width/7, height)
-                                    .background(color = Color.White)
-                                    .border(width = 1.dp, color = Color.Black)
-                                ,
-                                onClick = { audioEngine.signalBuffer.offer(setOf(viewModel.signal.value)) }
-                            ) {
-
-                            }
-                        }
-                    }
-                }
-
-            }
+//            Column {
+//                HarmonicSignalEditor(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .fillMaxHeight(0.8f),
+//                    viewModel = viewModel
+//                )
+//                BoxWithConstraints {
+//                    val width = this.maxWidth
+//                    val height = this.maxHeight
+//                    Row {
+//                        repeat(7){
+//                            Button(
+//                                modifier = Modifier
+//                                    .size(width/7, height)
+//                                    .background(color = Color.White)
+//                                    .border(width = 1.dp, color = Color.Black)
+//                                ,
+//                                onClick = { audioEngine.signalBuffer.offer(setOf(viewModel.signal.value)) }
+//                            ) {
+//
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+        Piano(modifier = Modifier.fillMaxSize())
 
         }
 
