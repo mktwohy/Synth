@@ -50,6 +50,10 @@ class HarmonicSignalViewModel(
 ) : ViewModel(){
     val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
     var plotBuffer: MutableState<FloatArray> = mutableStateOf(buffer.copyOf())
+    var bendAmount: MutableState<Float> = mutableStateOf(1f)
+    var harmonicSliders = mutableStateListOf<Float>().apply {
+        repeat(Constants.NUM_HARMONICS){ this.add(0f) }
+    }
 }
 
 @Composable
@@ -57,20 +61,14 @@ fun HarmonicSignalEditor(
     modifier: Modifier = Modifier,
     viewModel: HarmonicSignalViewModel
 ){
-    val sliderState = remember {
-        mutableStateListOf<Float>().apply {
-            repeat(Constants.NUM_HARMONICS){ this.add(0f) }
-        }
-    }
-
     Column(modifier) {
         RowOfVolumeSliders(
             modifier = Modifier.fillMaxHeight(0.50f),
             numSliders = Constants.NUM_HARMONICS,
-            value = { sliderIndex -> sliderState[sliderIndex] },
+            value = { sliderIndex -> viewModel.harmonicSliders[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue
-                sliderState[sliderIndex] = newSliderValue
+                viewModel.harmonicSliders[sliderIndex] = newSliderValue
                 viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue
             }
         )
@@ -83,16 +81,23 @@ fun HarmonicSignalEditor(
                 color = Color.White,
                 data = viewModel.plotBuffer.value,
             )
-            VolumeSliderScreen(
+            VerticalSlider(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.5f),
-                initialValue = 1f,
+                value = viewModel.bendAmount.value,
                 valueRange = 0.5f..1.5f,
-                onValueChange = { viewModel.signal.value.bend(it).also { log(it.toString()) } }
+                onValueChange = {
+                    viewModel.bendAmount.value = it
+                    viewModel.signal.value.bend(it)
+                },
+                onValueChangeFinished = {
+                    viewModel.signal.value.bend(1f)
+                    viewModel.bendAmount.value = 1f
+                }
             )
             Column {
-                VolumeSliderScreen(
+                VerticalValueSliderScreen(
                     modifier = Modifier
                         .fillMaxHeight(0.8f)
                         .fillMaxWidth(),
@@ -102,8 +107,10 @@ fun HarmonicSignalEditor(
                 Button(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
-                        sliderState.indices.forEach { sliderState[it] = 0f }
                         viewModel.signal.value.harmonicSeries.reset()
+                        for(i in viewModel.harmonicSliders.indices){
+                            viewModel.harmonicSliders[i] = 0f
+                        }
                         for(i in viewModel.plotBuffer.value.indices){
                             viewModel.plotBuffer.value[i] = 0f
                         }
@@ -129,7 +136,7 @@ fun RowOfVolumeSliders(
 
         Row(modifier = Modifier) {
             for(sliderIndex in 0 until numSliders){
-                VolumeSlider(
+                VerticalValueSlider(
                     modifier = Modifier.size(sliderWidth, sliderHeight),
                     value = value(sliderIndex),
                     onValueChange = { onValueChange(sliderIndex, it) }
@@ -153,61 +160,78 @@ fun RowOfVolumeSlidersScreen(
         value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
         onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
     )
-
 }
 
 @Composable
-fun VolumeSliderScreen(
+fun VerticalValueSliderScreen(
     modifier: Modifier = Modifier,
     initialValue: Float = 0f,
     onValueChange: (Float) -> Unit,
+    onValueChangeFinished: (() -> Unit)? = null,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f
-
 ){
     var amplitude by remember { mutableStateOf(initialValue) }
 
-    VolumeSlider(
+    VerticalValueSlider(
         modifier = modifier,
         value = amplitude,
         valueRange = valueRange,
         onValueChange = {
             amplitude = it
             onValueChange(it)
-        }
+        },
+        onValueChangeFinished = onValueChangeFinished
     )
 }
 
 @Composable
-fun VolumeSlider(
+fun VerticalValueSlider(
     modifier: Modifier,
     value: Float,
     onValueChange: (Float) -> Unit,
+    onValueChangeFinished: (() -> Unit)? = null,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+
 ){
     Column(
         modifier = modifier.border(width = 1.dp, color = Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ){
-        BoxWithConstraints(
+        VerticalSlider(
             modifier = Modifier
                 .fillMaxHeight(0.9f)
                 .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Slider(
-                modifier = Modifier
-                    .requiredWidth(this.maxHeight)
-                    .requiredHeight(this.maxWidth)
-                    .rotate(-90f),
-                value = value,
-                valueRange = valueRange,
-                onValueChange = onValueChange
-            )
-        }
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            onValueChangeFinished = onValueChangeFinished
+        )
         Text(
             text = (value * 100).toInt().toString(),
             color = Color.White
+        )
+    }
+}
+
+@Composable
+fun VerticalSlider(
+    modifier: Modifier,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: (() -> Unit)? = null,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+){
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+        Slider(
+            modifier = Modifier
+                .requiredWidth(this.maxHeight)
+                .requiredHeight(this.maxWidth)
+                .rotate(-90f),
+            value = value,
+            valueRange = valueRange,
+            onValueChange = onValueChange,
+            onValueChangeFinished = onValueChangeFinished
         )
     }
 }

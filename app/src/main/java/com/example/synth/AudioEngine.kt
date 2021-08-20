@@ -33,10 +33,6 @@ import java.util.*
  * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
 class AudioEngine{
-    companion object{
-
-    }
-
     private val callbacks = mutableSetOf<(FloatArray) -> Unit>()
     fun registerListener(onBufferUpdate: (FloatArray) -> Unit){
         callbacks.add(onBufferUpdate)
