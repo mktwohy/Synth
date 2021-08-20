@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import androidx.compose.ui.graphics.Color
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.doOnNextLayout
 import com.example.synth.Note.Companion.color
@@ -111,7 +112,7 @@ class PianoGrid(
         var bottomRowIndex = 0
 
         for (key in pianoKeys) {
-            if (key.color() == Paints.WHITE) {
+            if (key.color() == Color.White) {
                 rectToPianoKey[topRow[topRowIndex]]       = key
                 rectToPianoKey[bottomRow[bottomRowIndex]] = key
                 topRowIndex++
@@ -174,16 +175,16 @@ class PianoView(context: Context, attrs: AttributeSet)
         super.onDraw(canvas)
         if (canvas == null) return
 
-        for (r in pianoGrid.topRow + pianoGrid.bottomRow) {
-            val k = pianoGrid.rectToPianoKey[r]!!
-            canvas.apply {
-                drawRect(r, k.color().paint)
-                if (k.color() == Paints.WHITE)
-                    drawLine(r.left, r.top, r.left, r.bottom, Paints.BLACK.paint)
-                if (k in pressedKeys.pianoKeys)
-                    drawRect(r, Paints.PURPLE.paint)
-            }
-        }
+//        for (r in pianoGrid.topRow + pianoGrid.bottomRow) {
+//            val k = pianoGrid.rectToPianoKey[r]!!
+//            canvas.apply {
+//                drawRect(r, k.color())
+//                if (k.color() == Color.White)
+//                    drawLine(r.left, r.top, r.left, r.bottom, Paints.BLACK.paint)
+//                if (k in pressedKeys.pianoKeys)
+//                    drawRect(r, Paints.PURPLE.paint)
+//            }
+//        }
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {

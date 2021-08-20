@@ -3,13 +3,8 @@ package com.example.synth
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.example.synth.Constants.BUFFER_SIZE
 
 class MainActivity : ComponentActivity() {
@@ -57,8 +52,9 @@ class MainActivity : ComponentActivity() {
 //                    }
 //                }
 //            }
-        Piano(modifier = Modifier.fillMaxSize())
-
+//        Piano(modifier = Modifier.fillMaxSize())
+//            PianoKey(modifier = Modifier.fillMaxSize(), note = Note.A_4)
+            Piano(modifier = Modifier.fillMaxSize(), Note.toList(4))
         }
 
     }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,9 +16,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import com.example.synth.Note.Companion.color
 import kotlin.math.pow
 
 fun log(text: String){ Log.d("m_tag",text) }
@@ -29,54 +28,55 @@ class PianoViewModel(): ViewModel(){
 
 }
 
-fun getTopWidths(chunkIndex: Int) =
-    when(chunkIndex){
-        0 -> listOf(3/28f to White, 1/28f to Black)
-        1 -> listOf(1/28f to Black, 1/14f to White, 1/28f to Black)
-        2 -> listOf(1/28f to Black, 3/28f to White)
-        3 -> listOf(3/28f to White, 1/28f to Black)
-        4 -> listOf(1/28f to Black, 1/14f to White, 1/28f to Black)
-        5 -> listOf(1/28f to Black, 1/14f to White, 1/28f to Black)
-        6 -> listOf(1/28f to Black, 3/28f to White)
-        else -> listOf()
+@Composable
+fun Piano(modifier: Modifier, notes: List<Note>){
+    BoxWithConstraints(modifier = modifier) {
+        val boxWidth = this.maxWidth
+        val boxHeight = this.maxHeight
+        Row(Modifier.fillMaxSize()) {
+            notes.filter { it.color() == White }.forEach { whiteNote ->
+                PianoKey(
+                    modifier = Modifier.width(boxWidth/7).fillMaxHeight(),
+                    note = whiteNote
+                )
+            }
+
+        }
     }
-
-
+}
 
 @Composable
-fun Piano(
-    modifier: Modifier,
-){
-    BoxWithConstraints(modifier.background(Color.Green)) {
-        val height = this.maxHeight
-        val width = this.maxWidth
-        Column{
-            Row(
-                modifier = Modifier.fillMaxHeight(0.5f),
-                horizontalArrangement = Arrangement.Center
+fun PianoKey(modifier: Modifier, note: Note){
+    val topWidthMultipliers = when(note.toString()[0]){
+        'C' -> listOf(3/4f, 1/4f)
+        'D' -> listOf(1/4f, 1/2f, 1/4f)
+        'E' -> listOf(1/4f, 3/4f)
+        'F' -> listOf(3/4f, 1/4f)
+        'G' -> listOf(1/4f, 1/2f, 1/4f)
+        'A' -> listOf(1/4f, 1/2f, 1/4f)
+        'B' -> listOf(1/4f, 3/4f)
+        else -> listOf()
+    }
+    BoxWithConstraints(modifier = modifier.border(1.dp, Black)){
+        val boxWidth = this.maxWidth
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(Modifier
+                    .fillMaxHeight(0.5f)
+                    .fillMaxWidth()
             ) {
-                for(i in 0..6){
-                    for((widthMultiplier, color) in getTopWidths(i)){
-                        Box(modifier = Modifier
-                                .size(width * widthMultiplier, height)
-                                .background(color)
-                                .border(0.5.dp, Black)
-                        )
-                    }
-                }
-            }
-            Row{
-                repeat(7){
-                    Box(modifier = Modifier
-                            .size(width * 1/7f, height)
-                            .background(White)
-                            .border(0.5.dp, Black)
+                for(multiplier in topWidthMultipliers){
+                    Box(Modifier
+                            .fillMaxHeight()
+                            .width(boxWidth * multiplier)
+                            .background(if (multiplier == 1/4f) Black else White)
                     )
                 }
             }
+            Box(Modifier
+                    .fillMaxSize()
+                    .background(White)
+            )
         }
-
-
     }
 }
 

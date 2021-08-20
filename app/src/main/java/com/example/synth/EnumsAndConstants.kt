@@ -2,6 +2,7 @@ package com.example.synth
 
 import android.graphics.Paint
 import android.util.Rational
+import androidx.compose.ui.graphics.Color
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.absoluteValue
@@ -164,7 +165,7 @@ enum class Note(val freq: Float) {
 
 
     companion object{
-        fun Note.color() = if(this.name[1] == '_') Paints.WHITE else Paints.BLACK
+        fun Note.color() = if(this.name[1] == '_') Color.White else Color.Black
 
         fun toList() = values().toList()
 
