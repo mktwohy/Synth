@@ -51,6 +51,7 @@ class HarmonicSignalViewModel(
     val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
     var plotBuffer: MutableState<FloatArray> = mutableStateOf(buffer.copyOf())
     var bendAmount: MutableState<Float> = mutableStateOf(1f)
+    var volume: MutableState<Float> = mutableStateOf(1f)
     var harmonicSliders = mutableStateListOf<Float>().apply {
         repeat(Constants.NUM_HARMONICS){ this.add(0f) }
     }
@@ -76,7 +77,7 @@ fun HarmonicSignalEditor(
             XYPlot(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.8f)
                     .background(Color.Black),
                 color = Color.White,
                 data = viewModel.plotBuffer.value,
@@ -97,16 +98,20 @@ fun HarmonicSignalEditor(
                 }
             )
             Column {
-                VerticalValueSliderScreen(
+                VerticalSlider(
                     modifier = Modifier
                         .fillMaxHeight(0.8f)
                         .fillMaxWidth(),
-                    initialValue = viewModel.signal.value.amp,
-                    onValueChange = { viewModel.signal.value.amp = it }
+                    value = viewModel.volume.value,
+                    onValueChange = {
+                        viewModel.volume.value = it
+                        viewModel.signal.value.amp = it
+                    }
                 )
                 Button(
                     modifier = Modifier.fillMaxSize(),
                     onClick = {
+                        viewModel.signal.value.reset()
                         viewModel.signal.value.harmonicSeries.reset()
                         for(i in viewModel.harmonicSliders.indices){
                             viewModel.harmonicSliders[i] = 0f
