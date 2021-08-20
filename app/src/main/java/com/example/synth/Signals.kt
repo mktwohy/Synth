@@ -171,12 +171,12 @@ class HarmonicSignal(
     override val period: Float
         get() = signals.maxOfOrNull { it.period } ?: 1f
 
-    var fundamental = fundamental
+    var fundamental: Note = Note.A_4
         set(value){
+            field = value
             for(i in signals.indices) {
                 signals[i].freq = fundamental.freq*(i+1)
             }
-            field = value
         }
 
     fun bend(multiplier: Float){
@@ -191,7 +191,6 @@ class HarmonicSignal(
             for((overtone, amplitude) in harmonicSeries){
                 signals[overtone-1].amp = amplitude
             }
-            log("harmonicSeries:\n$harmonicSeries")
         }
     }
 }
