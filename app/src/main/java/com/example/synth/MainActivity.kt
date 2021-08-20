@@ -13,6 +13,7 @@ class MainActivity : ComponentActivity() {
         signal = signal,
         buffer = FloatArray(BUFFER_SIZE)
     )
+    private val pianoViewModel = PianoViewModel(Note.toList(4))
     private val audioEngine = AudioEngine()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +55,10 @@ class MainActivity : ComponentActivity() {
 //            }
 //        Piano(modifier = Modifier.fillMaxSize())
 //            PianoKey(modifier = Modifier.fillMaxSize(), note = Note.A_4)
-            Piano(modifier = Modifier.fillMaxSize(), Note.toList(4))
+            Piano(
+                    modifier = Modifier.fillMaxSize(),
+                    viewModel = pianoViewModel
+            )
         }
 
     }

@@ -5,7 +5,6 @@ import android.util.Rational
 import androidx.compose.ui.graphics.Color
 import java.util.*
 import kotlin.math.PI
-import kotlin.math.absoluteValue
 
 object Constants{
     const val TWO_PI           = 2.0 * PI.toFloat()
@@ -165,29 +164,34 @@ enum class Note(val freq: Float) {
 
 
     companion object{
-        fun Note.color() = if(this.name[1] == '_') Color.White else Color.Black
+        //saving this as a static, immutable variable ensures that the memory is only allocated once,
+        //which makes methods like [transpose] and [toList] more memory efficient
+        private val notes = values().toList()
 
-        fun toList() = values().toList()
+        fun Note.color() =
+            if(this.name[1] == '_') Color.White else Color.Black
+
+        fun Note.color(isPressed: Boolean) =
+            if(isPressed) this.color() + Color(0.4f, 0.0f, 1f, 0.5f)
+            else this.color()
+
+
+        fun toList() = notes
 
         fun toList(start: Note, end: Note) =
             EnumSet.range(start, end).toList()
 
         fun toList(octave: Int) =
-            if (octave in 0..8) values().toList().subList(octave*12, (octave+1)*12)
+            if (octave in 0..8) notes.subList(octave*12, (octave+1)*12)
             else listOf()
 
         fun random() =
-            values().random()
+            notes.random()
 
-        fun Note.transpose(steps: Int): Note{
-            val allNotes = values().toList()
-            val newIndex = allNotes.indexOf(this) + steps
-            return allNotes[newIndex]
-        }
+        fun Note.transpose(steps: Int) =
+            notes[notes.indexOf(this) + steps]
 
-        val Note.octave
-            get() = name[2].toString().toInt()
-
-
+        operator fun Note.plus(steps: Int) = transpose(steps)
+        operator fun Note.minus(steps: Int) = transpose(-1*steps)
     }
 }

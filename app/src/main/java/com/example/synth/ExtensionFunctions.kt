@@ -1,9 +1,21 @@
 package com.example.synth
 
 import android.util.Rational
+import androidx.compose.ui.graphics.Color
 import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
 import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
 import java.lang.StringBuilder
+
+//----- Color -----//
+fun Color.mix(that: Color) =
+    Color(
+    this.red/2 + that.red/2,
+    this.green/2 + that.green/2,
+    this.blue/2 + that.blue/2,
+    this.alpha/2 + that.alpha/2
+    )
+
+operator fun Color.plus(that: Color) = this.mix(that)
 
 //----- Rational ----- //
 fun Rational.times(that: Int) = Rational(numerator*that, numerator)

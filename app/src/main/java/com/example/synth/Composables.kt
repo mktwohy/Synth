@@ -15,46 +15,57 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
+import com.example.synth.Note.Companion.minus
+import com.example.synth.Note.Companion.plus
 import kotlin.math.pow
 
 fun log(text: String){ Log.d("m_tag",text) }
 
-class PianoViewModel(): ViewModel(){
-    var notes = mutableStateListOf(Note.toList(4))
-
+class PianoViewModel(
+        notes: List<Note>
+): ViewModel(){
+    val notes = notes.toMutableStateList()
+    val pressedNotes = mutableStateListOf<Note>()
 }
 
 @Composable
-fun Piano(modifier: Modifier, notes: List<Note>){
+fun Piano(
+        modifier: Modifier,
+        viewModel: PianoViewModel
+){
     BoxWithConstraints(modifier = modifier) {
         val boxWidth = this.maxWidth
-        val boxHeight = this.maxHeight
         Row(Modifier.fillMaxSize()) {
-            notes.filter { it.color() == White }.forEach { whiteNote ->
+            viewModel.notes.filter { it.toString()[1] == '_' }.forEach { whiteNote ->
                 PianoKey(
-                    modifier = Modifier.width(boxWidth/7).fillMaxHeight(),
-                    note = whiteNote
+                    modifier = Modifier
+                            .width(boxWidth/7)
+                            .fillMaxHeight(),
+                    whiteNote = whiteNote,
+                    viewModel = viewModel
                 )
             }
-
         }
     }
 }
 
 @Composable
-fun PianoKey(modifier: Modifier, note: Note){
-    val topWidthMultipliers = when(note.toString()[0]){
-        'C' -> listOf(3/4f, 1/4f)
-        'D' -> listOf(1/4f, 1/2f, 1/4f)
-        'E' -> listOf(1/4f, 3/4f)
-        'F' -> listOf(3/4f, 1/4f)
-        'G' -> listOf(1/4f, 1/2f, 1/4f)
-        'A' -> listOf(1/4f, 1/2f, 1/4f)
-        'B' -> listOf(1/4f, 3/4f)
+fun PianoKey(
+        modifier: Modifier,
+        whiteNote: Note,
+        viewModel: PianoViewModel
+){
+    val topRowNotes = when(whiteNote.toString()[0]){
+        'C'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/2f)
+        'D'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 1/2f, (whiteNote+1) to 1/4f)
+        'E'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
+        'F'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/4f)
+        'G'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
+        'A'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
+        'B'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
         else -> listOf()
     }
     BoxWithConstraints(modifier = modifier.border(1.dp, Black)){
@@ -64,18 +75,20 @@ fun PianoKey(modifier: Modifier, note: Note){
                     .fillMaxHeight(0.5f)
                     .fillMaxWidth()
             ) {
-                for(multiplier in topWidthMultipliers){
+                for((note, multiplier) in topRowNotes){
                     Box(Modifier
                             .fillMaxHeight()
                             .width(boxWidth * multiplier)
-                            .background(if (multiplier == 1/4f) Black else White)
-                    )
+                            .background(note.color(note in viewModel.pressedNotes))
+                    ){ Text(text = "$note", color = Color.Blue) }
+                    log("$note : ${note in viewModel.pressedNotes}")
                 }
             }
             Box(Modifier
                     .fillMaxSize()
-                    .background(White)
-            )
+                    .background(whiteNote.color(whiteNote in viewModel.pressedNotes))
+            ){ Text(text = "$whiteNote", color = Color.Blue) }
+
         }
     }
 }
