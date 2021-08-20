@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,13 +74,15 @@ fun HarmonicSignalEditor(
                 viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue
             }
         )
-        Row {
+        Row(Modifier.border(1.dp, Color.White),) {
             XYPlot(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.8f)
-                    .background(Color.Black),
-                color = Color.White,
+                    .background(Color.Black)
+                    .border(1.dp, Color.White),
+                color = Color(0.4f, 0.0f, 1f, 1f),
+                strokeWidth = 5f,
                 data = viewModel.plotBuffer.value,
             )
             VerticalSlider(
