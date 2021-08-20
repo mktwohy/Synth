@@ -21,6 +21,19 @@ import kotlin.math.pow
 
 fun log(text: String){ Log.d("m_tag",text) }
 
+class PianoViewModel(): ViewModel(){
+    var notes = mutableStateListOf(Note.toList(4))
+
+}
+
+@Composable
+fun Piano(
+    modifier: Modifier,
+
+){
+
+}
+
 @Composable
 fun XYPlot(
     modifier: Modifier = Modifier,

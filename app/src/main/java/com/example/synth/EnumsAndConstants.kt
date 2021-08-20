@@ -2,6 +2,7 @@ package com.example.synth
 
 import android.graphics.Paint
 import android.util.Rational
+import java.util.*
 import kotlin.math.PI
 import kotlin.math.absoluteValue
 
@@ -167,12 +168,12 @@ enum class Note(val freq: Float) {
 
         fun toList() = values().toList()
 
-        fun toList(start: Int, end: Int) =
-            values().toList().subList(start, end)
+        fun toList(start: Note, end: Note) =
+            EnumSet.range(start, end).toList()
 
         fun toList(octave: Int) =
-            if (octave > 8) listOf()
-            else toList(octave*12, ((octave+1) * 12) )
+            if (octave in 0..8) values().toList().subList(octave*12, (octave+1)*12)
+            else listOf()
 
         fun random() =
             values().random()
