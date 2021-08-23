@@ -30,7 +30,7 @@ abstract class Signal{
     abstract fun reset()
 
     /** Returns the value at a given index */
-    abstract fun evaluateAt(i: Int): Float
+    abstract fun evaluateAt(angle: Float): Float
 
     /** Uses the Signal's internal index to evaluate the next value in the Signal's sequence */
     abstract fun evaluateNext(): Float
@@ -39,21 +39,23 @@ abstract class Signal{
     fun evaluate(
         periods: Int,
         useInternalIndex: Boolean = false
-    ) =
-        if(useInternalIndex)
-            FloatArray(period.toInt() * periods){ evaluateNext() }
-        else
-            FloatArray(period.toInt() * periods){ i -> evaluateAt(i) }
+    ): FloatArray{
+        val ret = FloatArray(period.toInt() * periods)
+        evaluateToBuffer(ret, useInternalIndex)
+        return ret
+    }
 
     /** Evaluates the signal fill an existing array */
     fun evaluateToBuffer(
         destination: FloatArray,
-        useInternalIndex: Boolean = false
+        useInternalClock: Boolean = false
     ) {
-        if(useInternalIndex)
+        if(useInternalClock)
             destination.indices.forEach { i -> destination[i] = evaluateNext() }
         else
-            destination.indices.forEach { i -> destination[i] = evaluateAt(i) }
+            destination.indices.forEach { i ->
+                destination[i] = evaluateAt((2f*i / destination.size) % 2f )
+            }
     }
 
     fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))
@@ -77,10 +79,10 @@ abstract class SignalCollection: Signal(){
 
     override fun reset() { signals.forEach { it.reset() } }
 
-    override fun evaluateAt(i: Int): Float {
+    override fun evaluateAt(angle: Float): Float {
         if (autoNormalize) normalize()
         return signals.fold(0f){ sum, signal ->
-            sum + signal.evaluateAt(i) * amp
+            sum + signal.evaluateAt(angle) * amp
         }
     }
 
@@ -114,19 +116,19 @@ object SilentSignal: Signal() {
     override var amp: Float = 0f
 
     override fun reset() { }
-    override fun evaluateAt(i: Int) = 0f
+    override fun evaluateAt(angle: Float) = 0f
     override fun evaluateNext() = 0f
 
     override fun toString() = "SilentSignal"
 }
 
 
-class PeriodicSignal2(
+class PeriodicSignal(
+    val clock: Clock = Clock(440f),
     amp: Float = 1f,
-    var func: (Float) -> Float = { angle -> sin(angle) },
-    val clock: Clock = Clock(440f)
+    var func: (Float) -> Float = { angle -> sin(angle*Constants.PI) },
 ): Signal() {
-    override var amp: Float = 1f
+    override var amp: Float = amp
         set(value) {
             when{
                 value >= 0f -> field = value
@@ -137,13 +139,9 @@ class PeriodicSignal2(
 
     var bendMultiplier: Float = 1f
 
-    init{ this.amp = amp }
-
     override fun reset() { this.clock.reset() }
 
-    override fun evaluateAt(i: Int) = 0f
-
-    fun evaluateAt(angle: Float) = func(angle) * amp
+    override fun evaluateAt(angle: Float) = func(angle) * amp
 
     override fun evaluateNext() = evaluateAt(clock.angle).also { clock.tick() }
 
@@ -157,43 +155,43 @@ class PeriodicSignal2(
         return "FuncSignal:\n\tnote = ${clock.frequency} \n\tamp  = $amp \n\tfunc = $funcName"
     }
 }
-
-class PeriodicSignal(
-    var freq: Float = 440f,
-    amp: Float = 1f,
-    var func: (Int, Float) -> Float = sine,
-): Signal() {
-    override var amp: Float = 1f
-        set(value) {
-            when{
-                value >= 0f -> field = value
-                value.isNaN() -> field = 0f
-            }
-        }
-    override val period
-        get() = SAMPLE_RATE / freq
-
-    var bendMultiplier: Float = 1f
-    private var internalIndex: Int = 0
-
-    init{ this.amp = amp }
-
-    override fun reset() { internalIndex = 0 }
-
-    override fun evaluateAt(i: Int) = func(i, freq*bendMultiplier) * amp
-
-    override fun evaluateNext() = evaluateAt(internalIndex++)
-
-    override fun toString(): String {
-        val funcName = when(func){
-            sine    -> "sine"
-            cosine  -> "cosine"
-            silence -> "silence"
-            else    -> "custom function"
-        }
-        return "FuncSignal:\n\tnote = $freq \n\tamp  = $amp \n\tfunc = $funcName"
-    }
-}
+//
+//class PeriodicSignal1(
+//    var freq: Float = 440f,
+//    amp: Float = 1f,
+//    var func: (Int, Float) -> Float = sine,
+//): Signal() {
+//    override var amp: Float = 1f
+//        set(value) {
+//            when{
+//                value >= 0f -> field = value
+//                value.isNaN() -> field = 0f
+//            }
+//        }
+//    override val period
+//        get() = SAMPLE_RATE / freq
+//
+//    var bendMultiplier: Float = 1f
+//    private var internalIndex: Int = 0
+//
+//    init{ this.amp = amp }
+//
+//    override fun reset() { internalIndex = 0 }
+//
+//    override fun evaluateAt(i: Int) = func(i, freq*bendMultiplier) * amp
+//
+//    override fun evaluateNext() = evaluateAt(internalIndex++)
+//
+//    override fun toString(): String {
+//        val funcName = when(func){
+//            sine    -> "sine"
+//            cosine  -> "cosine"
+//            silence -> "silence"
+//            else    -> "custom function"
+//        }
+//        return "FuncSignal:\n\tnote = $freq \n\tamp  = $amp \n\tfunc = $funcName"
+//    }
+//}
 
 
 class HarmonicSignal(
@@ -203,7 +201,7 @@ class HarmonicSignal(
     autoNormalize: Boolean = true
 ): SignalCollection() {
     override val signals = List(Constants.NUM_HARMONICS){ i ->
-        PeriodicSignal(fundamental.freq*(i+1), 0f)
+        PeriodicSignal(Clock(fundamental.freq*(i+1)), 0f)
     }
 
     override val period: Float
@@ -213,7 +211,7 @@ class HarmonicSignal(
         set(value){
             field = value
             for(i in signals.indices) {
-                signals[i].freq = fundamental.freq*(i+1)
+                signals[i].clock.frequency = fundamental.freq*(i+1)
             }
         }
 
@@ -263,10 +261,13 @@ class SumSignal(
 }
 
 fun main(){
-    val s1 = PeriodicSignal(Note.A_4.freq, 1f)
-    val s2 = PeriodicSignal(Note.A_5.freq,1f)
+    val s1 = PeriodicSignal(Clock(Note.A_4.freq))
+    val s2 = PeriodicSignal(Clock(Note.A_4.freq))
     val sum = SumSignal(s1, s2)
 
+    println(s1.evaluate(1).contentToString())
+
+    s1.plotInConsole()
     sum.plotInConsole()
 //    val sum3 = SumSignal(sum, harm)
 

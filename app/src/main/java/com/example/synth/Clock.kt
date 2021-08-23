@@ -19,7 +19,6 @@ class Clock(
 
     fun tick(){
         angle = (angle + (2f / period)) % 2f
-        println("$angle")
     }
 
     fun sync(that: Clock){

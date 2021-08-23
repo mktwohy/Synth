@@ -7,6 +7,7 @@ import java.util.*
 import kotlin.math.PI
 
 object Constants{
+    const val PI               = Math.PI.toFloat()
     const val TWO_PI           = 2.0 * PI.toFloat()
     const val MIN_16BIT_VALUE  = -32_768
     const val MAX_16BIT_VALUE  = 32_767
