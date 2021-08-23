@@ -5,6 +5,7 @@ class Clock(
     initAngle: Float = 0f
 ) {
     var period = 0f
+    var frequencyBend = 1f
     var frequency: Float = 0f
         set(value){
             field = value
@@ -18,7 +19,7 @@ class Clock(
     }
 
     fun tick(){
-        angle = (angle + (2f / period)) % 2f
+        angle = (angle + (2f / period*frequencyBend) ) % 2f
     }
 
     fun sync(that: Clock){

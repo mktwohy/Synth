@@ -137,7 +137,11 @@ class PeriodicSignal(
         }
     override val period get() = clock.period
 
-    var bendMultiplier: Float = 1f
+    var pitchBend: Float = 1f
+        set(value) {
+            field = value
+            clock.frequencyBend = pitchBend
+        }
 
     override fun reset() { this.clock.reset() }
 
@@ -216,7 +220,7 @@ class HarmonicSignal(
         }
 
     fun bend(multiplier: Float){
-        signals.forEach { it.bendMultiplier = multiplier }
+        signals.forEach { it.pitchBend = multiplier }
     }
 
     init {
