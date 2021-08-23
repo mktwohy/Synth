@@ -121,10 +121,11 @@ object SilentSignal: Signal() {
 }
 
 
-class PeriodicSignal(
-    var freq: Float = 440f,
+class PeriodicSignal2(
+    freq: Float = 440f,
     amp: Float = 1f,
-    var func: (Int, Float) -> Float = sine
+    var func: (Float) -> Float = { angle -> sin(angle) },
+    offset: Float = 0f
 ): Signal() {
     override var amp: Float = 1f
         set(value) {
@@ -133,10 +134,50 @@ class PeriodicSignal(
                 value.isNaN() -> field = 0f
             }
         }
+    override val period
+        get() = SAMPLE_RATE / clock.frequency
 
+    var bendMultiplier: Float = 1f
+    val clock: Clock = Clock(freq, offset)
+
+    init{ this.amp = amp }
+
+    override fun reset() { this.clock.reset() }
+
+    override fun evaluateAt(i: Int) = 0f
+
+    fun evaluateAt(angle: Float) = func(angle) * amp
+
+    override fun evaluateNext() = evaluateAt(clock.angle).also { clock.tick() }
+
+    override fun toString(): String {
+        val funcName = when(func){
+            sine    -> "sine"
+            cosine  -> "cosine"
+            silence -> "silence"
+            else    -> "custom function"
+        }
+        return "FuncSignal:\n\tnote = ${clock.frequency} \n\tamp  = $amp \n\tfunc = $funcName"
+    }
+}
+
+class PeriodicSignal(
+    var freq: Float = 440f,
+    amp: Float = 1f,
+    var func: (Int, Float) -> Float = sine,
+    var offset: Float = 0f
+): Signal() {
+    override var amp: Float = 1f
+        set(value) {
+            when{
+                value >= 0f -> field = value
+                value.isNaN() -> field = 0f
+            }
+        }
     override val period
         get() = SAMPLE_RATE / freq
 
+    var angle: Float = 0f
     var bendMultiplier: Float = 1f
     private var internalIndex: Int = 0
 

@@ -1,6 +1,7 @@
 package com.example.synth
 
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,11 +11,13 @@ import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
@@ -29,14 +32,19 @@ class PianoViewModel(
 ): ViewModel(){
     val notes = notes.toMutableStateList()
     val pressedNotes = mutableStateListOf<Note>()
+    var width = mutableStateOf(0.dp)
+    var height = mutableStateOf(0.dp)
+    val pianoGridTop = mutableStateListOf<Pair<Note, Float>>()
+    val pianoGridBottom = mutableStateListOf<Pair<Note, Float>>()
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun Piano(
         modifier: Modifier,
         viewModel: PianoViewModel
 ){
-    BoxWithConstraints(modifier = modifier) {
+    BoxWithConstraints{
         val boxWidth = this.maxWidth
         Row(Modifier.fillMaxSize()) {
             viewModel.notes.filter { it.toString()[1] == '_' }.forEach { whiteNote ->
@@ -52,6 +60,9 @@ fun Piano(
     }
 }
 
+
+
+@ExperimentalComposeUiApi
 @Composable
 fun PianoKey(
         modifier: Modifier,
@@ -76,19 +87,40 @@ fun PianoKey(
                     .fillMaxWidth()
             ) {
                 for((note, multiplier) in topRowNotes){
+                    viewModel.pianoGridTop.add(note to multiplier)
                     Box(Modifier
                             .fillMaxHeight()
                             .width(boxWidth * multiplier)
                             .background(note.color(note in viewModel.pressedNotes))
-                    ){ Text(text = "$note", color = Color.Blue) }
-                    log("$note : ${note in viewModel.pressedNotes}")
+                            .pointerInteropFilter {
+                                when(it.actionMasked){
+                                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
+                                    -> if(note !in viewModel.pressedNotes)
+                                        viewModel.pressedNotes.add(note)
+                                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE
+                                    -> viewModel.pressedNotes.remove(note)
+                                }
+                                true
+                            }
+                    )
                 }
             }
             Box(Modifier
                     .fillMaxSize()
                     .background(whiteNote.color(whiteNote in viewModel.pressedNotes))
-            ){ Text(text = "$whiteNote", color = Color.Blue) }
-
+                    .pointerInteropFilter {
+                        when(it.actionMasked){
+                            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
+                            -> if(whiteNote !in viewModel.pressedNotes)
+                                viewModel.pressedNotes.add(whiteNote)
+                            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE
+                            -> viewModel.pressedNotes.remove(whiteNote)
+                        }
+                        true
+                    }
+            ){
+                viewModel.pianoGridTop.add(whiteNote to 1/7f)
+            }
         }
     }
 }
