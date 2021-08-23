@@ -122,10 +122,9 @@ object SilentSignal: Signal() {
 
 
 class PeriodicSignal2(
-    freq: Float = 440f,
     amp: Float = 1f,
     var func: (Float) -> Float = { angle -> sin(angle) },
-    offset: Float = 0f
+    val clock: Clock = Clock(440f)
 ): Signal() {
     override var amp: Float = 1f
         set(value) {
@@ -134,11 +133,9 @@ class PeriodicSignal2(
                 value.isNaN() -> field = 0f
             }
         }
-    override val period
-        get() = SAMPLE_RATE / clock.frequency
+    override val period get() = clock.period
 
     var bendMultiplier: Float = 1f
-    val clock: Clock = Clock(freq, offset)
 
     init{ this.amp = amp }
 
@@ -165,7 +162,6 @@ class PeriodicSignal(
     var freq: Float = 440f,
     amp: Float = 1f,
     var func: (Int, Float) -> Float = sine,
-    var offset: Float = 0f
 ): Signal() {
     override var amp: Float = 1f
         set(value) {
@@ -177,7 +173,6 @@ class PeriodicSignal(
     override val period
         get() = SAMPLE_RATE / freq
 
-    var angle: Float = 0f
     var bendMultiplier: Float = 1f
     private var internalIndex: Int = 0
 
