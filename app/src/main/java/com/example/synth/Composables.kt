@@ -83,16 +83,6 @@ class PianoGrid(
     }
 }
 
-class PianoViewModel(
-        notes: List<Note>
-): ViewModel(){
-    val notes = notes.toMutableStateList()
-    val pressedNotes = mutableStateListOf<Note>()
-    var width = mutableStateOf(0.dp)
-    var height = mutableStateOf(0.dp)
-    val pianoGrid = PianoGrid(width, height, notes)
-}
-
 @ExperimentalComposeUiApi
 @Composable
 fun Piano(
@@ -177,19 +167,6 @@ fun XYPlot(
                 strokeWidth = strokeWidth
             )
         }
-    }
-}
-
-class HarmonicSignalViewModel(
-    signal: HarmonicSignal,
-    plotBuffer: FloatArray
-) : ViewModel(){
-    val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
-    var plotBuffer: MutableState<FloatArray> = mutableStateOf(plotBuffer)
-    var bendAmount: MutableState<Float> = mutableStateOf(1f)
-    var volume: MutableState<Float> = mutableStateOf(1f)
-    var harmonicSliders = mutableStateListOf<Float>().apply {
-        repeat(Constants.NUM_HARMONICS){ this.add(0f) }
     }
 }
 

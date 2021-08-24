@@ -104,7 +104,7 @@ object SilentSignal: Signal() {
 class PeriodicSignal(
     val clock: Clock = Clock(440f),
     amp: Float = 1f,
-    var func: (Float) -> Float = { angle -> sin(angle*Constants.PI) },
+    var waveShape: WaveShape = WaveShape.SINE
 ): Signal() {
     override var amp: Float = amp
         set(value) {
@@ -123,17 +123,11 @@ class PeriodicSignal(
 
     override fun reset() { this.clock.reset() }
 
-    override fun evaluateNext() =  func(clock.angle) * amp
+    override fun evaluateNext() = waveShape.function(clock.angle) * amp
         .also { clock.tick() }
 
     override fun toString(): String {
-        val funcName = when(func){
-            sine    -> "sine"
-            cosine  -> "cosine"
-            silence -> "silence"
-            else    -> "custom function"
-        }
-        return "FuncSignal:\n\tnote = ${clock.frequency} \n\tamp  = $amp \n\tfunc = $funcName"
+        return "FuncSignal:\n\tnote = ${clock.frequency} \n\tamp  = $amp \n\twaveShape = $waveShape"
     }
 }
 

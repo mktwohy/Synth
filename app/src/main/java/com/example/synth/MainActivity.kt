@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
     private val pianoViewModel = PianoViewModel(Note.toList(4))
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>().apply {
         pianoViewModel.notes.forEach{
-            this[it] = HarmonicSignal(it, plotSignal.harmonicSeries)
+            this[it] = HarmonicSignal(it, plotSignal.harmonicSeries, 1/7f)
         }
     }
 

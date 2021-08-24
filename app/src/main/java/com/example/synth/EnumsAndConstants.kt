@@ -5,6 +5,7 @@ import android.util.Rational
 import androidx.compose.ui.graphics.Color
 import java.util.*
 import kotlin.math.PI
+import kotlin.math.sin
 
 object Constants{
     const val PI               = Math.PI.toFloat()
@@ -14,6 +15,13 @@ object Constants{
     const val NUM_HARMONICS    = 15
     const val SAMPLE_RATE      = 44100
     const val BUFFER_SIZE      = 512
+}
+
+enum class WaveShape(val function: (Float) -> Float) {
+    SINE( { angle: Float -> sin(angle * Constants.PI) } ) ,
+    SAWTOOTH( { angle: Float -> 0f } ),
+    TRIANGLE( { angle: Float -> 0f } ),
+    SQUARE( { angle: Float -> 0f } ),
 }
 
 /** The [Paint]s used in the UI */
