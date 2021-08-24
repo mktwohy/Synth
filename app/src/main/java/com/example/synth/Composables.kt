@@ -1,23 +1,25 @@
 package com.example.synth
 
 import android.util.Log
-import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.graphics.Color.Companion.Blue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
@@ -27,6 +29,54 @@ import kotlin.math.pow
 
 fun log(text: String){ Log.d("m_tag",text) }
 
+fun topRowNoteRatios(whiteNote: Note) =
+    when(whiteNote.toString()[0]) {
+        'C' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
+        'D' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 1/2f, (whiteNote + 1) to 1/4f)
+        'E' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 3/4f)
+        'F' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
+        'G' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 2/4f, (whiteNote + 1) to 1/4f)
+        'A' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 2/4f, (whiteNote + 1) to 1/4f)
+        'B' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 3/4f)
+        else -> listOf()
+    }
+
+class PianoGrid(
+    val width: MutableState<Dp>,
+    val height: MutableState<Dp>,
+    var notes: List<Note>){
+    val topRow = mutableListOf<Pair<Note, Dp>>()
+    val bottomRow = mutableListOf<Pair<Note, Dp>>()
+
+    fun recalculateWidths(){
+        topRow.clear()
+        bottomRow.clear()
+        val whiteNotes = notes.filter { it.name[1] == '_' }
+        whiteNotes.forEach { whiteNote ->
+            for((note, ratio) in topRowNoteRatios(whiteNote)){
+                topRow.add(note to width.value * ratio/whiteNotes.size)
+            }
+            bottomRow.add(whiteNote to width.value / whiteNotes.size)
+        }
+    }
+
+//    fun findKeyAt(x: Float, y: Float): Note? {
+//        var cumSum = 0f
+//        fun searchRow(row: List<Dp>): Note?{
+//            cumSum = 0f
+//            for (width in row){
+//                if (width.toFloat() in cumSum..cumSum+width)
+//            }
+//
+//            return null
+//        }
+//        return if (y < height / 2)
+//            searchRow(topRow)
+//        else
+//            searchRow(bottomRow)
+//    }
+}
+
 class PianoViewModel(
         notes: List<Note>
 ): ViewModel(){
@@ -34,99 +84,98 @@ class PianoViewModel(
     val pressedNotes = mutableStateListOf<Note>()
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
-    val pianoGridTop = mutableStateListOf<Pair<Note, Float>>()
-    val pianoGridBottom = mutableStateListOf<Pair<Note, Float>>()
+    val pianoGrid = PianoGrid(width, height, notes)
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun Piano(
         modifier: Modifier,
         viewModel: PianoViewModel
 ){
-    BoxWithConstraints{
-        val boxWidth = this.maxWidth
-        Row(Modifier.fillMaxSize()) {
-            viewModel.notes.filter { it.toString()[1] == '_' }.forEach { whiteNote ->
-                PianoKey(
-                    modifier = Modifier
-                        .width(boxWidth / 7)
-                        .fillMaxHeight(),
-                    whiteNote = whiteNote,
-                    viewModel = viewModel
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { log(viewModel.pianoGrid.findKeyAt(it.x, it.y).toString()) }
                 )
             }
+    ){
+        if(viewModel.width.value != this.maxWidth
+            || viewModel.height.value != this.maxHeight
+        ){
+            viewModel.width.value = this.maxWidth
+            viewModel.height.value = this.maxHeight
+            viewModel.pianoGrid.recalculateWidths()
+            log(viewModel.pianoGrid.topRow.toString())
         }
-    }
-}
 
-
-
-@ExperimentalComposeUiApi
-@Composable
-fun PianoKey(
-        modifier: Modifier,
-        whiteNote: Note,
-        viewModel: PianoViewModel
-){
-    val topRowNotes = when(whiteNote.toString()[0]){
-        'C'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/2f)
-        'D'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 1/2f, (whiteNote+1) to 1/4f)
-        'E'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
-        'F'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/4f)
-        'G'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
-        'A'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
-        'B'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
-        else -> listOf()
-    }
-    BoxWithConstraints(modifier = modifier.border(1.dp, Black)){
-        val boxWidth = this.maxWidth
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                Modifier
-                    .fillMaxHeight(0.5f)
-                    .fillMaxWidth()
-            ) {
-                for((note, multiplier) in topRowNotes){
-                    viewModel.pianoGridTop.add(note to multiplier)
-                    Box(
-                        Modifier
-                            .fillMaxHeight()
-                            .width(boxWidth * multiplier)
-                            .background(note.color(note in viewModel.pressedNotes))
-                            .pointerInteropFilter {
-                                when (it.actionMasked) {
-                                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
-                                    -> if (note !in viewModel.pressedNotes)
-                                        viewModel.pressedNotes.add(note)
-                                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE
-                                    -> viewModel.pressedNotes.remove(note)
-                                }
-                                true
-                            }
-                    )
+        Column(Modifier.fillMaxSize()) {
+            for(row in listOf(viewModel.pianoGrid.topRow, viewModel.pianoGrid.bottomRow) ){
+                Row(Modifier.size(viewModel.width.value, viewModel.height.value/2)) {
+                    for ((note, width) in row){
+                        Box(
+                            modifier = Modifier
+                                .size(width, viewModel.height.value / 2)
+                                .background(note.color(note in viewModel.pressedNotes))
+//                                .border(1.dp, Black)
+                        ){
+                            Text(text = "$note", color = Blue)
+                        }
+                    }
                 }
             }
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(whiteNote.color(whiteNote in viewModel.pressedNotes))
-                    .pointerInteropFilter {
-                        when (it.actionMasked) {
-                            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
-                            -> if (whiteNote !in viewModel.pressedNotes)
-                                viewModel.pressedNotes.add(whiteNote)
-                            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE
-                            -> viewModel.pressedNotes.remove(whiteNote)
-                        }
-                        true
-                    }
-            ){
-                viewModel.pianoGridTop.add(whiteNote to 1/7f)
-            }
         }
+
     }
 }
+
+
+
+//@Composable
+//fun PianoKey(
+//        modifier: Modifier,
+//        whiteNote: Note,
+//        viewModel: PianoViewModel
+//){
+//    val topRowNotes = when(whiteNote.toString()[0]){
+//        'C'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/2f)
+//        'D'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 1/2f, (whiteNote+1) to 1/4f)
+//        'E'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
+//        'F'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/4f)
+//        'G'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
+//        'A'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
+//        'B'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
+//        else -> listOf()
+//    }
+//    BoxWithConstraints(modifier = modifier.border(1.dp, Black)){
+//        val boxWidth = this.maxWidth
+//        Column(modifier = Modifier.fillMaxSize()) {
+//            Row(
+//                Modifier
+//                    .fillMaxHeight(0.5f)
+//                    .fillMaxWidth()
+//            ) {
+//                for((note, multiplier) in topRowNotes){
+//                    viewModel.pianoGridTop.add(note to multiplier)
+//                    Box(
+//                        Modifier
+//                            .fillMaxHeight()
+//                            .width(boxWidth * multiplier)
+//                            .background(note.color(note in viewModel.pressedNotes))
+//                    )
+//                }
+//            }
+//            Box(
+//                Modifier
+//                    .fillMaxSize()
+//                    .background(whiteNote.color(whiteNote in viewModel.pressedNotes))
+//            ){
+//                viewModel.pianoGridTop.add(whiteNote to 1/7f)
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun XYPlot(
