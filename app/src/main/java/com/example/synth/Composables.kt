@@ -50,8 +50,8 @@ fun Piano(
             viewModel.notes.filter { it.toString()[1] == '_' }.forEach { whiteNote ->
                 PianoKey(
                     modifier = Modifier
-                            .width(boxWidth/7)
-                            .fillMaxHeight(),
+                        .width(boxWidth / 7)
+                        .fillMaxHeight(),
                     whiteNote = whiteNote,
                     viewModel = viewModel
                 )
@@ -82,20 +82,22 @@ fun PianoKey(
     BoxWithConstraints(modifier = modifier.border(1.dp, Black)){
         val boxWidth = this.maxWidth
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(Modifier
+            Row(
+                Modifier
                     .fillMaxHeight(0.5f)
                     .fillMaxWidth()
             ) {
                 for((note, multiplier) in topRowNotes){
                     viewModel.pianoGridTop.add(note to multiplier)
-                    Box(Modifier
+                    Box(
+                        Modifier
                             .fillMaxHeight()
                             .width(boxWidth * multiplier)
                             .background(note.color(note in viewModel.pressedNotes))
                             .pointerInteropFilter {
-                                when(it.actionMasked){
+                                when (it.actionMasked) {
                                     MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
-                                    -> if(note !in viewModel.pressedNotes)
+                                    -> if (note !in viewModel.pressedNotes)
                                         viewModel.pressedNotes.add(note)
                                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE
                                     -> viewModel.pressedNotes.remove(note)
@@ -105,13 +107,14 @@ fun PianoKey(
                     )
                 }
             }
-            Box(Modifier
+            Box(
+                Modifier
                     .fillMaxSize()
                     .background(whiteNote.color(whiteNote in viewModel.pressedNotes))
                     .pointerInteropFilter {
-                        when(it.actionMasked){
+                        when (it.actionMasked) {
                             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
-                            -> if(whiteNote !in viewModel.pressedNotes)
+                            -> if (whiteNote !in viewModel.pressedNotes)
                                 viewModel.pressedNotes.add(whiteNote)
                             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE
                             -> viewModel.pressedNotes.remove(whiteNote)
@@ -152,10 +155,10 @@ fun XYPlot(
 
 class HarmonicSignalViewModel(
     signal: HarmonicSignal,
-    buffer: FloatArray
+    plotBuffer: FloatArray
 ) : ViewModel(){
     val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
-    var plotBuffer: MutableState<FloatArray> = mutableStateOf(buffer.copyOf())
+    var plotBuffer: MutableState<FloatArray> = mutableStateOf(plotBuffer)
     var bendAmount: MutableState<Float> = mutableStateOf(1f)
     var volume: MutableState<Float> = mutableStateOf(1f)
     var harmonicSliders = mutableStateListOf<Float>().apply {
@@ -164,72 +167,99 @@ class HarmonicSignalViewModel(
 }
 
 @Composable
-fun HarmonicSignalEditor(
+fun PitchBend(modifier: Modifier = Modifier, viewModel: HarmonicSignalViewModel){
+    VerticalSlider(
+        modifier = modifier,
+        value = viewModel.bendAmount.value,
+        valueRange = 0.5f..1.5f,
+        onValueChange = {
+            viewModel.bendAmount.value = it
+            viewModel.signal.value.bend(it)
+        },
+        onValueChangeFinished = {
+            viewModel.signal.value.bend(1f)
+            viewModel.bendAmount.value = 1f
+        }
+    )
+}
+
+@Composable
+fun Volume(
+    modifier: Modifier = Modifier,
+    viewModel: HarmonicSignalViewModel
+){
+    Column(modifier = modifier) {
+        VerticalSlider(
+            modifier = Modifier
+                .fillMaxHeight(0.8f)
+                .fillMaxWidth(),
+            value = viewModel.volume.value,
+            onValueChange = {
+                viewModel.volume.value = it
+                viewModel.signal.value.amp = it.pow(2)
+            }
+        )
+        Button(
+            modifier = Modifier.fillMaxSize(),
+            onClick = {
+                viewModel.signal.value.reset()
+                viewModel.signal.value.harmonicSeries.reset()
+                for(i in viewModel.harmonicSliders.indices){
+                    viewModel.harmonicSliders[i] = 0f
+                }
+                for(i in viewModel.plotBuffer.value.indices){
+                    viewModel.plotBuffer.value[i] = 0f
+                }
+            }
+        ) { Text("Reset") }
+    }
+}
+
+@Composable
+fun HarmonicSeriesEditor(
+    modifier: Modifier = Modifier,
+    viewModel: HarmonicSignalViewModel
+){
+    RowOfVolumeSliders(
+        modifier = modifier,
+        numSliders = Constants.NUM_HARMONICS,
+        value = { sliderIndex -> viewModel.harmonicSliders[sliderIndex] },
+        onValueChange = { sliderIndex, sliderValue ->
+            val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue
+            viewModel.harmonicSliders[sliderIndex] = newSliderValue
+            viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue.pow(3)
+        }
+    )
+}
+
+@Composable
+fun Main(
     modifier: Modifier = Modifier,
     viewModel: HarmonicSignalViewModel
 ){
     Column(modifier) {
-        RowOfVolumeSliders(
-            modifier = Modifier.fillMaxHeight(0.50f),
-            numSliders = Constants.NUM_HARMONICS,
-            value = { sliderIndex -> viewModel.harmonicSliders[sliderIndex] },
-            onValueChange = { sliderIndex, sliderValue ->
-                val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue
-                viewModel.harmonicSliders[sliderIndex] = newSliderValue
-                viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue.pow(3)
-            }
+        HarmonicSeriesEditor(
+            modifier = modifier.fillMaxHeight(0.50f),
+            viewModel = viewModel
         )
         Row(Modifier.border(1.dp, Color.White),) {
             XYPlot(
                 modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(0.8f)
-                        .background(Color.Black)
-                        .border(1.dp, Color.White),
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.8f)
+                    .background(Black)
+                    .border(1.dp, Color.White),
                 color = Color(0.4f, 0.0f, 1f, 1f),
                 strokeWidth = 5f,
                 data = viewModel.plotBuffer.value,
             )
-            VerticalSlider(
+            PitchBend(
                 modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(0.5f),
-                value = viewModel.bendAmount.value,
-                valueRange = 0.5f..1.5f,
-                onValueChange = {
-                    viewModel.bendAmount.value = it
-                    viewModel.signal.value.bend(it)
-                },
-                onValueChangeFinished = {
-                    viewModel.signal.value.bend(1f)
-                    viewModel.bendAmount.value = 1f
-                }
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.5f),
+                viewModel = viewModel
             )
-            Column {
-                VerticalSlider(
-                    modifier = Modifier
-                            .fillMaxHeight(0.8f)
-                            .fillMaxWidth(),
-                    value = viewModel.volume.value,
-                    onValueChange = {
-                        viewModel.volume.value = it
-                        viewModel.signal.value.amp = it.pow(3)
-                    }
-                )
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = {
-                        viewModel.signal.value.reset()
-                        viewModel.signal.value.harmonicSeries.reset()
-                        for(i in viewModel.harmonicSliders.indices){
-                            viewModel.harmonicSliders[i] = 0f
-                        }
-                        for(i in viewModel.plotBuffer.value.indices){
-                            viewModel.plotBuffer.value[i] = 0f
-                        }
-                    }
-                ) { Text("Reset") }
-            }
+            Volume(viewModel = viewModel)
         }
     }
 }
@@ -313,8 +343,8 @@ fun VerticalValueSlider(
     ){
         VerticalSlider(
             modifier = Modifier
-                    .fillMaxHeight(0.9f)
-                    .fillMaxWidth(),
+                .fillMaxHeight(0.9f)
+                .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
@@ -338,9 +368,9 @@ fun VerticalSlider(
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
         Slider(
             modifier = Modifier
-                    .requiredWidth(this.maxHeight)
-                    .requiredHeight(this.maxWidth)
-                    .rotate(-90f),
+                .requiredWidth(this.maxHeight)
+                .requiredHeight(this.maxWidth)
+                .rotate(-90f),
             value = value,
             valueRange = valueRange,
             onValueChange = onValueChange,

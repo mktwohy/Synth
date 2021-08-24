@@ -42,7 +42,7 @@ class AudioEngine{
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false
-    private val floatBuffer = FloatArray(BUFFER_SIZE)
+    val floatBuffer = FloatArray(BUFFER_SIZE)
     private val shortBuffer = ShortArray(BUFFER_SIZE)
     private val audioTrack = AudioTrack.Builder()
         .setAudioAttributes(
@@ -84,7 +84,7 @@ class AudioEngine{
                         this.signals.addAll(signalBuffer.poll()!!)
                     }
                     callbacks.forEach { it.invoke(floatBuffer) }
-                    evaluateToBuffer(floatBuffer, true)
+                    evaluateToBuffer(floatBuffer)
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)

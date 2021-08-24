@@ -36,26 +36,15 @@ abstract class Signal{
     abstract fun evaluateNext(): Float
 
     /** Evaluates the next n periods of the signal as a new array */
-    fun evaluate(
-        periods: Int,
-        useInternalIndex: Boolean = false
-    ): FloatArray{
+    fun evaluate(periods: Int): FloatArray{
         val ret = FloatArray(period.toInt() * periods)
-        evaluateToBuffer(ret, useInternalIndex)
+        evaluateToBuffer(ret)
         return ret
     }
 
     /** Evaluates the signal fill an existing array */
-    fun evaluateToBuffer(
-        destination: FloatArray,
-        useInternalClock: Boolean = false
-    ) {
-        if(useInternalClock)
-            destination.indices.forEach { i -> destination[i] = evaluateNext() }
-        else
-            destination.indices.forEach { i ->
-                destination[i] = evaluateAt((2f*i / destination.size) % 2f )
-            }
+    fun evaluateToBuffer(destination: FloatArray) {
+        destination.indices.forEach { i -> destination[i] = evaluateNext() }
     }
 
     fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))
@@ -81,8 +70,9 @@ abstract class SignalCollection: Signal(){
 
     override fun evaluateAt(angle: Float): Float {
         if (autoNormalize) normalize()
+
         return signals.fold(0f){ sum, signal ->
-            sum + signal.evaluateAt(angle) * amp
+            sum + signal.evaluateAt(angle * signal.period / this.period) * amp
         }
     }
 
@@ -159,44 +149,6 @@ class PeriodicSignal(
         return "FuncSignal:\n\tnote = ${clock.frequency} \n\tamp  = $amp \n\tfunc = $funcName"
     }
 }
-//
-//class PeriodicSignal1(
-//    var freq: Float = 440f,
-//    amp: Float = 1f,
-//    var func: (Int, Float) -> Float = sine,
-//): Signal() {
-//    override var amp: Float = 1f
-//        set(value) {
-//            when{
-//                value >= 0f -> field = value
-//                value.isNaN() -> field = 0f
-//            }
-//        }
-//    override val period
-//        get() = SAMPLE_RATE / freq
-//
-//    var bendMultiplier: Float = 1f
-//    private var internalIndex: Int = 0
-//
-//    init{ this.amp = amp }
-//
-//    override fun reset() { internalIndex = 0 }
-//
-//    override fun evaluateAt(i: Int) = func(i, freq*bendMultiplier) * amp
-//
-//    override fun evaluateNext() = evaluateAt(internalIndex++)
-//
-//    override fun toString(): String {
-//        val funcName = when(func){
-//            sine    -> "sine"
-//            cosine  -> "cosine"
-//            silence -> "silence"
-//            else    -> "custom function"
-//        }
-//        return "FuncSignal:\n\tnote = $freq \n\tamp  = $amp \n\tfunc = $funcName"
-//    }
-//}
-
 
 class HarmonicSignal(
     fundamental: Note,
@@ -204,12 +156,10 @@ class HarmonicSignal(
     amp: Float = 1f,
     autoNormalize: Boolean = true
 ): SignalCollection() {
+    override val period = SAMPLE_RATE / fundamental.freq
     override val signals = List(Constants.NUM_HARMONICS){ i ->
         PeriodicSignal(Clock(fundamental.freq*(i+1)), 0f)
     }
-
-    override val period: Float
-        get() = signals.maxOfOrNull { it.period } ?: 1f
 
     var fundamental: Note = Note.A_4
         set(value){
@@ -246,7 +196,6 @@ class SumSignal(
             : this(signal.toSet(), amp, autoNormalize)
 
     override val signals = mutableSetOf<Signal>()
-
     override val period
         get() = signals.map{ it.period.toInt() }.lcm().toFloat()
 
@@ -266,13 +215,14 @@ class SumSignal(
 
 fun main(){
     val s1 = PeriodicSignal(Clock(Note.A_4.freq))
-    val s2 = PeriodicSignal(Clock(Note.A_4.freq))
+    val s2 = PeriodicSignal(Clock(Note.A_3.freq))
     val sum = SumSignal(s1, s2)
-
-    println(s1.evaluate(1).contentToString())
 
     s1.plotInConsole()
     sum.plotInConsole()
+
+    val angle = 0.5f
+    println(angle * s1.period / sum.period)
 //    val sum3 = SumSignal(sum, harm)
 
 //    println(sum3)

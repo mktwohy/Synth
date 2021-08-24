@@ -12,6 +12,7 @@ class Clock(
             period = Constants.SAMPLE_RATE / this.frequency
         }
     var angle = initAngle
+    var backupAngle = 0f
 
     init {
         this.frequency = frequency
@@ -29,6 +30,10 @@ class Clock(
     fun reset(){
         this.angle = 0f
     }
+
+    fun save(){ backupAngle = angle }
+
+    fun restore(){ angle = backupAngle }
 }
 
 fun main(){
