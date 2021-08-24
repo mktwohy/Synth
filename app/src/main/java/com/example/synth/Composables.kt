@@ -1,6 +1,7 @@
 package com.example.synth
 
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,7 +70,6 @@ class PianoGrid(
         fun searchRow(row: List<Pair<Note, Dp>>): Note?{
             cumSum = 0.dp
             for ((note, width) in row){
-                log("$x in $cumSum..${cumSum+width}?")
                 if (x in cumSum..cumSum+width) return note
                 else cumSum += width
             }
@@ -104,8 +104,25 @@ fun Piano(
             .fillMaxSize()
             .pointerInteropFilter(
                 onTouchEvent = {
+                    viewModel.pressedNotes.clear()
                     with(density) {
-                        log(viewModel.pianoGrid.findKeyAt(it.x.toDp(), it.y.toDp()).toString())
+                        for(i in 0 until it.pointerCount){
+                            val note = viewModel.pianoGrid.findKeyAt(it.getX(i).toDp(), it.getY(i).toDp())!!
+                            if(i == it.actionIndex){
+                                log("pointer: $i action: ${it.actionMasked}")
+                                when(it.actionMasked){
+                                    MotionEvent.ACTION_DOWN,
+                                    MotionEvent.ACTION_MOVE
+                                        -> viewModel.pressedNotes.add(note)
+
+                                    MotionEvent.ACTION_UP
+                                        -> viewModel.pressedNotes.remove(note)
+                                }
+                            }else{
+                                log("pointer: $i")
+                                viewModel.pressedNotes.add(note)
+                            }
+                        }
                     }
                     true
                 }
