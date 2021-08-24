@@ -1,23 +1,24 @@
 package com.example.synth
 
-class Oscillator(
-    val harmonicSeries: HarmonicSeries,
-){
-    private var signal = SumSignal()
-    private val onNotesUpdated = mutableSetOf<(Set<Note>) -> Unit>()
-    private val notes = mutableSetOf<Note>()
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.example.synth.Note.Companion.toList
+
+class Oscillator(){
+    val harmonicSeries = HarmonicSeries()
+    private var output = SumSignal()
+    private val onOutputUpdated = mutableSetOf<(SumSignal) -> Unit>()
+    private val noteToSignal = mutableMapOf<Note, Signal>()
     var waveShape: WaveShape = WaveShape.SINE
 
-    fun registerOnNotesUpdatedCallback(callback: (Set<Note>) -> Unit){
-        onNotesUpdated.add(callback)
+    fun registerOnActiveSignalUpdatedCallback(callback: (SumSignal) -> Unit){
+        onOutputUpdated.add(callback)
     }
 
-    fun updateNotes(newNotes: Collection<Note>){
-        if(notes != newNotes){
-            notes.addAll(newNotes)
-            signal.signals.clear()
-//            signal.signals.addAll()
-            onNotesUpdated.forEach { it.invoke(notes) }
+    fun updateSignals(){
+        noteToSignal.clear()
+        AppModel.noteRange.toList().forEach {
+            noteToSignal[it] = HarmonicSignal(it, harmonicSeries, 1/7f)
         }
     }
 }

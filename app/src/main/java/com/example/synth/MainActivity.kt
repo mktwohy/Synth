@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
             audioEngine.signalBuffer.offer(
                 if(pianoViewModel.pressedNotes.isEmpty()) setOf(SilentSignal)
-                else pianoViewModel.pressedNotes.map { noteToSignal[it]!! }.toSet()
+                else pianoViewModel.pressedNotes.map { noteToSignal[it] ?: SilentSignal }.toSet()
             )
         }
 

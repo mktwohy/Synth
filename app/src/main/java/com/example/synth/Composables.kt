@@ -27,7 +27,7 @@ import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 import kotlin.math.pow
 
-fun log(text: String){ Log.d("m_tag",text) }
+fun logd(text: String){ Log.d("m_tag",text) }
 
 class PianoGrid(
     val width: MutableState<Dp>,
@@ -221,16 +221,15 @@ fun Volume(
 @Composable
 fun HarmonicSeriesEditor(
     modifier: Modifier = Modifier,
-    viewModel: HarmonicSignalViewModel
+    viewModel: HarmonicSeriesViewModel
 ){
     RowOfVolumeSliders(
         modifier = modifier,
         numSliders = Constants.NUM_HARMONICS,
-        value = { sliderIndex -> viewModel.harmonicSliders[sliderIndex] },
+        value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
         onValueChange = { sliderIndex, sliderValue ->
-            val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue
-            viewModel.harmonicSliders[sliderIndex] = newSliderValue
-            viewModel.signal.value.harmonicSeries[sliderIndex+1] = newSliderValue.pow(3)
+            val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
+            viewModel.harmonicSeries[sliderIndex+1] = newSliderValue.pow(3)
         }
     )
 }
@@ -243,7 +242,7 @@ fun Main(
     Column(modifier) {
         HarmonicSeriesEditor(
             modifier = modifier.fillMaxHeight(0.50f),
-            viewModel = viewModel
+            viewModel = AppModel.harmonicSeriesViewModel
         )
         Row(Modifier.border(1.dp, Color.White),) {
             XYPlot(

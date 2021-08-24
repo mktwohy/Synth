@@ -19,9 +19,10 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
 
     private val callbacks = mutableListOf<() -> Unit>()
     private fun invokeCallbacks(){ callbacks.forEach { it.invoke() } }
-    fun registerCallback(onHarmonicSeriesUpdated: () -> Unit){
-        callbacks.add(onHarmonicSeriesUpdated)
+    fun registerOnUpdatedCallback(callback: () -> Unit){
+        callbacks.add(callback)
     }
+
 
 
     operator fun get(overtone: Int) = harmonicSeries[overtone-1]

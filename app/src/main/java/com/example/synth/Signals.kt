@@ -158,7 +158,7 @@ class HarmonicSignal(
         this.fundamental = fundamental
         this.amp = amp
         this.autoNormalize = autoNormalize
-        harmonicSeries.registerCallback {
+        harmonicSeries.registerOnUpdatedCallback {
             for((overtone, amplitude) in harmonicSeries){
                 signals[overtone-1].amp = amplitude
             }

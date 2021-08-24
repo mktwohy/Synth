@@ -3,19 +3,14 @@ package com.example.synth
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import com.example.synth.Note.Companion.toList
+import kotlin.math.log
+import kotlin.math.pow
 
 object AppModel{
-    var noteRange by mutableStateOf(Note.C_3..Note.C_4)
-    val harmonicSeries  = HarmonicSeries()
-    val activeSignal    = SumSignal()
-
-    val pianoViewModel = PianoViewModel(Note.C_3..Note.C_4)
-    val oscillatorViewModel = OscillatorViewModel()
-
-    fun createDormantSignals(){
-
-    }
+    val noteRange = Note.C_3..Note.C_4
+    val oscillator = Oscillator()
+    val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
+    val pianoViewModel = PianoViewModel(noteRange)
 }
 
 class PianoViewModel(
@@ -27,11 +22,18 @@ class PianoViewModel(
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
-class OscillatorViewModel() : ViewModel(){
-    var bendAmount: MutableState<Float> = mutableStateOf(1f)
-    var volume: MutableState<Float> = mutableStateOf(1f)
-    var harmonicSliders = mutableStateListOf<Float>().apply {
+class HarmonicSeriesViewModel(
+    val harmonicSeries: HarmonicSeries
+): ViewModel(){
+    var sliderState = mutableStateListOf<Float>().apply {
         repeat(Constants.NUM_HARMONICS){ this.add(0f) }
+    }
+    init {
+        harmonicSeries.registerOnUpdatedCallback {
+            harmonicSeries.forEach { (harmonic, amplitude) ->
+                sliderState[harmonic-1] = amplitude.pow(1/3f)
+            }
+        }
     }
 }
 
