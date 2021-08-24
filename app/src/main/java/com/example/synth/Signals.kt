@@ -23,8 +23,6 @@ abstract class Signal{
     abstract val period: Float
     abstract var amp: Float
 
-    fun changeVolume(perceivedVolume: Float) { amp = perceivedVolume.pow(4) }
-
     /** Resets the internal index,
      * which guarantees that [evaluateNext] starts at the beginning */
     abstract fun reset()

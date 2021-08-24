@@ -31,7 +31,7 @@ class HarmonicSeriesViewModel(
     init {
         harmonicSeries.registerOnUpdatedCallback {
             harmonicSeries.forEach { (harmonic, amplitude) ->
-                sliderState[harmonic-1] = amplitude.pow(1/3f)
+                sliderState[harmonic-1] = amplitudeToVolume(amplitude)
             }
         }
     }

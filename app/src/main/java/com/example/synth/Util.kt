@@ -5,6 +5,10 @@ import androidx.compose.ui.graphics.Color
 import com.example.synth.Constants.MAX_16BIT_VALUE
 import com.example.synth.Constants.MIN_16BIT_VALUE
 import java.lang.StringBuilder
+import kotlin.math.pow
+
+fun volumeToAmplitude(volume: Float) = volume.pow(1/3f)
+fun amplitudeToVolume(amplitude: Float) = amplitude.pow(3f)
 
 //----- Color -----//
 fun Color.mix(that: Color) =

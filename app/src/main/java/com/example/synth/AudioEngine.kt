@@ -84,7 +84,9 @@ class AudioEngine{
                         this.signals.addAll(signalBuffer.poll()!!)
                     }
                     callbacks.forEach { it.invoke(floatBuffer) }
+
                     evaluateToBuffer(floatBuffer)
+
                 }
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)

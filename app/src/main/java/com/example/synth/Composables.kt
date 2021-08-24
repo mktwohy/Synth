@@ -229,7 +229,7 @@ fun HarmonicSeriesEditor(
         value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
         onValueChange = { sliderIndex, sliderValue ->
             val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
-            viewModel.harmonicSeries[sliderIndex+1] = newSliderValue.pow(3)
+            viewModel.harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
         }
     )
 }
