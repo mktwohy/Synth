@@ -5,8 +5,6 @@ import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Slider
@@ -19,45 +17,30 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.Blue
-import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
 import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
+import com.example.synth.Note.Companion.toList
 import kotlin.math.pow
 
 fun log(text: String){ Log.d("m_tag",text) }
 
-fun topRowNoteRatios(whiteNote: Note) =
-    when(whiteNote.toString()[0]) {
-        'C' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
-        'D' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 1/2f, (whiteNote + 1) to 1/4f)
-        'E' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 3/4f)
-        'F' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
-        'G' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 2/4f, (whiteNote + 1) to 1/4f)
-        'A' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 2/4f, (whiteNote + 1) to 1/4f)
-        'B' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 3/4f)
-        else -> listOf()
-    }
-
 class PianoGrid(
     val width: MutableState<Dp>,
     val height: MutableState<Dp>,
-    var notes: List<Note>){
+    var noteRange: ClosedRange<Note>
+){
     val topRow = mutableListOf<Pair<Note, Dp>>()
     val bottomRow = mutableListOf<Pair<Note, Dp>>()
 
     fun recalculateWidths(){
         topRow.clear()
         bottomRow.clear()
-        val whiteNotes = notes.filter { it.name[1] == '_' }
+        val whiteNotes = noteRange.toList().filter { it.name[1] == '_' }
         whiteNotes.forEach { whiteNote ->
             for((note, ratio) in topRowNoteRatios(whiteNote)){
                 topRow.add(note to width.value * ratio/whiteNotes.size)
@@ -81,6 +64,18 @@ class PianoGrid(
         else
             searchRow(bottomRow)
     }
+
+    private fun topRowNoteRatios(whiteNote: Note) =
+        when(whiteNote.toString()[0]) {
+            'C' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
+            'D' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 1/2f, (whiteNote + 1) to 1/4f)
+            'E' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 3/4f)
+            'F' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
+            'G' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 2/4f, (whiteNote + 1) to 1/4f)
+            'A' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 2/4f, (whiteNote + 1) to 1/4f)
+            'B' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 3/4f)
+            else -> listOf()
+        }
 }
 
 @ExperimentalComposeUiApi
@@ -96,38 +91,42 @@ fun Piano(
             .pointerInteropFilter(
                 onTouchEvent = {
                     viewModel.pressedNotes.clear()
-                    with(density) {
-                        for(i in 0 until it.pointerCount){
-                            val note = viewModel.pianoGrid.findKeyAt(
-                                it.getX(i).toDp(),
-                                it.getY(i).toDp()
-                            )!!
-                            if(i == it.actionIndex){
-                                when(it.actionMasked){
-                                    MotionEvent.ACTION_DOWN,
-                                    MotionEvent.ACTION_MOVE
+                        for (i in 0 until it.pointerCount) {
+                            val note: Note?
+                            with(density) {
+                                note = viewModel.pianoGrid.findKeyAt(
+                                    it.getX(i).toDp(),
+                                    it.getY(i).toDp()
+                                )
+                            }
+                            if(note != null){
+                                if (i == it.actionIndex) {
+                                    when (it.actionMasked) {
+                                        MotionEvent.ACTION_DOWN,
+                                        MotionEvent.ACTION_MOVE
                                         -> viewModel.pressedNotes.add(note)
 
-                                    MotionEvent.ACTION_UP
+                                        MotionEvent.ACTION_UP
                                         -> viewModel.pressedNotes.remove(note)
+                                    }
+                                } else {
+                                    viewModel.pressedNotes.add(note)
                                 }
-                            }else{
-                                viewModel.pressedNotes.add(note)
                             }
                         }
-                    }
                     true
                 }
             )
     ){
-        if(viewModel.width.value != this.maxWidth
-            || viewModel.height.value != this.maxHeight
-        ){
-            viewModel.width.value = this.maxWidth
-            viewModel.height.value = this.maxHeight
-            viewModel.pianoGrid.recalculateWidths()
+        SideEffect {
+            if(viewModel.width.value != this.maxWidth
+                || viewModel.height.value != this.maxHeight
+            ){
+                viewModel.width.value = this.maxWidth
+                viewModel.height.value = this.maxHeight
+                viewModel.pianoGrid.recalculateWidths()
+            }
         }
-
         Column(Modifier.fillMaxSize()) {
             for(row in listOf(viewModel.pianoGrid.topRow, viewModel.pianoGrid.bottomRow) ){
                 Row(Modifier.size(viewModel.width.value, viewModel.height.value/2)) {

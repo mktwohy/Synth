@@ -1,24 +1,39 @@
 package com.example.synth
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.toMutableStateList
+import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import com.example.synth.Note.Companion.toList
 
-val x = Note.toList(Note.A_4, Note.A_5)
+object AppModel{
+    var noteRange by mutableStateOf(Note.C_3..Note.C_4)
+    val harmonicSeries  = HarmonicSeries()
+    val activeSignal    = SumSignal()
+
+    val pianoViewModel = PianoViewModel(Note.C_3..Note.C_4)
+    val oscillatorViewModel = OscillatorViewModel()
+
+    fun createDormantSignals(){
+
+    }
+}
 
 class PianoViewModel(
-    notes: List<Note>
+    noteRange: ClosedRange<Note>
 ): ViewModel(){
-    val notes = notes.toMutableStateList()
     val pressedNotes = mutableStateListOf<Note>()
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
-    val pianoGrid = PianoGrid(width, height, notes)
+    val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
+class OscillatorViewModel() : ViewModel(){
+    var bendAmount: MutableState<Float> = mutableStateOf(1f)
+    var volume: MutableState<Float> = mutableStateOf(1f)
+    var harmonicSliders = mutableStateListOf<Float>().apply {
+        repeat(Constants.NUM_HARMONICS){ this.add(0f) }
+    }
+}
 
 class HarmonicSignalViewModel(
     signal: HarmonicSignal,

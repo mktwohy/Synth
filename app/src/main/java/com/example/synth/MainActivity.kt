@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import com.example.synth.Constants.BUFFER_SIZE
+import com.example.synth.Note.Companion.toList
 
 class MainActivity : ComponentActivity() {
     private val audioEngine = AudioEngine()
@@ -15,9 +16,9 @@ class MainActivity : ComponentActivity() {
         signal = plotSignal,
         plotBuffer = FloatArray(plotSignal.period.toInt()*4)
     )
-    private val pianoViewModel = PianoViewModel(Note.toList(4))
+    private val pianoViewModel = PianoViewModel(Note.C_3..Note.C_4)
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>().apply {
-        pianoViewModel.notes.forEach{
+        AppModel.noteRange.toList().forEach{
             this[it] = HarmonicSignal(it, plotSignal.harmonicSeries, 1/7f)
         }
     }
