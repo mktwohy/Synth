@@ -7,6 +7,8 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 
+val x = Note.toList(Note.A_4, Note.A_5)
+
 class PianoViewModel(
     notes: List<Note>
 ): ViewModel(){

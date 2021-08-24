@@ -2,8 +2,8 @@ package com.example.synth
 
 import android.util.Rational
 import androidx.compose.ui.graphics.Color
-import com.example.synth.CircularIntArray.Companion.MAX_16BIT_VALUE
-import com.example.synth.CircularIntArray.Companion.MIN_16BIT_VALUE
+import com.example.synth.Constants.MAX_16BIT_VALUE
+import com.example.synth.Constants.MIN_16BIT_VALUE
 import java.lang.StringBuilder
 
 //----- Color -----//
