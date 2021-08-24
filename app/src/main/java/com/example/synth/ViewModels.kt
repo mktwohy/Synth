@@ -6,12 +6,6 @@ import androidx.lifecycle.ViewModel
 import kotlin.math.log
 import kotlin.math.pow
 
-object AppModel{
-    val noteRange = Note.C_3..Note.C_4
-    val oscillator = Oscillator()
-    val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
-    val pianoViewModel = PianoViewModel(noteRange)
-}
 
 class PianoViewModel(
     noteRange: ClosedRange<Note>
@@ -20,6 +14,17 @@ class PianoViewModel(
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
+}
+
+class VolumeSliderViewModel(
+    val oscillator: Oscillator
+){
+    var sliderState by mutableStateOf(0f)
+    init {
+        oscillator.registerOnAmpChangedCallback {
+            sliderState = amplitudeToVolume(it)
+        }
+    }
 }
 
 class HarmonicSeriesViewModel(

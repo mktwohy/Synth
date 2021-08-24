@@ -91,29 +91,33 @@ fun Piano(
             .pointerInteropFilter(
                 onTouchEvent = {
                     viewModel.pressedNotes.clear()
-                        for (i in 0 until it.pointerCount) {
-                            val note: Note?
-                            with(density) {
-                                note = viewModel.pianoGrid.findKeyAt(
-                                    it.getX(i).toDp(),
-                                    it.getY(i).toDp()
-                                )
-                            }
-                            if(note != null){
-                                if (i == it.actionIndex) {
-                                    when (it.actionMasked) {
-                                        MotionEvent.ACTION_DOWN,
-                                        MotionEvent.ACTION_MOVE
-                                        -> viewModel.pressedNotes.add(note)
+                    for (i in 0 until it.pointerCount) {
+                        val note: Note?
+                        with(density) {
+                            note = viewModel.pianoGrid.findKeyAt(
+                                it
+                                    .getX(i)
+                                    .toDp(),
+                                it
+                                    .getY(i)
+                                    .toDp()
+                            )
+                        }
+                        if (note != null) {
+                            if (i == it.actionIndex) {
+                                when (it.actionMasked) {
+                                    MotionEvent.ACTION_DOWN,
+                                    MotionEvent.ACTION_MOVE
+                                    -> viewModel.pressedNotes.add(note)
 
-                                        MotionEvent.ACTION_UP
-                                        -> viewModel.pressedNotes.remove(note)
-                                    }
-                                } else {
-                                    viewModel.pressedNotes.add(note)
+                                    MotionEvent.ACTION_UP
+                                    -> viewModel.pressedNotes.remove(note)
                                 }
+                            } else {
+                                viewModel.pressedNotes.add(note)
                             }
                         }
+                    }
                     true
                 }
             )
@@ -170,7 +174,10 @@ fun XYPlot(
 }
 
 @Composable
-fun PitchBend(modifier: Modifier = Modifier, viewModel: HarmonicSignalViewModel){
+fun PitchBend(
+    modifier: Modifier = Modifier,
+    viewModel: HarmonicSignalViewModel
+){
     VerticalSlider(
         modifier = modifier,
         value = viewModel.bendAmount.value,
@@ -235,40 +242,6 @@ fun HarmonicSeriesEditor(
 }
 
 @Composable
-fun Main(
-    modifier: Modifier = Modifier,
-    viewModel: HarmonicSignalViewModel
-){
-    Column(modifier) {
-        HarmonicSeriesEditor(
-            modifier = modifier.fillMaxHeight(0.50f),
-            viewModel = AppModel.harmonicSeriesViewModel
-        )
-        Row(Modifier.border(1.dp, Color.White),) {
-            XYPlot(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.8f)
-                    .background(Black)
-                    .border(1.dp, Color.White),
-                color = Color(0.4f, 0.0f, 1f, 1f),
-                strokeWidth = 5f,
-                data = viewModel.plotBuffer.value,
-            )
-            PitchBend(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.5f),
-                viewModel = viewModel
-            )
-            Volume(viewModel = viewModel)
-        }
-    }
-}
-
-
-
-@Composable
 fun RowOfVolumeSliders(
     modifier: Modifier = Modifier,
     numSliders: Int = 1,
@@ -289,44 +262,6 @@ fun RowOfVolumeSliders(
             }
         }
     }
-}
-
-@Composable
-fun RowOfVolumeSlidersScreen(
-    modifier: Modifier = Modifier,
-    amplitudes: List<Float>,
-    numSliders: Int,
-){
-    var amplitudeState = remember { mutableStateMapOf<Int,Float>() }
-
-    RowOfVolumeSliders(
-        modifier = Modifier.fillMaxHeight(0.9f),
-        numSliders = numSliders,
-        value = { sliderIndex -> amplitudeState[sliderIndex] ?: 0f },
-        onValueChange = { sliderIndex, value -> amplitudeState[sliderIndex] = value }
-    )
-}
-
-@Composable
-fun VerticalValueSliderScreen(
-    modifier: Modifier = Modifier,
-    initialValue: Float = 0f,
-    onValueChange: (Float) -> Unit,
-    onValueChangeFinished: (() -> Unit)? = null,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
-){
-    var amplitude by remember { mutableStateOf(initialValue) }
-
-    VerticalValueSlider(
-        modifier = modifier,
-        value = amplitude,
-        valueRange = valueRange,
-        onValueChange = {
-            amplitude = it
-            onValueChange(it)
-        },
-        onValueChangeFinished = onValueChangeFinished
-    )
 }
 
 @Composable

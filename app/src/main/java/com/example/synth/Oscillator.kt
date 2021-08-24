@@ -1,18 +1,27 @@
 package com.example.synth
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import com.example.synth.Note.Companion.toList
 
 class Oscillator(){
     val harmonicSeries = HarmonicSeries()
+    var amplitude = 0f
+        set(value) {
+            field = value
+            onAmpChangedCallbacks.forEach { it.invoke(value) }
+        }
     private var output = SumSignal()
-    private val onOutputUpdated = mutableSetOf<(SumSignal) -> Unit>()
     private val noteToSignal = mutableMapOf<Note, Signal>()
     var waveShape: WaveShape = WaveShape.SINE
 
+    private val onOutputUpdatedCallbacks = mutableSetOf<(SumSignal) -> Unit>()
+    private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
+
+    fun registerOnAmpChangedCallback(callback: (Float) -> Unit){
+        onAmpChangedCallbacks.add(callback)
+    }
+
     fun registerOnActiveSignalUpdatedCallback(callback: (SumSignal) -> Unit){
-        onOutputUpdated.add(callback)
+        onOutputUpdatedCallbacks.add(callback)
     }
 
     fun updateSignals(){

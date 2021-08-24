@@ -3,11 +3,24 @@ package com.example.synth
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.synth.Constants.BUFFER_SIZE
 import com.example.synth.Note.Companion.toList
+
+object AppModel{
+    val noteRange = Note.C_3..Note.C_4
+    val oscillator = Oscillator()
+    val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
+    val pianoViewModel = PianoViewModel(noteRange)
+    val volumeSliderViewModel = VolumeSliderViewModel(oscillator)
+}
+
 
 class MainActivity : ComponentActivity() {
     private val audioEngine = AudioEngine()
@@ -45,20 +58,40 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Column {
-                Main(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.6f),
-                    viewModel = viewModel
+                HarmonicSeriesEditor(
+                    modifier = Modifier.fillMaxHeight(0.25f),
+                    viewModel = AppModel.harmonicSeriesViewModel
                 )
+                Row(Modifier.fillMaxHeight(0.5f).border(1.dp, Color.White)) {
+                    XYPlot(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.8f)
+                            .background(Color.Black)
+                            .border(1.dp, Color.White),
+                        color = Color(0.4f, 0.0f, 1f, 1f),
+                        strokeWidth = 5f,
+                        data = viewModel.plotBuffer.value,
+                    )
+                    PitchBend(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.5f),
+                        viewModel = viewModel
+                    )
+                    VerticalSlider(
+                        modifier = Modifier.fillMaxSize(),
+                        value = AppModel.volumeSliderViewModel.sliderState,
+                        onValueChange = {
+                            AppModel.oscillator.amplitude = volumeToAmplitude(it)
+                        }
+                    )
+                }
                 Piano(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = pianoViewModel
                 )
             }
-//        Piano(modifier = Modifier.fillMaxSize())
-//            PianoKey(modifier = Modifier.fillMaxSize(), note = Note.A_4)
-
         }
 
     }
