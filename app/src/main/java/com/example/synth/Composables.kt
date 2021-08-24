@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
@@ -11,6 +12,7 @@ import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
@@ -18,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
@@ -60,21 +64,22 @@ class PianoGrid(
         }
     }
 
-//    fun findKeyAt(x: Float, y: Float): Note? {
-//        var cumSum = 0f
-//        fun searchRow(row: List<Dp>): Note?{
-//            cumSum = 0f
-//            for (width in row){
-//                if (width.toFloat() in cumSum..cumSum+width)
-//            }
-//
-//            return null
-//        }
-//        return if (y < height / 2)
-//            searchRow(topRow)
-//        else
-//            searchRow(bottomRow)
-//    }
+    fun findKeyAt(x: Dp, y: Dp): Note? {
+        var cumSum: Dp
+        fun searchRow(row: List<Pair<Note, Dp>>): Note?{
+            cumSum = 0.dp
+            for ((note, width) in row){
+                log("$x in $cumSum..${cumSum+width}?")
+                if (x in cumSum..cumSum+width) return note
+                else cumSum += width
+            }
+            return null
+        }
+        return if (y < height.value / 2)
+            searchRow(topRow)
+        else
+            searchRow(bottomRow)
+    }
 }
 
 class PianoViewModel(
@@ -87,19 +92,24 @@ class PianoViewModel(
     val pianoGrid = PianoGrid(width, height, notes)
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun Piano(
         modifier: Modifier,
         viewModel: PianoViewModel
 ){
+    val density = LocalDensity.current
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { log(viewModel.pianoGrid.findKeyAt(it.x, it.y).toString()) }
-                )
-            }
+            .pointerInteropFilter(
+                onTouchEvent = {
+                    with(density) {
+                        log(viewModel.pianoGrid.findKeyAt(it.x.toDp(), it.y.toDp()).toString())
+                    }
+                    true
+                }
+            )
     ){
         if(viewModel.width.value != this.maxWidth
             || viewModel.height.value != this.maxHeight
