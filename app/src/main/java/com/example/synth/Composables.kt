@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.Blue
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
@@ -107,9 +108,11 @@ fun Piano(
                     viewModel.pressedNotes.clear()
                     with(density) {
                         for(i in 0 until it.pointerCount){
-                            val note = viewModel.pianoGrid.findKeyAt(it.getX(i).toDp(), it.getY(i).toDp())!!
+                            val note = viewModel.pianoGrid.findKeyAt(
+                                it.getX(i).toDp(),
+                                it.getY(i).toDp()
+                            )!!
                             if(i == it.actionIndex){
-                                log("pointer: $i action: ${it.actionMasked}")
                                 when(it.actionMasked){
                                     MotionEvent.ACTION_DOWN,
                                     MotionEvent.ACTION_MOVE
@@ -119,7 +122,6 @@ fun Piano(
                                         -> viewModel.pressedNotes.remove(note)
                                 }
                             }else{
-                                log("pointer: $i")
                                 viewModel.pressedNotes.add(note)
                             }
                         }
@@ -134,7 +136,6 @@ fun Piano(
             viewModel.width.value = this.maxWidth
             viewModel.height.value = this.maxHeight
             viewModel.pianoGrid.recalculateWidths()
-            log(viewModel.pianoGrid.topRow.toString())
         }
 
         Column(Modifier.fillMaxSize()) {
@@ -145,10 +146,7 @@ fun Piano(
                             modifier = Modifier
                                 .size(width, viewModel.height.value / 2)
                                 .background(note.color(note in viewModel.pressedNotes))
-//                                .border(1.dp, Black)
-                        ){
-                            Text(text = "$note", color = Blue)
-                        }
+                        )
                     }
                 }
             }
@@ -156,53 +154,6 @@ fun Piano(
 
     }
 }
-
-
-
-//@Composable
-//fun PianoKey(
-//        modifier: Modifier,
-//        whiteNote: Note,
-//        viewModel: PianoViewModel
-//){
-//    val topRowNotes = when(whiteNote.toString()[0]){
-//        'C'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/2f)
-//        'D'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 1/2f, (whiteNote+1) to 1/4f)
-//        'E'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
-//        'F'  -> listOf(whiteNote to 3/4f, (whiteNote+1) to 1/4f)
-//        'G'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
-//        'A'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 2/4f, (whiteNote+1) to 1/4f)
-//        'B'  -> listOf((whiteNote-1) to 1/4f, whiteNote to 3/4f)
-//        else -> listOf()
-//    }
-//    BoxWithConstraints(modifier = modifier.border(1.dp, Black)){
-//        val boxWidth = this.maxWidth
-//        Column(modifier = Modifier.fillMaxSize()) {
-//            Row(
-//                Modifier
-//                    .fillMaxHeight(0.5f)
-//                    .fillMaxWidth()
-//            ) {
-//                for((note, multiplier) in topRowNotes){
-//                    viewModel.pianoGridTop.add(note to multiplier)
-//                    Box(
-//                        Modifier
-//                            .fillMaxHeight()
-//                            .width(boxWidth * multiplier)
-//                            .background(note.color(note in viewModel.pressedNotes))
-//                    )
-//                }
-//            }
-//            Box(
-//                Modifier
-//                    .fillMaxSize()
-//                    .background(whiteNote.color(whiteNote in viewModel.pressedNotes))
-//            ){
-//                viewModel.pianoGridTop.add(whiteNote to 1/7f)
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun XYPlot(

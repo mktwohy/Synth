@@ -17,6 +17,7 @@ class MainActivity : ComponentActivity() {
     )
     private val pianoViewModel = PianoViewModel(Note.toList(4))
 
+    @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         audioEngine.start()
