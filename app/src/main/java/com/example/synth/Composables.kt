@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -176,19 +175,17 @@ fun XYPlot(
 @Composable
 fun PitchBend(
     modifier: Modifier = Modifier,
-    viewModel: HarmonicSignalViewModel
+    viewModel: PitchBendViewModel
 ){
     VerticalSlider(
         modifier = modifier,
-        value = viewModel.bendAmount.value,
+        value = viewModel.sliderState,
         valueRange = 0.5f..1.5f,
         onValueChange = {
-            viewModel.bendAmount.value = it
-            viewModel.signal.value.bend(it)
+            viewModel.oscillator.bend = it
         },
         onValueChangeFinished = {
-            viewModel.signal.value.bend(1f)
-            viewModel.bendAmount.value = 1f
+            viewModel.oscillator.bend = 1f //snap back to 1f
         }
     )
 }
@@ -196,41 +193,24 @@ fun PitchBend(
 @Composable
 fun Volume(
     modifier: Modifier = Modifier,
-    viewModel: HarmonicSignalViewModel
+    viewModel: VolumeSliderViewModel
 ){
-    Column(modifier = modifier) {
-        VerticalSlider(
-            modifier = Modifier
-                .fillMaxHeight(0.8f)
-                .fillMaxWidth(),
-            value = viewModel.volume.value,
-            onValueChange = {
-                viewModel.volume.value = it
-                viewModel.signal.value.amp = it.pow(2)
-            }
-        )
-        Button(
-            modifier = Modifier.fillMaxSize(),
-            onClick = {
-                viewModel.signal.value.reset()
-                viewModel.signal.value.harmonicSeries.reset()
-                for(i in viewModel.harmonicSliders.indices){
-                    viewModel.harmonicSliders[i] = 0f
-                }
-                for(i in viewModel.plotBuffer.value.indices){
-                    viewModel.plotBuffer.value[i] = 0f
-                }
-            }
-        ) { Text("Reset") }
-    }
+    VerticalValueSlider(
+        modifier = modifier,
+        value = viewModel.sliderState,
+        onValueChange = {
+            viewModel.oscillator.amplitude = volumeToAmplitude(it)
+        }
+    )
 }
+
 
 @Composable
 fun HarmonicSeriesEditor(
     modifier: Modifier = Modifier,
     viewModel: HarmonicSeriesViewModel
 ){
-    RowOfVolumeSliders(
+    RowOfVerticalValueSliders(
         modifier = modifier,
         numSliders = Constants.NUM_HARMONICS,
         value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
@@ -242,7 +222,7 @@ fun HarmonicSeriesEditor(
 }
 
 @Composable
-fun RowOfVolumeSliders(
+fun RowOfVerticalValueSliders(
     modifier: Modifier = Modifier,
     numSliders: Int = 1,
     value: (Int) -> Float,

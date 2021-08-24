@@ -7,22 +7,27 @@ import kotlin.math.log
 import kotlin.math.pow
 
 
-class PianoViewModel(
-    noteRange: ClosedRange<Note>
-): ViewModel(){
+class PianoViewModel : ViewModel(){
     val pressedNotes = mutableStateListOf<Note>()
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
-class VolumeSliderViewModel(
-    val oscillator: Oscillator
-){
+class VolumeSliderViewModel(val oscillator: Oscillator) : ViewModel(){
     var sliderState by mutableStateOf(0f)
     init {
         oscillator.registerOnAmpChangedCallback {
             sliderState = amplitudeToVolume(it)
+        }
+    }
+}
+
+class PitchBendViewModel(val oscillator: Oscillator) : ViewModel(){
+    var sliderState by mutableStateOf(1f)
+    init {
+        oscillator.registerOnBendChangedCallback {
+            sliderState = it
         }
     }
 }
@@ -34,8 +39,8 @@ class HarmonicSeriesViewModel(
         repeat(Constants.NUM_HARMONICS){ this.add(0f) }
     }
     init {
-        harmonicSeries.registerOnUpdatedCallback {
-            harmonicSeries.forEach { (harmonic, amplitude) ->
+        AppModel.oscillator.harmonicSeries.registerOnUpdatedCallback {
+            AppModel.oscillator.harmonicSeries.forEach { (harmonic, amplitude) ->
                 sliderState[harmonic-1] = amplitudeToVolume(amplitude)
             }
         }
