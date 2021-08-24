@@ -38,7 +38,7 @@ class AudioEngine{
         callbacks.add(onBufferUpdate)
     }
 
-    val masterSignal = SumSignal(autoNormalize = false)
+    private val masterSignal = SumSignal(autoNormalize = false)
     val signalBuffer: Queue<Set<Signal>> = LinkedList()
 
     private var runMainLoop = false

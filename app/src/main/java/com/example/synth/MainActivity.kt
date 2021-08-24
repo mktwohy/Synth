@@ -10,12 +10,18 @@ import com.example.synth.Constants.BUFFER_SIZE
 
 class MainActivity : ComponentActivity() {
     private val audioEngine = AudioEngine()
-    private val signal = HarmonicSignal(Note.C_3)
+    val plotSignal = HarmonicSignal(Note.C_3)
     private val viewModel = HarmonicSignalViewModel(
-        signal = signal,
-        plotBuffer = FloatArray(signal.period.toInt()*4)
+        signal = plotSignal,
+        plotBuffer = FloatArray(plotSignal.period.toInt()*4)
     )
     private val pianoViewModel = PianoViewModel(Note.toList(4))
+    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>().apply {
+        pianoViewModel.notes.forEach{
+            this[it] = HarmonicSignal(it, plotSignal.harmonicSeries)
+        }
+    }
+
 
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,8 +34,13 @@ class MainActivity : ComponentActivity() {
             }
             viewModel.signal.value.evaluateToBuffer(viewModel.plotBuffer.value)
             viewModel.signal.value.signals.forEach{ it.clock.restore() }
+
+            audioEngine.signalBuffer.offer(
+                if(pianoViewModel.pressedNotes.isEmpty()) setOf(SilentSignal)
+                else pianoViewModel.pressedNotes.map { noteToSignal[it]!! }.toSet()
+            )
         }
-        audioEngine.signalBuffer.offer(setOf(viewModel.signal.value))
+
 
         setContent {
             Column {
