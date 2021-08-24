@@ -26,13 +26,10 @@ abstract class Signal{
     fun changeVolume(perceivedVolume: Float) { amp = perceivedVolume.pow(4) }
 
     /** Resets the internal index,
-     * which guarantees that [evaluate] and [evaluateToBuffer] start at the beginning */
+     * which guarantees that [evaluateNext] starts at the beginning */
     abstract fun reset()
 
-    /** Returns the value at a given index */
-    abstract fun evaluateAt(angle: Float): Float
-
-    /** Uses the Signal's internal index to evaluate the next value in the Signal's sequence */
+    /** Uses the Signal's Clock to evaluate the next value in the Signal's sequence */
     abstract fun evaluateNext(): Float
 
     /** Evaluates the next n periods of the signal as a new array */
@@ -68,14 +65,6 @@ abstract class SignalCollection: Signal(){
 
     override fun reset() { signals.forEach { it.reset() } }
 
-    override fun evaluateAt(angle: Float): Float {
-        if (autoNormalize) normalize()
-
-        return signals.fold(0f){ sum, signal ->
-            sum + signal.evaluateAt(angle * signal.period / this.period) * amp
-        }
-    }
-
     override fun evaluateNext(): Float{
         if (autoNormalize) normalize()
         return signals.fold(0f){ sum, signal ->
@@ -106,7 +95,6 @@ object SilentSignal: Signal() {
     override var amp: Float = 0f
 
     override fun reset() { }
-    override fun evaluateAt(angle: Float) = 0f
     override fun evaluateNext() = 0f
 
     override fun toString() = "SilentSignal"
@@ -135,9 +123,8 @@ class PeriodicSignal(
 
     override fun reset() { this.clock.reset() }
 
-    override fun evaluateAt(angle: Float) = func(angle) * amp
-
-    override fun evaluateNext() = evaluateAt(clock.angle).also { clock.tick() }
+    override fun evaluateNext() =  func(clock.angle) * amp
+        .also { clock.tick() }
 
     override fun toString(): String {
         val funcName = when(func){
