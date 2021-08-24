@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
 import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
@@ -148,9 +149,24 @@ fun Piano(
 }
 
 @Composable
+fun SignalPlot(
+    modifier: Modifier,
+    viewModel: SignalPlotViewModel,
+    color: Color = Color.Green,
+    strokeWidth: Float = 3f
+){
+    XYPlot(
+        modifier = modifier,
+        data = viewModel.plotData,
+        color = color,
+        strokeWidth = strokeWidth
+    )
+}
+
+@Composable
 fun XYPlot(
     modifier: Modifier = Modifier,
-    data: FloatArray,
+    data: List<Float>,
     color: Color = Color.Green,
     strokeWidth: Float = 3f,
 ) {
@@ -183,9 +199,11 @@ fun PitchBend(
         valueRange = 0.5f..1.5f,
         onValueChange = {
             viewModel.oscillator.bend = it
+            AppModel.SignalPlotViewModel.plotSignal.bend(it)
         },
         onValueChangeFinished = {
             viewModel.oscillator.bend = 1f //snap back to 1f
+            AppModel.SignalPlotViewModel.plotSignal.bend(1f)
         }
     )
 }

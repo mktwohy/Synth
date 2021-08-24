@@ -17,44 +17,36 @@ object AppModel{
     val oscillator = Oscillator()
 
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
-    val pianoViewModel          = PianoViewModel()
     val volumeSliderViewModel   = VolumeSliderViewModel(oscillator)
     val pitchBendViewModel      = PitchBendViewModel(oscillator)
+    val pianoViewModel          = PianoViewModel()
+    val SignalPlotViewModel     = SignalPlotViewModel(oscillator.harmonicSeries)
 }
 
 
 class MainActivity : ComponentActivity() {
     private val audioEngine = AudioEngine()
-    val plotSignal = HarmonicSignal(Note.C_3)
-    private val harmonicSignalViewModel = HarmonicSignalViewModel(
-        signal = plotSignal,
-        plotBuffer = FloatArray(plotSignal.period.toInt()*4)
-    )
     private val pianoViewModel = PianoViewModel()
-    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>().apply {
-        AppModel.noteRange.toList().forEach{
-            this[it] = HarmonicSignal(it, plotSignal.harmonicSeries, 1/7f)
-        }
-    }
 
 
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         audioEngine.start()
-        audioEngine.registerListener {
-            harmonicSignalViewModel.signal.value.signals.forEach{
-                it.clock.save()
-                it.clock.angle = 0f
-            }
-            harmonicSignalViewModel.signal.value.evaluateToBuffer(harmonicSignalViewModel.plotBuffer.value)
-            harmonicSignalViewModel.signal.value.signals.forEach{ it.clock.restore() }
+//        audioEngine.registerListener {
+//            harmonicSignalViewModel.signal.value.signals.forEach{
+//                it.clock.save()
+//                it.clock.angle = 0f
+//            }
+//            harmonicSignalViewModel.signal.value.evaluateToBuffer(harmonicSignalViewModel.plotBuffer.value)
+//            harmonicSignalViewModel.signal.value.signals.forEach{ it.clock.restore()
+//        }
 
-            audioEngine.signalBuffer.offer(
-                if(pianoViewModel.pressedNotes.isEmpty()) setOf(SilentSignal)
-                else pianoViewModel.pressedNotes.map { noteToSignal[it] ?: SilentSignal }.toSet()
-            )
-        }
+//            audioEngine.signalBuffer.offer(
+//                if(pianoViewModel.pressedNotes.isEmpty()) setOf(SilentSignal)
+//                else pianoViewModel.pressedNotes.map { noteToSignal[it] ?: SilentSignal }.toSet()
+//            )
+//        }
 
 
         setContent {
@@ -66,24 +58,28 @@ class MainActivity : ComponentActivity() {
                 Row(
                     Modifier
                         .fillMaxHeight(0.5f)
-                        .border(1.dp, Color.White)) {
-                    XYPlot(
+                        .border(1.dp, Color.White)
+                ) {
+                    SignalPlot(
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(0.8f)
                             .background(Color.Black)
                             .border(1.dp, Color.White),
+                        viewModel = AppModel.SignalPlotViewModel,
                         color = Color(0.4f, 0.0f, 1f, 1f),
-                        strokeWidth = 5f,
-                        data = harmonicSignalViewModel.plotBuffer.value,
+                        strokeWidth = 5f
+
                     )
-                    Volume(
-                        modifier = Modifier.fillMaxWidth(0.5f).fillMaxHeight(),
-                        viewModel = AppModel.volumeSliderViewModel)
                     PitchBend(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .fillMaxHeight(),
                         viewModel = AppModel.pitchBendViewModel
                     )
+                    Volume(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = AppModel.volumeSliderViewModel)
                 }
                 Piano(
                     modifier = Modifier.fillMaxSize(),
