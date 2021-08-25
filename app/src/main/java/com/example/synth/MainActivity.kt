@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 object AppModel{
+    val audioEngine = AudioEngine()
     val noteRange = Note.C_3..Note.C_4
     val pianoViewModel          = PianoViewModel()
     val oscillator = Oscillator(pianoViewModel.pressedNotes)
@@ -25,12 +26,11 @@ object AppModel{
 
 
 class MainActivity : ComponentActivity() {
-    private val audioEngine = AudioEngine()
 
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        audioEngine.start()
+        AppModel.audioEngine.start()
 //        audioEngine.registerListener {
 //            harmonicSignalViewModel.signal.value.signals.forEach{
 //                it.clock.save()

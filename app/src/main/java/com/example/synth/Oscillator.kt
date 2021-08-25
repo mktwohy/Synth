@@ -21,6 +21,16 @@ class Oscillator(input: Set<Note>){
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
+    init {
+        assignSignalsToNotes()
+    }
+
+    fun bundleSignals() = mutableSetOf<Signal>().apply{
+        AppModel.pianoViewModel.pressedNotes.forEach{
+            this += noteToSignal[it] ?: SilentSignal
+        }
+    }.toSet()
+
     fun evaluateToBuffer(destination: FloatArray){
         output.signals.clear()
         AppModel.pianoViewModel.pressedNotes.forEach{
@@ -44,6 +54,7 @@ class Oscillator(input: Set<Note>){
         noteToSignal.clear()
         AppModel.noteRange.toList().forEach {
             noteToSignal[it] = HarmonicSignal(it, harmonicSeries, 1/7f)
+//            noteToSignal[it] = PeriodicSignal(Clock(it.freq))
         }
     }
 }
