@@ -78,8 +78,6 @@ class AudioEngine{
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                signalBuffer += AppModel.oscillator.bundleSignals()
-
                 masterSignal.apply {
                     if(signalBuffer.isNotEmpty()){
                         this.signals.clear()

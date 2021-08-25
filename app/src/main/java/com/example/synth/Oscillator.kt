@@ -26,19 +26,15 @@ class Oscillator(input: Set<Note>){
 
     }
 
-    fun bundleSignals() = mutableSetOf<Signal>().apply{
-        AppModel.pianoViewModel.pressedNotes.forEach{
-            this += noteToSignal[it]?.apply {
-                this.bend(1/bend) } ?: SilentSignal
+    fun bundleSignals() = mutableSetOf<Signal>()
+        .apply{
+            AppModel.pianoViewModel.pressedNotes.forEach{
+                this += noteToSignal[it]
+                    ?.apply {
+                        this.bend(1/bend)
+                    } ?: SilentSignal
         }
     }.toSet()
-
-    fun evaluateToBuffer(destination: FloatArray){
-        output.signals.clear()
-        AppModel.pianoViewModel.pressedNotes.forEach{
-            output += noteToSignal[it] ?: SilentSignal
-        }
-    }
 
     fun registerOnActiveNotesChangedCallbacksCallback(callback: (Float) -> Unit){
         onAmpChangedCallbacks.add(callback)

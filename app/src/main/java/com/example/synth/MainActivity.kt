@@ -53,36 +53,30 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxHeight(0.25f),
                     viewModel = AppModel.harmonicSeriesViewModel
                 )
-                Row(
-                    Modifier
-                        .fillMaxHeight(0.5f)
-                        .border(1.dp, Color.White)
-                ) {
-                    SignalPlot(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(0.8f)
-                            .background(Color.Black)
-                            .border(1.dp, Color.White),
-                        viewModel = AppModel.SignalPlotViewModel,
-                        color = Color(0.4f, 0.0f, 1f, 1f),
-                        strokeWidth = 5f
+                SignalPlot(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.4f)
+                        .background(Color.Black)
+                        .border(1.dp, Color.White),
+                    viewModel = AppModel.SignalPlotViewModel,
+                    color = Color(0.4f, 0.0f, 1f, 1f),
+                    strokeWidth = 5f
 
+                )
+                Row {
+                    Piano(
+                        modifier = Modifier.fillMaxHeight().fillMaxWidth(0.9f),
+                        viewModel = AppModel.pianoViewModel
                     )
                     PitchBend(
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .fillMaxHeight(),
+                            .fillMaxSize()
+                            .border(1.dp, Color.White),
                         viewModel = AppModel.pitchBendViewModel
                     )
-                    VolumeSlider(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = AppModel.volumeSliderViewModel)
                 }
-                Piano(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = AppModel.pianoViewModel
-                )
+
             }
         }
 

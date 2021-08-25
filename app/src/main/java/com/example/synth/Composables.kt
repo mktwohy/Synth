@@ -59,10 +59,12 @@ class PianoGrid(
             }
             return null
         }
-        return if (y < height.value / 2)
-            searchRow(topRow)
-        else
-            searchRow(bottomRow)
+        return when{
+            y < 0.dp || y > height.value -> null
+            y < height.value / 2 -> searchRow(topRow)
+            else -> searchRow(bottomRow)
+        }
+
     }
 
     private fun topRowNoteRatios(whiteNote: Note) =
@@ -122,6 +124,8 @@ fun Piano(
                     if(newPressedNotes != viewModel.pressedNotes){
                         viewModel.pressedNotes = newPressedNotes
                     }
+                    AppModel.audioEngine.signalBuffer += AppModel.oscillator.bundleSignals()
+
                     true
                 }
             )
@@ -200,7 +204,7 @@ fun PitchBend(
     VerticalSlider(
         modifier = modifier,
         value = viewModel.sliderState,
-        valueRange = 0.5f..1.5f,
+        valueRange = 0.8f..1.2f,
         onValueChange = {
             viewModel.oscillator.bend = it
         },
