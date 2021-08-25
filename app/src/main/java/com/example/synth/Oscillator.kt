@@ -1,5 +1,6 @@
 package com.example.synth
 
+import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 
 class Oscillator(input: Set<Note>){
@@ -23,7 +24,6 @@ class Oscillator(input: Set<Note>){
 
     init {
         assignSignalsToNotes()
-
     }
 
     fun bundleSignals() = mutableSetOf<Signal>()
@@ -52,7 +52,9 @@ class Oscillator(input: Set<Note>){
         noteToSignal.clear()
         AppModel.noteRange.toList().forEach {
             noteToSignal[it] = HarmonicSignal(it, harmonicSeries, 1/7f)
-//            noteToSignal[it] = PeriodicSignal(Clock(it.freq))
         }
+        val lastNote = AppModel.noteRange.endInclusive
+        noteToSignal[lastNote+1] = HarmonicSignal(lastNote+1, harmonicSeries, 1/7f)
+
     }
 }
