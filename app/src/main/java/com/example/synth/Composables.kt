@@ -121,7 +121,7 @@ fun Piano(
                             }
                         }
                     }
-                    if(newPressedNotes != viewModel.pressedNotes){
+                    if (newPressedNotes != viewModel.pressedNotes) {
                         viewModel.pressedNotes = newPressedNotes
                     }
                     AppModel.audioEngine.signalBuffer += AppModel.oscillator.bundleSignals()
@@ -139,20 +139,33 @@ fun Piano(
                 viewModel.pianoGrid.recalculateWidths()
             }
         }
+
         Column(Modifier.fillMaxSize()) {
             for(row in listOf(viewModel.pianoGrid.topRow, viewModel.pianoGrid.bottomRow) ){
-                Row(Modifier.size(viewModel.width.value, viewModel.height.value/2)) {
+                Row(
+                    modifier = Modifier
+                        .size(viewModel.width.value, viewModel.height.value/2),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
                     for ((note, width) in row){
                         Box(
                             modifier = Modifier
                                 .size(width, viewModel.height.value / 2)
                                 .background(note.color(note in viewModel.pressedNotes))
+//                                .border(2.dp, Color.Black)
                         )
                     }
                 }
             }
         }
-
+        Row(Modifier.fillMaxSize()) {
+            for((note, width) in viewModel.pianoGrid.bottomRow){
+                Box(Modifier
+                    .size(width, viewModel.height.value)
+                    .border(2.dp, Color.Black)
+                )
+            }
+        }
     }
 }
 
