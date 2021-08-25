@@ -17,6 +17,14 @@ object Constants{
     const val BUFFER_SIZE      = 512
 }
 
+enum class HarmonicFilter(val function: (Int) -> Boolean){
+    FUNDAMENTAL ({ i: Int -> i == 1 }),
+    ODD         ({ i: Int -> i % 2 != 0 }),
+    EVEN        ({ i: Int -> i % 2 == 0 }),
+    ALL         ({ true }),
+    NONE        ({ false });
+}
+
 enum class WaveShape(val function: (Float) -> Float) {
     SINE( { angle: Float -> sin(angle * Constants.PI) } ) ,
     SAWTOOTH( { angle: Float -> 0f } ),

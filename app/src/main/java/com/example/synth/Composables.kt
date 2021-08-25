@@ -18,14 +18,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
 import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 import kotlin.math.pow
+import kotlin.random.Random
 
 fun logd(text: String){ Log.d("m_tag",text) }
 
@@ -152,17 +152,17 @@ fun Piano(
                             modifier = Modifier
                                 .size(width, viewModel.height.value / 2)
                                 .background(note.color(note in viewModel.pressedNotes))
-//                                .border(2.dp, Color.Black)
                         )
                     }
                 }
             }
         }
         Row(Modifier.fillMaxSize()) {
-            for((note, width) in viewModel.pianoGrid.bottomRow){
-                Box(Modifier
-                    .size(width, viewModel.height.value)
-                    .border(2.dp, Color.Black)
+            for((_, width) in viewModel.pianoGrid.bottomRow){
+                Box(
+                    Modifier
+                        .size(width, viewModel.height.value)
+                        .border(2.dp, Color.Black)
                 )
             }
         }
@@ -247,15 +247,45 @@ fun HarmonicSeriesEditor(
     modifier: Modifier = Modifier,
     viewModel: HarmonicSeriesViewModel
 ){
-    RowOfVerticalValueSliders(
-        modifier = modifier,
-        numSliders = Constants.NUM_HARMONICS,
-        value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
-        onValueChange = { sliderIndex, sliderValue ->
-            val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
-            viewModel.harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
+    Row(modifier){
+        RowOfVerticalSliders(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            numSliders = Constants.NUM_HARMONICS,
+            value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
+            onValueChange = { sliderIndex, sliderValue ->
+                val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
+                viewModel.harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
+            }
+        )
+        Column(Modifier.fillMaxSize()) {
+            Button(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
+                onClick = {viewModel.harmonicSeries.reset() }
+            ) {
+                Text(
+                    text = "Reset",
+                    color = Color.White,
+                    fontSize = 11.sp
+                )
+            }
+            Button(
+                modifier = Modifier.fillMaxSize(),
+                onClick = {
+                    viewModel.harmonicSeries.reset()
+                    viewModel.harmonicSeries.generateRandom()
+                }
+            ) {
+                Text(
+                    text = "Random",
+                    color = Color.White,
+                    fontSize = 11.sp
+                )
+            }
+
         }
-    )
+
+    }
+
 }
 
 @Composable
@@ -272,6 +302,29 @@ fun RowOfVerticalValueSliders(
         Row(modifier = Modifier) {
             for(sliderIndex in 0 until numSliders){
                 VerticalValueSlider(
+                    modifier = Modifier.size(sliderWidth, sliderHeight),
+                    value = value(sliderIndex),
+                    onValueChange = { onValueChange(sliderIndex, it) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RowOfVerticalSliders(
+    modifier: Modifier = Modifier,
+    numSliders: Int = 1,
+    value: (Int) -> Float,
+    onValueChange: (Int, Float) -> Unit
+){
+    BoxWithConstraints(modifier = modifier){
+        val sliderWidth = this.maxWidth/numSliders
+        val sliderHeight = this.maxHeight
+
+        Row(modifier = Modifier) {
+            for(sliderIndex in 0 until numSliders){
+                VerticalSlider(
                     modifier = Modifier.size(sliderWidth, sliderHeight),
                     value = value(sliderIndex),
                     onValueChange = { onValueChange(sliderIndex, it) }

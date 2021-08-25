@@ -4,16 +4,9 @@ import java.lang.StringBuilder
 import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.pow
+import kotlin.random.Random
 
 class HarmonicSeries : Iterable<Pair<Int, Float>>{
-    companion object{
-        val fundamental = { i: Int -> i == 1 }
-        val odd         = { i: Int -> i % 2 != 0 }
-        val even        = { i: Int -> i % 2 == 0 }
-        val all         = { _: Int -> true }
-        val none        = { _: Int -> false }
-    }
-
     //indices refer to overtone-1. for example, index 0 refers to the first overtone
     private val harmonicSeries = FloatArray(Constants.NUM_HARMONICS){ 0f }
 
@@ -44,7 +37,7 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
         decayRate: Float = 0.75f,
         floor: Float = 0.01f,
         ceiling: Float = 1.0f,
-        filter: (Int) -> Boolean = all
+        filter: (Int) -> Boolean = HarmonicFilter.ALL.function
     ) {
         for(index in harmonicSeries.indices){
             val overtone = index+1
@@ -53,6 +46,29 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
             }
         }
         invokeCallbacks()
+    }
+
+    fun generateRandom(){
+        val decayRate   = (0..50).random() / 100f
+        val floor       = (10..60).random() / 100f
+        val ceiling     = (90..100).random() / 100f
+        logd("Random: \ndecay: $decayRate \nfloor: $floor \nceiling: $ceiling")
+        generate(
+            decayRate   = decayRate,
+            floor       = floor,
+            ceiling     = ceiling,
+            filter = { i ->
+                HarmonicFilter.values()
+                    .filter { it != HarmonicFilter.FUNDAMENTAL }
+                    .random()
+                    .function(i)
+                ||
+
+                if(Random.nextBoolean())
+                    HarmonicFilter.FUNDAMENTAL.function(i)
+                else !HarmonicFilter.FUNDAMENTAL.function(i)
+            }
+        )
     }
 
     override fun toString(): String {
