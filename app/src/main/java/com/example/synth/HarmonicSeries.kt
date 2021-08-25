@@ -49,21 +49,16 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
     }
 
     fun generateRandom(){
-        val decayRate   = (0..50).random() / 100f
-        val floor       = (10..60).random() / 100f
-        val ceiling     = (90..100).random() / 100f
-        logd("Random: \ndecay: $decayRate \nfloor: $floor \nceiling: $ceiling")
         generate(
-            decayRate   = decayRate,
-            floor       = floor,
-            ceiling     = ceiling,
+            decayRate   = (0..50).random() / 100f,
+            floor       = (10..60).random() / 100f,
+            ceiling     = (90..100).random() / 100f,
             filter = { i ->
                 HarmonicFilter.values()
                     .filter { it != HarmonicFilter.FUNDAMENTAL }
                     .random()
                     .function(i)
                 ||
-
                 if(Random.nextBoolean())
                     HarmonicFilter.FUNDAMENTAL.function(i)
                 else !HarmonicFilter.FUNDAMENTAL.function(i)
