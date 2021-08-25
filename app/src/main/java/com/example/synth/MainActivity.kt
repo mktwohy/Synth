@@ -10,24 +10,22 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.synth.Note.Companion.toList
 
 object AppModel{
     val noteRange = Note.C_3..Note.C_4
-    val oscillator = Oscillator()
+    val pianoViewModel          = PianoViewModel()
+    val oscillator = Oscillator(pianoViewModel.pressedNotes)
 
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
+    val SignalPlotViewModel     = SignalPlotViewModel(oscillator.harmonicSeries)
     val volumeSliderViewModel   = VolumeSliderViewModel(oscillator)
     val pitchBendViewModel      = PitchBendViewModel(oscillator)
-    val pianoViewModel          = PianoViewModel()
-    val SignalPlotViewModel     = SignalPlotViewModel(oscillator.harmonicSeries)
+
 }
 
 
 class MainActivity : ComponentActivity() {
     private val audioEngine = AudioEngine()
-    private val pianoViewModel = PianoViewModel()
-
 
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,13 +75,13 @@ class MainActivity : ComponentActivity() {
                             .fillMaxHeight(),
                         viewModel = AppModel.pitchBendViewModel
                     )
-                    Volume(
+                    VolumeSlider(
                         modifier = Modifier.fillMaxSize(),
                         viewModel = AppModel.volumeSliderViewModel)
                 }
                 Piano(
                     modifier = Modifier.fillMaxSize(),
-                    viewModel = pianoViewModel
+                    viewModel = AppModel.pianoViewModel
                 )
             }
         }

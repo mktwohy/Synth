@@ -2,7 +2,7 @@ package com.example.synth
 
 import com.example.synth.Note.Companion.toList
 
-class Oscillator(){
+class Oscillator(input: Set<Note>){
     val harmonicSeries = HarmonicSeries()
     var amplitude = 0f
         set(value) {
@@ -11,18 +11,28 @@ class Oscillator(){
         }
     var bend = 1f
         set(value) {
-            field = value
+            field = 1/value
             onBendChangedCallbacks.forEach { it.invoke(value) }
         }
-    private var output = SumSignal()
-    private val noteToSignal = mutableMapOf<Note, Signal>()
-    var waveShape: WaveShape = WaveShape.SINE
 
-    private val onOutputUpdatedCallbacks = mutableSetOf<(SumSignal) -> Unit>()
+    val output = SumSignal()
+    var waveShape: WaveShape = WaveShape.SINE
+    private val noteToSignal = mutableMapOf<Note, Signal>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
-    fun registerOnAmpChangedCallback(callback: (Float) -> Unit){
+    fun evaluateToBuffer(destination: FloatArray){
+        output.signals.clear()
+        AppModel.pianoViewModel.pressedNotes.forEach{
+            output += noteToSignal[it] ?: SilentSignal
+        }
+    }
+
+    fun registerOnActiveNotesChangedCallbacksCallback(callback: (Float) -> Unit){
+        onAmpChangedCallbacks.add(callback)
+    }
+
+   fun registerOnAmpChangedCallback(callback: (Float) -> Unit){
         onAmpChangedCallbacks.add(callback)
     }
 
@@ -30,11 +40,7 @@ class Oscillator(){
         onBendChangedCallbacks.add(callback)
     }
 
-    fun registerOnActiveSignalUpdatedCallback(callback: (SumSignal) -> Unit){
-        onOutputUpdatedCallbacks.add(callback)
-    }
-
-    fun updateSignals(){
+    fun assignSignalsToNotes(){
         noteToSignal.clear()
         AppModel.noteRange.toList().forEach {
             noteToSignal[it] = HarmonicSignal(it, harmonicSeries, 1/7f)

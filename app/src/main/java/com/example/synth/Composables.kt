@@ -90,7 +90,8 @@ fun Piano(
             .fillMaxSize()
             .pointerInteropFilter(
                 onTouchEvent = {
-                    viewModel.pressedNotes.clear()
+                    val newPressedNotes = mutableSetOf<Note>()
+
                     for (i in 0 until it.pointerCount) {
                         val note: Note?
                         with(density) {
@@ -108,15 +109,18 @@ fun Piano(
                                 when (it.actionMasked) {
                                     MotionEvent.ACTION_DOWN,
                                     MotionEvent.ACTION_MOVE
-                                    -> viewModel.pressedNotes.add(note)
+                                    -> newPressedNotes.add(note)
 
                                     MotionEvent.ACTION_UP
-                                    -> viewModel.pressedNotes.remove(note)
+                                    -> newPressedNotes.remove(note)
                                 }
                             } else {
-                                viewModel.pressedNotes.add(note)
+                                newPressedNotes.add(note)
                             }
                         }
+                    }
+                    if(newPressedNotes != viewModel.pressedNotes){
+                        viewModel.pressedNotes = newPressedNotes
                     }
                     true
                 }
@@ -199,17 +203,15 @@ fun PitchBend(
         valueRange = 0.5f..1.5f,
         onValueChange = {
             viewModel.oscillator.bend = it
-            AppModel.SignalPlotViewModel.plotSignal.bend(it)
         },
         onValueChangeFinished = {
             viewModel.oscillator.bend = 1f //snap back to 1f
-            AppModel.SignalPlotViewModel.plotSignal.bend(1f)
         }
     )
 }
 
 @Composable
-fun Volume(
+fun VolumeSlider(
     modifier: Modifier = Modifier,
     viewModel: VolumeSliderViewModel
 ){

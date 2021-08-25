@@ -3,13 +3,14 @@ package com.example.synth
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import kotlin.math.log
-import kotlin.math.pow
 
 
-class SignalPlotViewModel(harmonicSeries: HarmonicSeries) : ViewModel(){
-    val plotSignal = HarmonicSignal(Note.C_3, harmonicSeries, autoNormalize = false)
-    val plotBuffer = FloatArray(plotSignal.period.toInt()*4)
+class SignalPlotViewModel(
+    harmonicSeries: HarmonicSeries,
+    numPeriods: Int = 4
+) : ViewModel(){
+    val plotSignal = HarmonicSignal(Note.C_2, harmonicSeries)
+    val plotBuffer = FloatArray(plotSignal.period.toInt()*numPeriods)
     val plotData   = mutableStateListOf<Float>()
 
     init {
@@ -18,7 +19,10 @@ class SignalPlotViewModel(harmonicSeries: HarmonicSeries) : ViewModel(){
             plotSignal.amp = it
             updatePlot()
         }
-        AppModel.oscillator.registerOnBendChangedCallback { updatePlot() }
+        AppModel.oscillator.registerOnBendChangedCallback {
+            plotSignal.bend(it)
+            updatePlot()
+        }
 
     }
 
@@ -33,14 +37,19 @@ class SignalPlotViewModel(harmonicSeries: HarmonicSeries) : ViewModel(){
 }
 
 class PianoViewModel : ViewModel(){
-    val pressedNotes = mutableStateListOf<Note>()
+    var pressedNotes by mutableStateOf(setOf<Note>())
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
+//    private val onPressedNotesChangedCallbacks = mutableSetOf< (Set<Note>) -> Unit >()
+//
+//    fun registerOnPressedNotesChangedCallback(callback: (Set<Note>) -> Unit){
+//        onPressedNotesChangedCallbacks.add(callback)
+//    }
 }
 
 class VolumeSliderViewModel(val oscillator: Oscillator) : ViewModel(){
-    var sliderState by mutableStateOf(0f)
+    var sliderState by mutableStateOf(1f)
     init {
         oscillator.registerOnAmpChangedCallback {
             sliderState = amplitudeToVolume(it)
@@ -70,18 +79,5 @@ class HarmonicSeriesViewModel(
                 sliderState[harmonic-1] = amplitudeToVolume(amplitude)
             }
         }
-    }
-}
-
-class HarmonicSignalViewModel(
-    signal: HarmonicSignal,
-    plotBuffer: FloatArray
-) : ViewModel(){
-    val signal: MutableState<HarmonicSignal> = mutableStateOf(signal)
-    var plotBuffer: MutableState<FloatArray> = mutableStateOf(plotBuffer)
-    var bendAmount: MutableState<Float> = mutableStateOf(1f)
-    var volume: MutableState<Float> = mutableStateOf(1f)
-    var harmonicSliders = mutableStateListOf<Float>().apply {
-        repeat(Constants.NUM_HARMONICS){ this.add(0f) }
     }
 }
