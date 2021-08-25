@@ -1,6 +1,7 @@
 package com.example.synth
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -14,14 +15,13 @@ import androidx.compose.ui.unit.dp
 object AppModel{
     val audioEngine = AudioEngine()
     val noteRange = Note.C_3..Note.C_5
-    val pianoViewModel          = PianoViewModel()
+    val pianoViewModel = PianoViewModel()
     val oscillator = Oscillator(pianoViewModel.pressedNotes)
 
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
     val SignalPlotViewModel     = SignalPlotViewModel(oscillator.harmonicSeries)
     val volumeSliderViewModel   = VolumeSliderViewModel(oscillator)
     val pitchBendViewModel      = PitchBendViewModel(oscillator)
-
 }
 
 
@@ -31,6 +31,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppModel.audioEngine.start()
+
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN)
 //        audioEngine.registerListener {
 //            harmonicSignalViewModel.signal.value.signals.forEach{
 //                it.clock.save()

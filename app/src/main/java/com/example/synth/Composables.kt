@@ -18,14 +18,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import androidx.lifecycle.ViewModel
 import com.example.synth.Note.Companion.color
 import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
-import kotlin.math.pow
-import kotlin.random.Random
 
 fun logd(text: String){ Log.d("m_tag",text) }
 
@@ -232,12 +230,13 @@ fun VolumeSlider(
     modifier: Modifier = Modifier,
     viewModel: VolumeSliderViewModel
 ){
-    VerticalValueSlider(
+    LabeledVerticalSlider(
         modifier = modifier,
         value = viewModel.sliderState,
         onValueChange = {
             viewModel.oscillator.amplitude = volumeToAmplitude(it)
-        }
+        },
+        showValue = true
     )
 }
 
@@ -255,7 +254,9 @@ fun HarmonicSeriesEditor(
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
                 viewModel.harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
-            }
+            },
+            label = { index -> if(index == 0) "f" else "${index+1}" },
+            showValue = false
         )
         Column(Modifier.fillMaxSize()) {
             Button(
@@ -281,32 +282,6 @@ fun HarmonicSeriesEditor(
                     fontSize = 11.sp
                 )
             }
-
-        }
-
-    }
-
-}
-
-@Composable
-fun RowOfVerticalValueSliders(
-    modifier: Modifier = Modifier,
-    numSliders: Int = 1,
-    value: (Int) -> Float,
-    onValueChange: (Int, Float) -> Unit
-){
-    BoxWithConstraints(modifier = modifier){
-        val sliderWidth = this.maxWidth/numSliders
-        val sliderHeight = this.maxHeight
-
-        Row(modifier = Modifier) {
-            for(sliderIndex in 0 until numSliders){
-                VerticalValueSlider(
-                    modifier = Modifier.size(sliderWidth, sliderHeight),
-                    value = value(sliderIndex),
-                    onValueChange = { onValueChange(sliderIndex, it) }
-                )
-            }
         }
     }
 }
@@ -316,7 +291,9 @@ fun RowOfVerticalSliders(
     modifier: Modifier = Modifier,
     numSliders: Int = 1,
     value: (Int) -> Float,
-    onValueChange: (Int, Float) -> Unit
+    onValueChange: (Int, Float) -> Unit,
+    label: (Int) -> String,
+    showValue: Boolean
 ){
     BoxWithConstraints(modifier = modifier){
         val sliderWidth = this.maxWidth/numSliders
@@ -324,10 +301,12 @@ fun RowOfVerticalSliders(
 
         Row(modifier = Modifier) {
             for(sliderIndex in 0 until numSliders){
-                VerticalSlider(
+                LabeledVerticalSlider(
                     modifier = Modifier.size(sliderWidth, sliderHeight),
                     value = value(sliderIndex),
-                    onValueChange = { onValueChange(sliderIndex, it) }
+                    onValueChange = { onValueChange(sliderIndex, it) },
+                    label = label(sliderIndex),
+                    showValue = showValue
                 )
             }
         }
@@ -335,32 +314,59 @@ fun RowOfVerticalSliders(
 }
 
 @Composable
-fun VerticalValueSlider(
+fun LabeledVerticalSlider(
     modifier: Modifier,
     value: Float,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: (() -> Unit)? = null,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
-
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    label: String = "hello",
+    showValue: Boolean = true
 ){
     Column(
         modifier = modifier.border(width = 1.dp, color = Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ){
+        val showLabel = label != ""
+        logd("label: $showLabel, value: $showValue")
         VerticalSlider(
             modifier = Modifier
-                .fillMaxHeight(0.9f)
+                .fillMaxHeight(
+                    when{
+                        showLabel && showValue -> 0.75f
+                        showLabel xor showValue -> 0.85f
+                        else -> 1f
+                    }
+                )
                 .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
             onValueChangeFinished = onValueChangeFinished
         )
-        Text(
-            text = (value * 100).toInt().toString(),
-            color = Color.White
-        )
+        if(showValue){
+            Text(
+                modifier = Modifier
+                    .fillMaxHeight(if(showLabel) 0.5f else 1f)
+                    .fillMaxWidth()
+                    .border(1.dp, Color.White),
+                text = (value * 100).toInt().toString(),
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
+        if(showLabel){
+            Text(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(1.dp, Color.White),
+                text = label,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
+
     }
 }
 
@@ -370,18 +376,21 @@ fun VerticalSlider(
     value: Float,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: (() -> Unit)? = null,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
 ){
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
         Slider(
             modifier = Modifier
-                .requiredWidth(this.maxHeight)
-                .requiredHeight(this.maxWidth)
-                .rotate(-90f),
+                .requiredWidth(maxHeight)
+                .requiredHeight(maxWidth)
+                .rotate(-90f)
+                .border(2.dp, Color.White),
             value = value,
             valueRange = valueRange,
             onValueChange = onValueChange,
             onValueChangeFinished = onValueChangeFinished
         )
+
+
     }
 }

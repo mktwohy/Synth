@@ -7,7 +7,7 @@ import com.example.synth.Constants.BUFFER_SIZE
 import com.example.synth.Constants.SAMPLE_RATE
 
 import java.util.*
-
+import kotlin.system.measureTimeMillis
 
 
 /**
@@ -85,7 +85,9 @@ class AudioEngine{
                     }
                     callbacks.forEach { it.invoke(floatBuffer) }
 
-                    evaluateToBuffer(floatBuffer)
+//                    measureTimeMillis {
+                        evaluateToBuffer(floatBuffer)
+//                    }.also { logd("evaluate: $it") }
 
                 }
 //                logd(floatBuffer.contentToString())
