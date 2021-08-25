@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 
 object AppModel{
     val audioEngine = AudioEngine()
-    val noteRange = Note.C_3..Note.C_4
+    val noteRange = Note.C_3..Note.C_5
     val pianoViewModel          = PianoViewModel()
     val oscillator = Oscillator(pianoViewModel.pressedNotes)
 

@@ -17,17 +17,19 @@ class Oscillator(input: Set<Note>){
 
     val output = SumSignal()
     var waveShape: WaveShape = WaveShape.SINE
-    private val noteToSignal = mutableMapOf<Note, Signal>()
+    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
     init {
         assignSignalsToNotes()
+
     }
 
     fun bundleSignals() = mutableSetOf<Signal>().apply{
         AppModel.pianoViewModel.pressedNotes.forEach{
-            this += noteToSignal[it] ?: SilentSignal
+            this += noteToSignal[it]?.apply {
+                this.bend(1/bend) } ?: SilentSignal
         }
     }.toSet()
 

@@ -90,7 +90,7 @@ class AudioEngine{
                     evaluateToBuffer(floatBuffer)
 
                 }
-                logd(floatBuffer.contentToString())
+//                logd(floatBuffer.contentToString())
                 floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }
