@@ -50,8 +50,8 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
 
     fun generateRandom(){
         generate(
-            decayRate   = (0..50).random() / 100f,
-            floor       = (10..60).random() / 100f,
+            decayRate   = (0..100).random() / 100f,
+            floor       = (0..20).random() / 100f,
             ceiling     = (90..100).random() / 100f,
             filter = { i ->
                 HarmonicFilter.values()
