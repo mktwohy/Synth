@@ -20,7 +20,7 @@ class SignalPlotViewModel(
             updatePlot()
         }
         AppModel.oscillator.registerOnBendChangedCallback {
-            plotSignal.bend(it)
+            plotSignal.bendAmount = it
             updatePlot()
         }
 
@@ -58,7 +58,8 @@ class VolumeSliderViewModel(val oscillator: Oscillator) : ViewModel(){
 }
 
 class PitchBendViewModel(val oscillator: Oscillator) : ViewModel(){
-    var sliderState by mutableStateOf(1f)
+    val bendRange = AppModel.bendRange
+    var sliderState by mutableStateOf(0f)
     init {
         oscillator.registerOnBendChangedCallback {
             sliderState = it

@@ -5,11 +5,10 @@ class Clock(
     initAngle: Float = 0f
 ) {
     var period = 0f
-    var frequencyBend = 1f
     var frequency: Float = 0f
         set(value){
+            period = Constants.SAMPLE_RATE / value
             field = value
-            period = Constants.SAMPLE_RATE / this.frequency
         }
     var angle = initAngle
     var backupAngle = 0f
@@ -20,7 +19,7 @@ class Clock(
     }
 
     fun tick(){
-        angle = (angle + (2f / period*frequencyBend) ) % 2f
+        angle = (angle + (2f / period) ) % 2f
     }
 
     fun sync(that: Clock){

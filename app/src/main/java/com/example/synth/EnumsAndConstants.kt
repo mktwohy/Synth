@@ -3,8 +3,9 @@ package com.example.synth
 import android.graphics.Paint
 import android.util.Rational
 import androidx.compose.ui.graphics.Color
+import com.example.synth.Note.Companion.bend
 import java.util.*
-import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.sin
 
 object Constants{
@@ -208,10 +209,26 @@ enum class Note(val freq: Float): Comparable<Note> {
         fun random() =
             notes.random()
 
-        fun Note.transpose(steps: Int) =
+        fun Note.transpose(steps: Int): Note =
             notes[notes.indexOf(this) + steps]
+
+        fun Note.bend(bendAmount: Float): Float{
+            val sign = if(bendAmount < 0f) -1 else 1
+            val stepBendAmount = bendAmount.toInt()
+            val fractionalBendAmount = abs(bendAmount - stepBendAmount)
+            val transposeNote = this.transpose(stepBendAmount)
+            val freqBend = ((transposeNote+1).freq - transposeNote.freq) * fractionalBendAmount * sign
+            return transposeNote.freq + freqBend
+        }
 
         operator fun Note.plus(steps: Int) = transpose(steps)
         operator fun Note.minus(steps: Int) = transpose(-1*steps)
     }
+}
+
+fun main(){
+
+    println(Note.B_4.bend(-2.5f))
+    println(Note.A_4.freq)
+
 }

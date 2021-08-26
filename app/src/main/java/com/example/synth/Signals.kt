@@ -3,6 +3,7 @@ package com.example.synth
 
 import com.example.synth.Constants.TWO_PI
 import com.example.synth.Constants.SAMPLE_RATE
+import com.example.synth.Note.Companion.bend
 import kotlin.math.*
 
 /** Represents a time-varying signal.
@@ -47,7 +48,7 @@ abstract class Signal{
 
 abstract class SignalCollection: Signal(){
     abstract val signals: Collection<Signal>
-    var autoNormalize: Boolean = true
+    abstract var autoNormalize: Boolean
 
     override var amp: Float = 1f
         set(value){
@@ -113,12 +114,6 @@ class PeriodicSignal(
         }
     override val period get() = clock.period
 
-    var pitchBend: Float = 1f
-        set(value) {
-            field = value
-            clock.frequencyBend = pitchBend
-        }
-
     override fun reset() { this.clock.reset() }
 
     override fun evaluateNext() = waveShape.function(clock.angle) * amp
@@ -132,15 +127,24 @@ class PeriodicSignal(
 class HarmonicSignal(
     fundamental: Note,
     val harmonicSeries: HarmonicSeries = HarmonicSeries(),
-    amp: Float = 1f,
-    autoNormalize: Boolean = true
+    override var amp: Float = 1f,
+    override var autoNormalize: Boolean = true
 ): SignalCollection() {
     override val period = SAMPLE_RATE / fundamental.freq
     override val signals = List(Constants.NUM_HARMONICS){ i ->
         PeriodicSignal(Clock(fundamental.freq*(i+1)), 0f)
     }
+    var bendAmount: Float = 1f
+        set(value){
+            val bentFundFreq = fundamental.bend(value)
+            for(i in signals.indices) {
+                signals[i].clock.frequency = bentFundFreq * (i+1)
+            }
+            logd(value)
+            field = value
+        }
 
-    var fundamental: Note = Note.A_4
+    var fundamental: Note = fundamental
         set(value){
             field = value
             for(i in signals.indices) {
@@ -148,14 +152,8 @@ class HarmonicSignal(
             }
         }
 
-    fun bend(multiplier: Float){
-        signals.forEach { it.pitchBend = multiplier }
-    }
-
     init {
-        this.fundamental = fundamental
-        this.amp = amp
-        this.autoNormalize = autoNormalize
+        logd("HARM SIGNAL INIT")
         harmonicSeries.registerOnUpdatedCallback {
             for((overtone, amplitude) in harmonicSeries){
                 signals[overtone-1].amp = amplitude
@@ -167,8 +165,8 @@ class HarmonicSignal(
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
     signals: Collection<Signal>,
-    amp: Float = 1f,
-    autoNormalize: Boolean = true
+    override var amp: Float = 1f,
+    override var autoNormalize: Boolean = true
 ) : SignalCollection() {
 
     constructor(vararg signal: Signal, amp: Float = 1f, autoNormalize: Boolean = true)
@@ -180,8 +178,6 @@ class SumSignal(
 
     init {
         this.signals.addAll(signals)
-        this.amp = amp
-        this.autoNormalize = autoNormalize
     }
 
     operator fun plusAssign(that: Signal){

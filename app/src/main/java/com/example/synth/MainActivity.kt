@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 object AppModel{
     val audioEngine = AudioEngine()
     val noteRange = Note.C_3..Note.C_5
+    val bendRange = -1f..1f
     val pianoViewModel = PianoViewModel()
     val oscillator = Oscillator(pianoViewModel.pressedNotes)
 
@@ -24,10 +25,9 @@ object AppModel{
     val pitchBendViewModel      = PitchBendViewModel(oscillator)
 }
 
-
+@ExperimentalComposeUiApi
 class MainActivity : ComponentActivity() {
 
-    @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppModel.audioEngine.start()

@@ -10,9 +10,12 @@ class Oscillator(input: Set<Note>){
             field = value
             onAmpChangedCallbacks.forEach { it.invoke(value) }
         }
-    var bend = 1f
+    var bend = 0f
         set(value) {
-            field = 1/value
+            field = value
+            for((_, signal) in noteToSignal){
+                signal.bendAmount = this.bend
+            }
             onBendChangedCallbacks.forEach { it.invoke(value) }
         }
 
@@ -29,10 +32,7 @@ class Oscillator(input: Set<Note>){
     fun bundleSignals() = mutableSetOf<Signal>()
         .apply{
             AppModel.pianoViewModel.pressedNotes.forEach{
-                this += noteToSignal[it]
-                    ?.apply {
-                        this.bend(1/bend)
-                    } ?: SilentSignal
+                this += noteToSignal[it] ?: SilentSignal
         }
     }.toSet()
 

@@ -25,7 +25,7 @@ import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 
-fun logd(text: String){ Log.d("m_tag",text) }
+fun logd(message: Any){ Log.d("m_tag",message.toString()) }
 
 class PianoGrid(
     val width: MutableState<Dp>,
@@ -212,16 +212,17 @@ fun PitchBend(
     modifier: Modifier = Modifier,
     viewModel: PitchBendViewModel
 ){
-    VerticalSlider(
+    LabeledVerticalSlider(
         modifier = modifier,
         value = viewModel.sliderState,
-        valueRange = 0.8f..1.2f,
+        valueRange = viewModel.bendRange,
         onValueChange = {
             viewModel.oscillator.bend = it
         },
         onValueChangeFinished = {
-            viewModel.oscillator.bend = 1f //snap back to 1f
-        }
+            viewModel.oscillator.bend = 0f //snap back to 0f
+        },
+        showValue = true
     )
 }
 
@@ -320,16 +321,15 @@ fun LabeledVerticalSlider(
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: (() -> Unit)? = null,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
-    label: String = "hello",
+    label: String = "",
     showValue: Boolean = true
 ){
     Column(
-        modifier = modifier.border(width = 1.dp, color = Color.White),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ){
         val showLabel = label != ""
-        logd("label: $showLabel, value: $showValue")
         VerticalSlider(
             modifier = Modifier
                 .fillMaxHeight(
