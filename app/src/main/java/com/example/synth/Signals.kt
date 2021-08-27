@@ -101,7 +101,7 @@ object SilentSignal: Signal() {
 
 
 class PeriodicSignal(
-    val clock: Clock = Clock(440f),
+    val angularClock: AngularClock = AngularClock(440f),
     amp: Float = 1f,
     var waveShape: WaveShape = WaveShape.SINE
 ): Signal() {
@@ -112,15 +112,15 @@ class PeriodicSignal(
                 value.isNaN() -> field = 0f
             }
         }
-    override val period get() = SAMPLE_RATE / clock.frequency
+    override val period get() = SAMPLE_RATE / angularClock.frequency
 
-    override fun reset() { this.clock.reset() }
+    override fun reset() { this.angularClock.reset() }
 
-    override fun evaluateNext() = waveShape.values[radianToDegree(clock.angle*PI).toInt()] * amp
-        .also { clock.tick() }
+    override fun evaluateNext() = waveShape.values[angularClock.angle.toInt()] * amp
+        .also { angularClock.tick() }
 
     override fun toString(): String {
-        return "FuncSignal:\n\tnote = ${clock.frequency} \n\tamp  = $amp \n\twaveShape = $waveShape"
+        return "FuncSignal:\n\tnote = ${angularClock.frequency} \n\tamp  = $amp \n\twaveShape = $waveShape"
     }
 }
 
@@ -132,13 +132,13 @@ class HarmonicSignal(
 ): SignalCollection() {
     override val period = SAMPLE_RATE / fundamental.freq
     override val signals = List(Constants.NUM_HARMONICS){ i ->
-        PeriodicSignal(Clock(fundamental.freq*(i+1)), 0f)
+        PeriodicSignal(AngularClock(fundamental.freq*(i+1)), 0f)
     }
     var bendAmount: Float = 1f
         set(value){
             val bentFundFreq = fundamental.bend(value)
             for(i in signals.indices) {
-                signals[i].clock.frequency = bentFundFreq * (i+1)
+                signals[i].angularClock.frequency = bentFundFreq * (i+1)
             }
             logd(value)
             field = value
@@ -148,12 +148,11 @@ class HarmonicSignal(
         set(value){
             field = value
             for(i in signals.indices) {
-                signals[i].clock.frequency = fundamental.freq*(i+1)
+                signals[i].angularClock.frequency = fundamental.freq*(i+1)
             }
         }
 
     init {
-        logd("HARM SIGNAL INIT")
         harmonicSeries.registerOnUpdatedCallback {
             for((overtone, amplitude) in harmonicSeries){
                 signals[overtone-1].amp = amplitude
@@ -189,8 +188,8 @@ class SumSignal(
 }
 
 fun main(){
-    val s1 = PeriodicSignal(Clock(Note.A_4.freq))
-    val s2 = PeriodicSignal(Clock(Note.A_3.freq))
+    val s1 = PeriodicSignal(AngularClock(Note.A_4.freq))
+    val s2 = PeriodicSignal(AngularClock(Note.A_3.freq))
     val sum = SumSignal(s1, s2)
 
     s1.plotInConsole()

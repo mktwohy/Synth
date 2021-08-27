@@ -1,13 +1,12 @@
 package com.example.synth
 
-class Clock(
+class AngularClock(
     frequency: Float,
     initAngle: Float = 0f
-) {
-
+){
     var frequency: Float = 0f
         set(value){
-            tickAmount = 2f / (Constants.SAMPLE_RATE / value)
+            tickAmount = 360 / (Constants.SAMPLE_RATE / value)
             field = value
         }
     var tickAmount: Float = 0f
@@ -20,10 +19,10 @@ class Clock(
     }
 
     fun tick(){
-        angle = (angle + tickAmount) % 2f
+        angle = (angle + tickAmount) % 360
     }
 
-    fun sync(that: Clock){
+    fun sync(that: AngularClock){
         this.angle = that.angle
     }
 

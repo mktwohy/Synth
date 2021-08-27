@@ -35,17 +35,6 @@ enum class WaveShape(val values: FloatArray) {
     SQUARE(  FloatArray(360) ),
 }
 
-fun main() {
-    println(WaveShape.SINE.values.contentToString())
-}
-
-/** The [Paint]s used in the UI */
-enum class Paints(val paint: Paint){
-    WHITE   ( Paint().apply { setARGB(255, 255, 255, 255) } ),
-    PURPLE  ( Paint().apply { setARGB(100, 255, 0, 255); strokeWidth = 4f } ),
-    BLACK   ( Paint().apply { setARGB(255, 0, 0, 0); strokeWidth = 2f } );
-}
-
 /** Musical intervals and their associated mathematical ratio */
 enum class Interval(val ratio: Rational){
     PER_1   (Rational(1, 1)),
