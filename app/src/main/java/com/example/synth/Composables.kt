@@ -198,11 +198,11 @@ fun XYPlot(
                 drawLine(
                     start = Offset(
                         x = i * size.width / (data.size-1),
-                        y = (data[i] * size.height/2) + (size.height/2)
+                        y = (data[i] * -1 * size.height/2) + (size.height/2)
                     ),
                     end = Offset(
                         x = (i+1) * size.width / (data.size-1),
-                        y = (data[i+1] * size.height/2) + (size.height/2)
+                        y = (data[i+1] * -1 * size.height/2) + (size.height/2)
                     ),
                     color = color,
                     strokeWidth = strokeWidth
