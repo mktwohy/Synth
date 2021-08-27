@@ -101,10 +101,18 @@ object SilentSignal: Signal() {
 
 
 class PeriodicSignal(
-    val angularClock: AngularClock = AngularClock(440f),
+    frequency: Float,
     amp: Float = 1f,
     var waveShape: WaveShape = WaveShape.SINE
 ): Signal() {
+    var frequency: Float = frequency
+        set(value) {
+            angularClock.frequency = value
+            field = value
+        }
+
+    private val angularClock: AngularClock = AngularClock(frequency)
+
     override var amp: Float = amp
         set(value) {
             when{
@@ -132,13 +140,13 @@ class HarmonicSignal(
 ): SignalCollection() {
     override val period = SAMPLE_RATE / fundamental.freq
     override val signals = List(Constants.NUM_HARMONICS){ i ->
-        PeriodicSignal(AngularClock(fundamental.freq*(i+1)), 0f)
+        PeriodicSignal(fundamental.freq*(i+1), 0f)
     }
     var bendAmount: Float = 1f
         set(value){
             val bentFundFreq = fundamental.bend(value)
             for(i in signals.indices) {
-                signals[i].angularClock.frequency = bentFundFreq * (i+1)
+                signals[i].frequency = bentFundFreq * (i+1)
             }
             logd(value)
             field = value
@@ -148,7 +156,7 @@ class HarmonicSignal(
         set(value){
             field = value
             for(i in signals.indices) {
-                signals[i].angularClock.frequency = fundamental.freq*(i+1)
+                signals[i].frequency = fundamental.freq*(i+1)
             }
         }
 
@@ -185,35 +193,4 @@ class SumSignal(
             else                -> this.signals.add(that)
         }
     }
-}
-
-fun main(){
-    val s1 = PeriodicSignal(AngularClock(Note.A_4.freq))
-    val s2 = PeriodicSignal(AngularClock(Note.A_3.freq))
-    val sum = SumSignal(s1, s2)
-
-    s1.plotInConsole()
-    sum.plotInConsole()
-
-    val angle = 0.5f
-    println(angle * s1.period / sum.period)
-//    val sum3 = SumSignal(sum, harm)
-
-//    println(sum3)
-//    println(harm)
-//    harm.amp = 0.5f
-//    println(harm)
-
-
-//    sum3.plotInConsole()
-//
-//    println(s1.evaluate(1, true).contentToString())
-//
-//    s1.plotInConsole()
-//    s2.plotInConsole()
-//    sum.plotInConsole(false)
-//    sum.plotInConsole()
-//
-//    println(Signal.sine(0, Note.A_4.freq))
-
 }
