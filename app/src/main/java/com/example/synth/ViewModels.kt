@@ -9,7 +9,7 @@ class SignalPlotViewModel(
     harmonicSeries: HarmonicSeries,
     numPeriods: Int = 4
 ) : ViewModel(){
-    val plotSignal = HarmonicSignal(Note.C_2, harmonicSeries)
+    val plotSignal = HarmonicSignal(Note.C_2, harmonicSeries, WaveShape.SAWTOOTH)
     val plotBuffer = FloatArray(plotSignal.period.toInt()*numPeriods)
     val plotData   = mutableStateListOf<Float>()
 

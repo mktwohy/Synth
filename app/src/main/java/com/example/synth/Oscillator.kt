@@ -18,9 +18,14 @@ class Oscillator(input: Set<Note>){
             }
             onBendChangedCallbacks.forEach { it.invoke(value) }
         }
+    var waveShape: WaveShape = WaveShape.SAWTOOTH
+        set(value){
+            for((_, signal) in noteToSignal){
+                signal.waveShape = value
+            }
+            field = value
+        }
 
-    val output = SumSignal()
-    var waveShape: WaveShape = WaveShape.SINE
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
@@ -51,10 +56,10 @@ class Oscillator(input: Set<Note>){
     private fun assignSignalsToNotes(){
         noteToSignal.clear()
         AppModel.noteRange.toList().forEach {
-            noteToSignal[it] = HarmonicSignal(it, harmonicSeries, 1/7f)
+            noteToSignal[it] = HarmonicSignal(it, harmonicSeries, waveShape, 1/7f)
         }
         val lastNote = AppModel.noteRange.endInclusive
-        noteToSignal[lastNote+1] = HarmonicSignal(lastNote+1, harmonicSeries, 1/7f)
+        noteToSignal[lastNote+1] = HarmonicSignal(lastNote+1, harmonicSeries, waveShape,1/7f)
 
     }
 }

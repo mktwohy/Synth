@@ -9,18 +9,6 @@ import kotlin.math.*
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
 abstract class Signal{
-    companion object{
-        val sine = { i: Int, freq: Float ->
-            sin(TWO_PI * i / (SAMPLE_RATE/freq)).toFloat()
-        }
-        val cosine = { i: Int, freq: Float ->
-            cos(TWO_PI * i / (SAMPLE_RATE/freq)).toFloat()
-        }
-        val silence = { _: Int, _: Int ->
-            0f
-        }
-    }
-
     abstract val period: Float
     abstract var amp: Float
 
@@ -135,13 +123,23 @@ class PeriodicSignal(
 class HarmonicSignal(
     fundamental: Note,
     val harmonicSeries: HarmonicSeries = HarmonicSeries(),
+    waveShape: WaveShape = WaveShape.SINE,
     override var amp: Float = 1f,
     override var autoNormalize: Boolean = true
 ): SignalCollection() {
     override val period = SAMPLE_RATE / fundamental.freq
     override val signals = List(Constants.NUM_HARMONICS){ i ->
-        PeriodicSignal(fundamental.freq*(i+1), 0f)
+        PeriodicSignal(
+            fundamental.freq*(i+1),
+            0f,
+            waveShape
+        )
     }
+    var waveShape: WaveShape = waveShape
+        set(value){
+            signals.forEach{it.waveShape = value}
+            field = value
+        }
     var bendAmount: Float = 1f
         set(value){
             val bentFundFreq = fundamental.bend(value)

@@ -189,20 +189,22 @@ fun XYPlot(
     color: Color = Color.Green,
     strokeWidth: Float = 3f,
 ) {
-    Canvas(modifier = modifier) {
-        for(i in 0..data.size-2){
-            drawLine(
-                start = Offset(
-                    x = i * size.width / (data.size-1),
-                    y = (data[i] * size.height/2) + (size.height/2)
-                ),
-                end = Offset(
-                    x = (i+1) * size.width / (data.size-1),
-                    y = (data[i+1] * size.height/2) + (size.height/2)
-                ),
-                color = color,
-                strokeWidth = strokeWidth
-            )
+    Box(modifier = modifier, contentAlignment = Alignment.Center){
+        Canvas(modifier = Modifier.fillMaxHeight(0.9f).fillMaxWidth()) {
+            for(i in 0..data.size-2){
+                drawLine(
+                    start = Offset(
+                        x = i * size.width / (data.size-1),
+                        y = (data[i] * size.height/2) + (size.height/2)
+                    ),
+                    end = Offset(
+                        x = (i+1) * size.width / (data.size-1),
+                        y = (data[i+1] * size.height/2) + (size.height/2)
+                    ),
+                    color = color,
+                    strokeWidth = strokeWidth
+                )
+            }
         }
     }
 }
@@ -261,7 +263,9 @@ fun HarmonicSeriesEditor(
         )
         Column(Modifier.fillMaxSize()) {
             Button(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.5f),
                 onClick = {viewModel.harmonicSeries.reset() }
             ) {
                 Text(
@@ -333,7 +337,7 @@ fun LabeledVerticalSlider(
         VerticalSlider(
             modifier = Modifier
                 .fillMaxHeight(
-                    when{
+                    when {
                         showLabel && showValue -> 0.75f
                         showLabel xor showValue -> 0.85f
                         else -> 1f
@@ -348,7 +352,7 @@ fun LabeledVerticalSlider(
         if(showValue){
             Text(
                 modifier = Modifier
-                    .fillMaxHeight(if(showLabel) 0.5f else 1f)
+                    .fillMaxHeight(if (showLabel) 0.5f else 1f)
                     .fillMaxWidth()
                     .border(1.dp, Color.White),
                 text = (value * 100).toInt().toString(),

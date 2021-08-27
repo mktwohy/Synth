@@ -3,6 +3,7 @@ package com.example.synth
 import android.graphics.Paint
 import android.util.Rational
 import androidx.compose.ui.graphics.Color
+import com.example.synth.Constants.WAVEFORM_SIZE
 import com.example.synth.Note.Companion.bend
 import java.util.*
 import kotlin.math.abs
@@ -16,6 +17,7 @@ object Constants{
     const val NUM_HARMONICS    = 15
     const val SAMPLE_RATE      = 44100
     const val BUFFER_SIZE      = 512
+    const val WAVEFORM_SIZE = 360
 }
 
 enum class HarmonicFilter(val function: (Int) -> Boolean){
@@ -27,12 +29,21 @@ enum class HarmonicFilter(val function: (Int) -> Boolean){
 }
 
 enum class WaveShape(val values: FloatArray) {
-    SINE(FloatArray(360) {
+    SINE(FloatArray(WAVEFORM_SIZE) {
         sin( degreeToRadian(it.toFloat()) )
     }),
-    SAWTOOTH(  FloatArray(360) ),
-    TRIANGLE( FloatArray(360) ),
-    SQUARE(  FloatArray(360) ),
+    SAWTOOTH(  FloatArray(WAVEFORM_SIZE) {
+        it.toFloat() / WAVEFORM_SIZE
+    }),
+    TRIANGLE( FloatArray(WAVEFORM_SIZE){
+        it.toFloat() / WAVEFORM_SIZE / 4
+    }),
+    SQUARE(  FloatArray(WAVEFORM_SIZE){
+        if(it < WAVEFORM_SIZE / 2) 1f else -1f
+    } ),
+    NOISE(  FloatArray(WAVEFORM_SIZE){
+        (-100..100).random() / 100f
+    } ),
 }
 
 /** Musical intervals and their associated mathematical ratio */
