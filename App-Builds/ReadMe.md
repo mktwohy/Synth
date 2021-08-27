@@ -14,6 +14,7 @@
   - Audio stuttering issue alleviated
     - Previously, pressing 4 notes would cause stuttering. Now the threshold is ~7 notes
   - UI layout now resizes based on phone orientation
+  - On startup, the fundamental overtone is set to max volume
 - **8-24-2021:**
   - All UI components have been rebuilt from the ground up to fit into the new Jetpack Compose framework. 
   - Added feature: Piano can support any range of keys; it is no longer limited to one octave. User control for this will be added soon.
