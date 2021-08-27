@@ -33,14 +33,16 @@ enum class WaveShape(val values: FloatArray) {
         sin( degreeToRadian(it.toFloat()) )
     }),
     SAWTOOTH(  FloatArray(WAVEFORM_SIZE) {
-        it.toFloat() / WAVEFORM_SIZE
+        (2 * it.toFloat() / WAVEFORM_SIZE) - 1f
     }),
     SQUARE(  FloatArray(WAVEFORM_SIZE){
         if(it < WAVEFORM_SIZE / 2) 1f else -1f
     } ),
-//    TRIANGLE( FloatArray(WAVEFORM_SIZE){
-//        it.toFloat() / WAVEFORM_SIZE / 4
-//    }),
+    TRIANGLE( FloatArray(WAVEFORM_SIZE){
+        val amp = 1f
+        val period = WAVEFORM_SIZE
+        (4*amp/period) * abs(((it - (period/4)).mod(period) ) - (period/2)) - amp
+    }),
 //    NOISE(  FloatArray(WAVEFORM_SIZE){
 //        (-100..100).random() / 100f
 //    } ),
