@@ -18,7 +18,7 @@ class Oscillator(input: Set<Note>){
             }
             onBendChangedCallbacks.forEach { it.invoke(value) }
         }
-    var waveShape: WaveShape = WaveShape.SAWTOOTH
+    var waveShape: WaveShape = WaveShape.SINE
         set(value){
             for((_, signal) in noteToSignal){
                 signal.waveShape = value

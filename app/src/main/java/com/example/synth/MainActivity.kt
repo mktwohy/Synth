@@ -1,5 +1,6 @@
 package com.example.synth
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
 object AppModel{
@@ -51,9 +53,11 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
+            val isPortrait = LocalConfiguration.current.orientation ==
+                    Configuration.ORIENTATION_PORTRAIT
             Column {
                 HarmonicSeriesEditor(
-                    modifier = Modifier.fillMaxHeight(0.25f),
+                    modifier = Modifier.fillMaxHeight(if(isPortrait) 0.5f else 0.3f),
                     viewModel = AppModel.harmonicSeriesViewModel
                 )
                 SignalPlot(
@@ -69,7 +73,9 @@ class MainActivity : ComponentActivity() {
                 )
                 Row {
                     Piano(
-                        modifier = Modifier.fillMaxHeight().fillMaxWidth(0.9f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(if(isPortrait) 0.9f else 0.95f),
                         viewModel = AppModel.pianoViewModel
                     )
                     PitchBend(

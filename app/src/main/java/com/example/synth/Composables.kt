@@ -190,7 +190,9 @@ fun XYPlot(
     strokeWidth: Float = 3f,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center){
-        Canvas(modifier = Modifier.fillMaxHeight(0.9f).fillMaxWidth()) {
+        Canvas(modifier = Modifier
+            .fillMaxHeight(0.9f)
+            .fillMaxWidth()) {
             for(i in 0..data.size-2){
                 drawLine(
                     start = Offset(
@@ -214,7 +216,7 @@ fun PitchBend(
     modifier: Modifier = Modifier,
     viewModel: PitchBendViewModel
 ){
-    LabeledVerticalSlider(
+    VerticalSlider(
         modifier = modifier,
         value = viewModel.sliderState,
         valueRange = viewModel.bendRange,
@@ -224,7 +226,6 @@ fun PitchBend(
         onValueChangeFinished = {
             viewModel.oscillator.bend = 0f //snap back to 0f
         },
-        showValue = true
     )
 }
 
@@ -350,27 +351,36 @@ fun LabeledVerticalSlider(
             onValueChangeFinished = onValueChangeFinished
         )
         if(showValue){
-            Text(
+            Box(
                 modifier = Modifier
                     .fillMaxHeight(if (showLabel) 0.5f else 1f)
                     .fillMaxWidth()
                     .border(1.dp, Color.White),
-                text = (value * 100).toInt().toString(),
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
+                contentAlignment = Alignment.Center
+            ){
+                Text(
+                    modifier = Modifier.fillMaxSize(),
+                    text = (value * 100).toInt().toString(),
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
         if(showLabel){
-            Text(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .border(1.dp, Color.White),
-                text = label,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
+                contentAlignment = Alignment.Center
+            ){
+                Text(
+                    modifier = Modifier.fillMaxSize(),
+                    text = label,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
-
     }
 }
 
@@ -387,8 +397,7 @@ fun VerticalSlider(
             modifier = Modifier
                 .requiredWidth(maxHeight)
                 .requiredHeight(maxWidth)
-                .rotate(-90f)
-                .border(2.dp, Color.White),
+                .rotate(-90f),
             value = value,
             valueRange = valueRange,
             onValueChange = onValueChange,
