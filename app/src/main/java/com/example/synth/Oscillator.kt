@@ -3,7 +3,7 @@ package com.example.synth
 import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 
-class Oscillator(input: Set<Note>){
+class Oscillator{
     val harmonicSeries = HarmonicSeries()
     var amplitude = 0f
         set(value) {
@@ -23,10 +23,12 @@ class Oscillator(input: Set<Note>){
             for((_, signal) in noteToSignal){
                 signal.waveShape = value
             }
+            onWaveShapeChangedCallbacks.forEach { it.invoke(value) }
             field = value
         }
 
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
+    private val onWaveShapeChangedCallbacks = mutableSetOf<(WaveShape) -> Unit>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
@@ -41,13 +43,14 @@ class Oscillator(input: Set<Note>){
         }
     }.toSet()
 
-    fun registerOnActiveNotesChangedCallbacksCallback(callback: (Float) -> Unit){
-        onAmpChangedCallbacks.add(callback)
+
+    fun registerOnWaveShapeChangedCallback(callback: (WaveShape) -> Unit){
+        onWaveShapeChangedCallbacks.add(callback)
     }
 
    fun registerOnAmpChangedCallback(callback: (Float) -> Unit){
         onAmpChangedCallbacks.add(callback)
-    }
+   }
 
     fun registerOnBendChangedCallback(callback: (Float) -> Unit){
         onBendChangedCallbacks.add(callback)

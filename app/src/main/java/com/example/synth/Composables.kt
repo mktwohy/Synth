@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -208,6 +209,19 @@ fun XYPlot(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun WaveShapeSelector(
+    modifier: Modifier,
+    viewModel: WaveFormChangeViewModel
+){
+    Button(
+        modifier = modifier,
+        onClick = { viewModel.nextWaveShape() }
+    ) {
+        Text(text = viewModel.waveShape.toString())
     }
 }
 

@@ -18,11 +18,12 @@ object AppModel{
     val audioEngine = AudioEngine()
     val noteRange = Note.C_3..Note.C_5
     val bendRange = -1f..1f
-    val pianoViewModel = PianoViewModel()
-    val oscillator = Oscillator(pianoViewModel.pressedNotes)
+    val oscillator = Oscillator()
 
+    val pianoViewModel          = PianoViewModel()
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
     val SignalPlotViewModel     = SignalPlotViewModel(oscillator.harmonicSeries)
+    val waveFormChangeViewModel = WaveFormChangeViewModel(oscillator)
     val volumeSliderViewModel   = VolumeSliderViewModel(oscillator)
     val pitchBendViewModel      = PitchBendViewModel(oscillator)
 }
@@ -56,6 +57,12 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column {
+                WaveShapeSelector(
+                    modifier = Modifier
+                        .fillMaxHeight(if(isPortrait) 0.05f else 0.1f)
+                        .fillMaxWidth(),
+                    viewModel = AppModel.waveFormChangeViewModel
+                )
                 HarmonicSeriesEditor(
                     modifier = Modifier.fillMaxHeight(if(isPortrait) 0.5f else 0.3f),
                     viewModel = AppModel.harmonicSeriesViewModel
@@ -69,13 +76,12 @@ class MainActivity : ComponentActivity() {
                     viewModel = AppModel.SignalPlotViewModel,
                     color = Color(0.4f, 0.0f, 1f, 1f),
                     strokeWidth = 5f
-
                 )
                 Row {
                     Piano(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .fillMaxWidth(if(isPortrait) 0.9f else 0.95f),
+                            .fillMaxWidth(if (isPortrait) 0.9f else 0.95f),
                         viewModel = AppModel.pianoViewModel
                     )
                     PitchBend(

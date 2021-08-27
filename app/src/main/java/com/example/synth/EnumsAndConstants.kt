@@ -35,15 +35,15 @@ enum class WaveShape(val values: FloatArray) {
     SAWTOOTH(  FloatArray(WAVEFORM_SIZE) {
         it.toFloat() / WAVEFORM_SIZE
     }),
-    TRIANGLE( FloatArray(WAVEFORM_SIZE){
-        it.toFloat() / WAVEFORM_SIZE / 4
-    }),
     SQUARE(  FloatArray(WAVEFORM_SIZE){
         if(it < WAVEFORM_SIZE / 2) 1f else -1f
     } ),
-    NOISE(  FloatArray(WAVEFORM_SIZE){
-        (-100..100).random() / 100f
-    } ),
+//    TRIANGLE( FloatArray(WAVEFORM_SIZE){
+//        it.toFloat() / WAVEFORM_SIZE / 4
+//    }),
+//    NOISE(  FloatArray(WAVEFORM_SIZE){
+//        (-100..100).random() / 100f
+//    } ),
 }
 
 /** Musical intervals and their associated mathematical ratio */

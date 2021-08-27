@@ -14,6 +14,7 @@ class SignalPlotViewModel(
     val plotData   = mutableStateListOf<Float>()
 
     init {
+        updatePlot()
         harmonicSeries.registerOnUpdatedCallback { updatePlot() }
         AppModel.oscillator.registerOnAmpChangedCallback {
             plotSignal.amp = it
@@ -21,6 +22,10 @@ class SignalPlotViewModel(
         }
         AppModel.oscillator.registerOnBendChangedCallback {
             plotSignal.bendAmount = it
+            updatePlot()
+        }
+        AppModel.oscillator.registerOnWaveShapeChangedCallback {
+            plotSignal.waveShape = it
             updatePlot()
         }
 
@@ -41,11 +46,23 @@ class PianoViewModel : ViewModel(){
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
-//    private val onPressedNotesChangedCallbacks = mutableSetOf< (Set<Note>) -> Unit >()
-//
-//    fun registerOnPressedNotesChangedCallback(callback: (Set<Note>) -> Unit){
-//        onPressedNotesChangedCallbacks.add(callback)
-//    }
+}
+
+class WaveFormChangeViewModel(val oscillator: Oscillator): ViewModel() {
+    var waveShape by mutableStateOf(WaveShape.SINE)
+
+    private var index = 1
+    private val waveShapes = WaveShape.values()
+    fun nextWaveShape(){
+        oscillator.waveShape = waveShapes[index]
+        index = (index + 1) % waveShapes.size
+    }
+
+    init {
+        oscillator.registerOnWaveShapeChangedCallback {
+            waveShape = it
+        }
+    }
 }
 
 class VolumeSliderViewModel(val oscillator: Oscillator) : ViewModel(){
