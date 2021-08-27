@@ -1,0 +1,44 @@
+## Install Instructions
+- Click on the most recent build. 
+  - Builds use the following naming scheme: Synth_v(month)-(day)-(year).apk
+- Click "view raw." 
+  - This should download the file. 
+- Once downloaded, click on the download and it should automatically install. 
+  - If it doesn't install, you'll need to go to your web browser app settings and enable the option titled "Install Unknown Apps"
+
+
+## Changelogs 
+- **8-27-2021 (Latest Build):**
+  - Added feature: Waveform selector.
+    - You can now choose between Sine, Triangle, Sawtooth, and Square waves
+  - Audio stuttering issue alleviated
+    - Previously, pressing 4 notes would cause stuttering. Now the threshold is ~7 notes
+  - UI layout now resizes based on phone orientation
+- **8-24-2021:**
+  - All UI components have been rebuilt from the ground up to fit into the new Jetpack Compose framework. 
+  - Added feature: Piano can support any range of keys; it is no longer limited to one octave. User control for this will be added soon.
+  - Added feature: Harmonic Series Editor gives the user more control over their sound.
+    - Sliders for controlling the volume of each overtone
+    - Reset button (sets all sliders to zero)
+    - Random button (adjusts sliders by randomly changing parameters decay, floor, ceiling, and filter)
+  - Added feature: Pitch Bend
+  - Added feature: Signal preview
+    - similar to realtime-audio viewer, but instead shows 4 periods of the signal you've generated with the Harmonic Series. 
+- **8-10-2021:**
+  - Added feature: replaced noise effect with harmonic overtones
+    - this is the first step towards additive synthesis. For now, the user can only change the harmonic range; the volume of each overtone exponentially decays automatically . However, under the hood, these overtones can be manipulated with more control, and this control will be given to the user in a later update. 
+  - Fixed bug: all keys had to be released in order for changes from [-] and [+] buttons to apply 
+  - Fixed bug: when holding two or more keys on the piano, releasing one key would cause all keys would release momentarily
+  - Fixed bug: audio visualizer was not properly centered and had a range of 0.0 to 2.0 rather than -1.0 to 1.0
+  - Fixed bug: generated audio was off-pitch
+- **8-3-2021:**
+  - Added feature: audio visualizer 
+  - Fixed bug: noise level indicator to display incorrectly
+- **8-2-2021:**
+  - Fixed bug: excessive memory allocation that caused app to slow to a halt and even crash
+    - this yields significant performance improvements
+- **7-27-2021:**
+  - Added feature: harmonic white-noise effect
+- **7-25-2021:**
+  - Under the hood improvements which lessen the severity of the memory bug. This means that more notes can be played simultaneously without slowdown or crashing
+  - Added feature: the user can change the current octave
