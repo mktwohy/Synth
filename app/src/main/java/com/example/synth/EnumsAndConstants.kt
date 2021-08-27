@@ -26,11 +26,17 @@ enum class HarmonicFilter(val function: (Int) -> Boolean){
     NONE        ({ false });
 }
 
-enum class WaveShape(val function: (Float) -> Float) {
-    SINE( { angle: Float -> sin(angle * Constants.PI) } ) ,
-    SAWTOOTH( { angle: Float -> 0f } ),
-    TRIANGLE( { angle: Float -> 0f } ),
-    SQUARE( { angle: Float -> 0f } ),
+enum class WaveShape(val values: FloatArray) {
+    SINE(FloatArray(360) {
+        sin( degreeToRadian(it.toFloat()) )
+    }),
+    SAWTOOTH(  FloatArray(360) ),
+    TRIANGLE( FloatArray(360) ),
+    SQUARE(  FloatArray(360) ),
+}
+
+fun main() {
+    println(WaveShape.SINE.values.contentToString())
 }
 
 /** The [Paint]s used in the UI */
@@ -224,11 +230,4 @@ enum class Note(val freq: Float): Comparable<Note> {
         operator fun Note.plus(steps: Int) = transpose(steps)
         operator fun Note.minus(steps: Int) = transpose(-1*steps)
     }
-}
-
-fun main(){
-
-    println(Note.B_4.bend(-2.5f))
-    println(Note.A_4.freq)
-
 }

@@ -112,11 +112,11 @@ class PeriodicSignal(
                 value.isNaN() -> field = 0f
             }
         }
-    override val period get() = clock.period
+    override val period get() = SAMPLE_RATE / clock.frequency
 
     override fun reset() { this.clock.reset() }
 
-    override fun evaluateNext() = waveShape.function(clock.angle) * amp
+    override fun evaluateNext() = waveShape.values[radianToDegree(clock.angle*PI).toInt()] * amp
         .also { clock.tick() }
 
     override fun toString(): String {

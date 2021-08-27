@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.synth.Constants.MAX_16BIT_VALUE
 import com.example.synth.Constants.MIN_16BIT_VALUE
 import java.lang.StringBuilder
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.truncate
@@ -12,6 +13,10 @@ import kotlin.math.truncate
 fun volumeToAmplitude(volume: Float) = volume.pow(3f)
 fun amplitudeToVolume(amplitude: Float) = amplitude.pow(1/3f)
 
+fun radianToDegree(radian: Float) = (radian *180 / PI).toFloat()
+fun radianToDegree(radian: Double) = radianToDegree(radian.toFloat())
+fun degreeToRadian(degree: Float) = (degree * PI / 180).toFloat()
+fun degreeToRadian(degree: Double) = radianToDegree(degree.toFloat())
 
 //----- Color -----//
 fun Color.mix(that: Color) =

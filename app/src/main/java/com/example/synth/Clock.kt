@@ -4,14 +4,15 @@ class Clock(
     frequency: Float,
     initAngle: Float = 0f
 ) {
-    var period = 0f
+
     var frequency: Float = 0f
         set(value){
-            period = Constants.SAMPLE_RATE / value
+            tickAmount = 2f / (Constants.SAMPLE_RATE / value)
             field = value
         }
-    var angle = initAngle
-    var backupAngle = 0f
+    var tickAmount: Float = 0f
+    var angle = 0f
+    var backupAngle = 0f //used during save and restore
 
     init {
         this.frequency = frequency
@@ -19,7 +20,7 @@ class Clock(
     }
 
     fun tick(){
-        angle = (angle + (2f / period) ) % 2f
+        angle = (angle + tickAmount) % 2f
     }
 
     fun sync(that: Clock){
@@ -31,15 +32,5 @@ class Clock(
     }
 
     fun save(){ backupAngle = angle }
-
     fun restore(){ angle = backupAngle }
-}
-
-fun main(){
-    val clock = Clock(440f)
-    repeat(103){ clock.tick() }
-    println(clock.period)
-    clock.frequency = 100f
-    println(clock.period)
-
 }
