@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
 //            )
 //        }
 
-
+        AppModel.oscillator.harmonicSeries[1] = 1f
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
