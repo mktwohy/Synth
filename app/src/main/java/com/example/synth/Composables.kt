@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
@@ -276,7 +277,7 @@ fun HarmonicSeriesEditor(
             label = { index -> if(index == 0) "f" else "${index+1}" },
             showValue = false
         )
-        Column(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().border(1.dp, Color.White)) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -284,7 +285,7 @@ fun HarmonicSeriesEditor(
                 onClick = {viewModel.harmonicSeries.reset() }
             ) {
                 Text(
-                    text = "Reset",
+                    text = "RESET",
                     color = Color.White,
                     fontSize = 11.sp
                 )
@@ -297,7 +298,7 @@ fun HarmonicSeriesEditor(
                 }
             ) {
                 Text(
-                    text = "Random",
+                    text = "RANDOM",
                     color = Color.White,
                     fontSize = 11.sp
                 )

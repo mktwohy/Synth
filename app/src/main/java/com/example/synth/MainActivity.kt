@@ -57,27 +57,35 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column {
-                WaveShapeSelector(
-                    modifier = Modifier
-                        .fillMaxHeight(if(isPortrait) 0.05f else 0.1f)
-                        .fillMaxWidth(),
-                    viewModel = AppModel.waveFormChangeViewModel
-                )
                 HarmonicSeriesEditor(
-                    modifier = Modifier.fillMaxHeight(if(isPortrait) 0.5f else 0.3f),
+                    modifier = Modifier
+                        .fillMaxHeight(if(isPortrait) 0.5f else 0.3f)
+                        .border(1.dp, Color.White),
                     viewModel = AppModel.harmonicSeriesViewModel
                 )
-                SignalPlot(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.4f)
-                        .background(Color.Black)
-                        .border(1.dp, Color.White),
-                    viewModel = AppModel.SignalPlotViewModel,
-                    color = Color(0.4f, 0.0f, 1f, 1f),
-                    strokeWidth = 5f
-                )
-                Row {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.4f)
+                    .border(1.dp, Color.White)
+                ){
+                    SignalPlot(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.9f)
+                            .background(Color.Black)
+                            .border(1.dp, Color.White),
+                        viewModel = AppModel.SignalPlotViewModel,
+                        color = Color(0.4f, 0.0f, 1f, 1f),
+                        strokeWidth = 5f
+                    )
+                    WaveShapeSelector(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        viewModel = AppModel.waveFormChangeViewModel
+                    )
+                }
+
+                Row(Modifier.border(1.dp, Color.White)) {
                     Piano(
                         modifier = Modifier
                             .fillMaxHeight()
