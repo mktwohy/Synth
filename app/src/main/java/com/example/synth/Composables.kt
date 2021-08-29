@@ -124,7 +124,10 @@ fun Piano(
                     if (newPressedNotes != viewModel.pressedNotes) {
                         viewModel.pressedNotes = newPressedNotes
                     }
+
                     AppModel.audioEngine.signalBuffer += AppModel.oscillator.bundleSignals()
+
+
 
                     true
                 }

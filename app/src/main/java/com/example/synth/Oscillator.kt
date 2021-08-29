@@ -36,6 +36,7 @@ class Oscillator{
         assignSignalsToNotes()
     }
 
+
     fun bundleSignals() = mutableSetOf<Signal>()
         .apply{
             AppModel.pianoViewModel.pressedNotes.forEach{

@@ -74,25 +74,32 @@ class AudioEngine{
         audioTrack.release()
     }
 
+    val latencyTimes = mutableListOf<Long>()
     private fun mainLoop(){
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                masterSignal.apply {
-                    if(signalBuffer.isNotEmpty()){
-                        this.signals.clear()
-                        this.signals.addAll(signalBuffer.poll()!!)
-                    }
-                    callbacks.forEach { it.invoke(floatBuffer) }
+                measureTimeMillis {
+                    masterSignal.apply {
+                        if(signalBuffer.isNotEmpty()){
+                            this.signals.clear()
+                            this.signals.addAll(signalBuffer.poll()!!)
+                        }
 
-//                    measureTimeMillis {
                         evaluateToBuffer(floatBuffer)
-//                    }.also { logd("evaluate: $it") }
+                    }
 
+                    floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
+                }.also {
+//                    latencyTimes += it
+//                    if(latencyTimes.size > 15){
+//                        AppModel.lag = latencyTimes.average()
+//                        latencyTimes.clear()
+//                    }
+                    AppModel.lag = it.toFloat()
                 }
-//                logd(floatBuffer.contentToString())
-                floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
+
             }
             audioTrack.stop()
             audioTrack.flush()

@@ -28,7 +28,7 @@ abstract class Signal{
 
     /** Evaluates the signal fill an existing array */
     fun evaluateToBuffer(destination: FloatArray) {
-        destination.indices.forEach { i -> destination[i] = evaluateNext() }
+        destination.indices.forEach { destination[it] = evaluateNext() }
     }
 
     fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))
@@ -52,9 +52,15 @@ abstract class SignalCollection: Signal(){
 
     override fun reset() { signals.forEach { it.reset() } }
 
+//    override fun evaluateNext(): Float{
+//        if (autoNormalize) normalize()
+//        return signals.fold(0f){ sum, signal ->
+//            sum + signal.evaluateNext() * amp
+//        }
+//    }
     override fun evaluateNext(): Float{
         if (autoNormalize) normalize()
-        return signals.fold(0f){ sum, signal ->
+        return signals.filter { it.amp > 0 }.fold(0f){ sum, signal ->
             sum + signal.evaluateNext() * amp
         }
     }
@@ -146,7 +152,6 @@ class HarmonicSignal(
             for(i in signals.indices) {
                 signals[i].frequency = bentFundFreq * (i+1)
             }
-            logd(value)
             field = value
         }
 
@@ -191,4 +196,11 @@ class SumSignal(
             else                -> this.signals.add(that)
         }
     }
+}
+
+fun main() {
+    val b = FloatArray(Constants.BUFFER_SIZE)
+    val s = HarmonicSignal(Note.A_4, HarmonicSeries())
+    printAvgTimeMillis(repeat = 50000){ s.evaluateToBuffer(b) }
+
 }

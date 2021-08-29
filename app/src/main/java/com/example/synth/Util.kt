@@ -9,6 +9,36 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.truncate
+import kotlin.system.measureNanoTime
+import kotlin.system.measureTimeMillis
+
+fun logTime(title: String = "", block: () -> Unit){
+    measureTimeMillis { block() }.also { logd("$title $it ms") }
+}
+fun printTime(title: String = "", block: () -> Unit){
+    measureTimeMillis { block() }.also { println("$title $it ms") }
+}
+fun printAvgTimeMillis(title: String = "", repeat: Int = 100, block: () -> Unit){
+    println("$title avg: ${avgTimeMillis(repeat, block)}")
+}
+fun avgTimeMillis(repeat: Int, block: () -> Unit): Double {
+    val times = mutableListOf<Long>()
+    repeat(repeat){
+        measureTimeMillis{ block() }
+            .also{ times += it }
+    }
+    return times.average()
+}
+fun avgTimeNano(repeat: Int, block: () -> Any?): Double {
+    val times = mutableListOf<Long>()
+    repeat(repeat){
+        measureNanoTime{ block() }
+            .also{ times += it }
+    }
+    return times.average()
+}
+
+
 
 fun volumeToAmplitude(volume: Float) = volume.pow(3f)
 fun amplitudeToVolume(amplitude: Float) = amplitude.pow(1/3f)
