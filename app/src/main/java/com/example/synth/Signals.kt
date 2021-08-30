@@ -41,7 +41,10 @@ abstract class SignalCollection: Signal(){
     override var amp: Float = 1f
         set(value){
             if(value >= 0f) field = value
-            if (autoNormalize) normalize()
+            if (autoNormalize)
+            {
+                normalize()
+            }
         }
 
     open fun normalize() {
@@ -60,9 +63,13 @@ abstract class SignalCollection: Signal(){
 //    }
     override fun evaluateNext(): Float{
         if (autoNormalize) normalize()
-        return signals.filter { it.amp > 0 }.fold(0f){ sum, signal ->
-            sum + signal.evaluateNext() * amp
+        var sum = 0f
+        signals.forEach {
+            if(it.amp != 0f){
+                sum += it.evaluateNext()
+            }
         }
+        return sum
     }
 
     override fun toString(): String{
@@ -105,7 +112,7 @@ class PeriodicSignal(
             field = value
         }
 
-    private val angularClock: AngularClock = AngularClock(frequency)
+    private val angularClock = AngularClock(frequency)
 
     override var amp: Float = amp
         set(value) {
@@ -122,7 +129,10 @@ class PeriodicSignal(
         .also { angularClock.tick() }
 
     override fun toString(): String {
-        return "FuncSignal:\n\tnote = ${angularClock.frequency} \n\tamp  = $amp \n\twaveShape = $waveShape"
+        return "FuncSignal:" +
+                "\n\tnote = ${angularClock.frequency} " +
+                "\n\tamp  = $amp " +
+                "\n\twaveShape = $waveShape"
     }
 }
 
@@ -178,13 +188,13 @@ class SumSignal(
     override var amp: Float = 1f,
     override var autoNormalize: Boolean = true
 ) : SignalCollection() {
-
     constructor(vararg signal: Signal, amp: Float = 1f, autoNormalize: Boolean = true)
             : this(signal.toSet(), amp, autoNormalize)
 
     override val signals = mutableSetOf<Signal>()
     override val period
         get() = signals.map{ it.period.toInt() }.lcm().toFloat()
+
 
     init {
         this.signals.addAll(signals)
