@@ -22,12 +22,12 @@ class AngularClock(
         angle = (angle + tickAmount) % 360
     }
 
-    fun sync(that: AngularClock){
-        this.angle = that.angle
-    }
-
     fun reset(){
         this.angle = 0f
+    }
+
+    fun sync(that: AngularClock){
+        this.angle = that.angle
     }
 
     fun save(){ backupAngle = angle }

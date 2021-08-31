@@ -1,10 +1,8 @@
 package com.example.synth
 
 
-import com.example.synth.Constants.TWO_PI
 import com.example.synth.Constants.SAMPLE_RATE
 import com.example.synth.Note.Companion.bend
-import kotlin.math.*
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
@@ -12,7 +10,7 @@ abstract class Signal{
     abstract val period: Float
     abstract var amp: Float
 
-    /** Resets the internal index,
+    /** Resets the internal angle,
      * which guarantees that [evaluateNext] starts at the beginning */
     abstract fun reset()
 
@@ -40,21 +38,24 @@ abstract class SignalCollection: Signal(){
 
     override var amp: Float = 1f
         set(value){
-            if(value >= 0f) field = value
+            if(value >= 0f)
+                field = value
             if (autoNormalize)
-            {
                 normalize()
-            }
         }
 
-    open fun normalize() {
-        if (signals.isEmpty()) return
+    private fun normalize() {
+        if (signals.isEmpty())
+            return
         val ampSum = signals.map { it.amp }.sum()
+        if(ampSum <= amp)
+            return
         signals.forEach { it.amp = (it.amp / ampSum) * this.amp  }
     }
 
     override fun reset() { signals.forEach { it.reset() } }
 
+// MORE READABLE, LESS EFFICIENT (?)
 //    override fun evaluateNext(): Float{
 //        if (autoNormalize) normalize()
 //        return signals.fold(0f){ sum, signal ->
@@ -65,9 +66,8 @@ abstract class SignalCollection: Signal(){
         if (autoNormalize) normalize()
         var sum = 0f
         signals.forEach {
-            if(it.amp != 0f){
+            if(it.amp != 0f)
                 sum += it.evaluateNext()
-            }
         }
         return sum
     }
@@ -125,8 +125,9 @@ class PeriodicSignal(
 
     override fun reset() { this.angularClock.reset() }
 
-    override fun evaluateNext() = waveShape.values[angularClock.angle.toInt()] * amp
-        .also { angularClock.tick() }
+    override fun evaluateNext(): Float =
+        waveShape.lookupTable[angularClock.angle.toInt()] * amp
+            .also { angularClock.tick() }
 
     override fun toString(): String {
         return "FuncSignal:" +

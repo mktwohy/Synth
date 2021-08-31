@@ -29,7 +29,7 @@ enum class HarmonicFilter(val function: (Int) -> Boolean){
     NONE        ({ false });
 }
 
-enum class WaveShape(val values: FloatArray) {
+enum class WaveShape(val lookupTable: FloatArray) {
     SINE(FloatArray(WAVEFORM_SIZE) {
         sin( degreeToRadian(it.toFloat()) )
     }),

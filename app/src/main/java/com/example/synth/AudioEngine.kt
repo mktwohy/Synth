@@ -82,6 +82,9 @@ class AudioEngine{
                     if(signalBuffer.isNotEmpty()){
                         masterSignal.signals.clear()
                         masterSignal.signals.addAll(signalBuffer.poll()!!)
+//                        signalBuffer.poll()!!.forEach{
+//                            masterSignal += it
+//                        }
                     }
                     masterSignal.evaluateToBuffer(floatBuffer)
                     floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)

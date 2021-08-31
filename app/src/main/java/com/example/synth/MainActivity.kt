@@ -47,22 +47,6 @@ class MainActivity : ComponentActivity() {
 
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
-//        audioEngine.registerListener {
-//            harmonicSignalViewModel.signal.value.signals.forEach{
-//                it.clock.save()
-//                it.clock.angle = 0f
-//            }
-//            harmonicSignalViewModel.signal.value.evaluateToBuffer(harmonicSignalViewModel.plotBuffer.value)
-//            harmonicSignalViewModel.signal.value.signals.forEach{ it.clock.restore()
-//        }
-
-//            audioEngine.signalBuffer.offer(
-//                if(pianoViewModel.pressedNotes.isEmpty()) setOf(SilentSignal)
-//                else pianoViewModel.pressedNotes.map { noteToSignal[it] ?: SilentSignal }.toSet()
-//            )
-//        }
-
-
         AppModel.oscillator.harmonicSeries[1] = 1f
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
