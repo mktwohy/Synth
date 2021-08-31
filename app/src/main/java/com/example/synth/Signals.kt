@@ -7,8 +7,24 @@ import com.example.synth.Note.Companion.bend
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
 abstract class Signal{
+    val parents = mutableSetOf<SignalCollection>()
     abstract val period: Float
-    abstract var amp: Float
+    var amp: Float = 1f
+        set(value){
+            when{
+                value >= 0f -> field = value
+                value.isNaN() -> field = 0f
+            }
+            if(this is SignalCollection && this.autoNormalize){
+                logd("normalize!")
+                this.normalize()
+            }
+            logd(parents.size)
+            parents.forEach{
+                if(it.autoNormalize) it.normalize()
+            }
+
+        }
 
     /** Resets the internal angle,
      * which guarantees that [evaluateNext] starts at the beginning */
@@ -28,32 +44,22 @@ abstract class Signal{
     fun evaluateToBuffer(destination: FloatArray) {
         destination.indices.forEach { destination[it] = evaluateNext() }
     }
-
-    fun plus(that: Signal) = SumSignal(mutableSetOf(this, that))
 }
 
-abstract class SignalCollection: Signal(){
-    abstract val signals: Collection<Signal>
-    abstract var autoNormalize: Boolean
+abstract class SignalCollection: Signal(), Collection<Signal>{
+    var autoNormalize: Boolean = true
 
-    override var amp: Float = 1f
-        set(value){
-            if(value >= 0f)
-                field = value
-            if (autoNormalize)
-                normalize()
-        }
-
-    private fun normalize() {
-        if (signals.isEmpty())
+    fun normalize() {
+        if (this.isEmpty())
             return
-        val ampSum = signals.map { it.amp }.sum()
+        val ampSum = this.map { it.amp }.sum()
         if(ampSum <= amp)
             return
-        signals.forEach { it.amp = (it.amp / ampSum) * this.amp  }
+        this.forEach { it.amp = (it.amp / ampSum) * amp  }
     }
 
-    override fun reset() { signals.forEach { it.reset() } }
+    override fun reset() { this.forEach { it.reset() } }
+
 
 // MORE READABLE, LESS EFFICIENT (?)
 //    override fun evaluateNext(): Float{
@@ -63,9 +69,8 @@ abstract class SignalCollection: Signal(){
 //        }
 //    }
     override fun evaluateNext(): Float{
-        if (autoNormalize) normalize()
         var sum = 0f
-        signals.forEach {
+        this.forEach {
             if(it.amp != 0f)
                 sum += it.evaluateNext()
         }
@@ -82,7 +87,7 @@ abstract class SignalCollection: Signal(){
             }
         )
         s.append("(total amp = $amp):")
-        signals.forEach{
+        this.forEach{
             s.append("\n\t")
             s.append("$it".replace("\n\t", "\n\t\t"))
         }
@@ -92,7 +97,6 @@ abstract class SignalCollection: Signal(){
 
 object SilentSignal: Signal() {
     override var period: Float = 1f
-    override var amp: Float = 0f
 
     override fun reset() { }
     override fun evaluateNext() = 0f
@@ -112,15 +116,12 @@ class PeriodicSignal(
             field = value
         }
 
+    init {
+        this.amp = amp
+    }
+
     private val angularClock = AngularClock(frequency)
 
-    override var amp: Float = amp
-        set(value) {
-            when{
-                value >= 0f -> field = value
-                value.isNaN() -> field = 0f
-            }
-        }
     override val period get() = SAMPLE_RATE / angularClock.frequency
 
     override fun reset() { this.angularClock.reset() }
@@ -141,11 +142,12 @@ class HarmonicSignal(
     fundamental: Note,
     val harmonicSeries: HarmonicSeries = HarmonicSeries(),
     waveShape: WaveShape = WaveShape.SINE,
-    override var amp: Float = 1f,
-    override var autoNormalize: Boolean = true
+    amp: Float = 1f,
+    autoNormalize: Boolean = true
 ): SignalCollection() {
+    override val size get() = signals.size
     override val period = SAMPLE_RATE / fundamental.freq
-    override val signals = List(Constants.NUM_HARMONICS){ i ->
+    private val signals = List(Constants.NUM_HARMONICS){ i ->
         PeriodicSignal(
             fundamental.freq*(i+1),
             0f,
@@ -154,7 +156,7 @@ class HarmonicSignal(
     }
     var waveShape: WaveShape = waveShape
         set(value){
-            signals.forEach{it.waveShape = value}
+            signals.forEach{ it.waveShape = value }
             field = value
         }
     var bendAmount: Float = 1f
@@ -175,38 +177,99 @@ class HarmonicSignal(
         }
 
     init {
+        this.autoNormalize = autoNormalize
+        this.amp = amp
         harmonicSeries.registerOnUpdatedCallback {
             for((overtone, amplitude) in harmonicSeries){
                 signals[overtone-1].amp = amplitude
             }
         }
     }
+
+    override fun contains(element: Signal): Boolean = signals.contains(element)
+    override fun containsAll(elements: Collection<Signal>): Boolean = signals.containsAll(elements)
+    override fun isEmpty(): Boolean = signals.isEmpty()
+    override fun iterator(): Iterator<Signal> = signals.iterator()
 }
 
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
     signals: Collection<Signal>,
-    override var amp: Float = 1f,
-    override var autoNormalize: Boolean = true
-) : SignalCollection() {
+    amp: Float = 1f,
+    autoNormalize: Boolean = true
+) : SignalCollection(), MutableCollection<Signal> {
     constructor(vararg signal: Signal, amp: Float = 1f, autoNormalize: Boolean = true)
             : this(signal.toSet(), amp, autoNormalize)
 
-    override val signals = mutableSetOf<Signal>()
+    private val signals = mutableSetOf<Signal>()
     override val period
         get() = signals.map{ it.period.toInt() }.lcm().toFloat()
 
 
     init {
+        this.autoNormalize = autoNormalize
+        this.amp = amp
         this.signals.addAll(signals)
     }
 
     operator fun plusAssign(that: Signal){
         when(that){
-            is SignalCollection -> this.signals.addAll(that.signals)
+            is SignalCollection -> this.signals.addAll(that)
             else                -> this.signals.add(that)
         }
     }
+
+    override val size: Int get() = signals.size
+    override fun contains(element: Signal): Boolean = signals.contains(element)
+    override fun containsAll(elements: Collection<Signal>): Boolean = signals.containsAll(elements)
+    override fun isEmpty(): Boolean = signals.isEmpty()
+    override fun clear() {
+        signals.forEach{ it.parents.remove(this) }
+        signals.clear()
+    }
+    override fun iterator(): MutableIterator<Signal> = signals.iterator()
+    override fun remove(element: Signal): Boolean {
+        if(signals.contains(element)){
+            element.parents.remove(this)
+            signals.remove(element)
+            return true
+        }
+        return false
+    }
+
+    override fun removeAll(elements: Collection<Signal>): Boolean {
+        var removed = false
+        elements.forEach{
+            if(this.remove(it))
+                removed = true
+        }
+        return removed
+    }
+
+    override fun retainAll(elements: Collection<Signal>): Boolean = this.signals.retainAll(elements)
+    override fun add(element: Signal): Boolean {
+        if(element !in signals){
+            element.parents.add(this)
+            this.signals.add(element)
+            this.normalize()
+            return true
+        }
+        return false
+    }
+
+    override fun addAll(elements: Collection<Signal>): Boolean {
+        var added = false
+        elements.forEach{
+            if(it !in signals){
+                added = true
+                it.parents.add(this)
+                this.signals.add(it)
+            }
+        }
+        return added
+    }
+
+
 }
 
 fun main() {
