@@ -9,10 +9,12 @@
 
 ## Changelogs 
 - **8-27-2021 (Latest Build):**
+  - Fixed bug: audio stuttering when playing 6+ notes
+- **8-27-2021:**
   - Added feature: Waveform selector.
     - You can now choose between Sine, Triangle, Sawtooth, and Square waves
   - Audio stuttering issue alleviated
-    - Previously, pressing 4 notes would cause stuttering. Now the threshold is ~7 notes
+    - Previously, pressing 4 notes would cause stuttering. Now the threshold is ~6 notes
   - UI layout now resizes based on phone orientation
   - On startup, the fundamental overtone is set to max volume
 - **8-24-2021:**

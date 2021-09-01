@@ -85,7 +85,7 @@ class AudioEngine{
                     }
                     masterSignal.evaluateToBuffer(floatBuffer)
                     floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
-                }.also { AppModel.lag = it.toFloat() }
+                }
                 audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
             }
             audioTrack.stop()

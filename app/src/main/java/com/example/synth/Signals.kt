@@ -215,7 +215,7 @@ class SumSignal(
     override fun contains(element: Signal): Boolean = signals.contains(element)
     override fun containsAll(elements: Collection<Signal>): Boolean = signals.containsAll(elements)
     override fun isEmpty(): Boolean = signals.isEmpty()
-    override fun retainAll(elements: Collection<Signal>): Boolean = this.signals.retainAll(elements).also { logd("hello") }
+    override fun retainAll(elements: Collection<Signal>): Boolean = this.signals.retainAll(elements)
     override fun clear() {
         signals.forEach{ it.parents.remove(this) }
         signals.clear()
