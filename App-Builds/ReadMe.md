@@ -10,6 +10,7 @@
 ## Changelogs 
 - **8-27-2021 (Latest Build):**
   - Fixed bug: audio stuttering when playing 6+ notes
+  - renamed wave shapes to their abbreviations (sin, sqr, tri, saw) so that they fit in one line
 - **8-27-2021:**
   - Added feature: Waveform selector.
     - You can now choose between Sine, Triangle, Sawtooth, and Square waves

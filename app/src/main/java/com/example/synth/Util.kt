@@ -1,5 +1,6 @@
 package com.example.synth
 
+import android.util.Log
 import android.util.Rational
 import androidx.compose.ui.graphics.Color
 import com.example.synth.Constants.MAX_16BIT_VALUE
@@ -11,6 +12,8 @@ import kotlin.math.pow
 import kotlin.math.truncate
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
+
+fun logd(message: Any){ Log.d("m_tag",message.toString()) }
 
 fun logTime(title: String = "", block: () -> Unit){
     measureTimeMillis { block() }.also { logd("$title $it ms") }

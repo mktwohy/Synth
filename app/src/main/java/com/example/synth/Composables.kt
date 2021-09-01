@@ -27,8 +27,6 @@ import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 
-fun logd(message: Any){ Log.d("m_tag",message.toString()) }
-
 class PianoGrid(
     val width: MutableState<Dp>,
     val height: MutableState<Dp>,
@@ -225,7 +223,7 @@ fun WaveShapeSelector(
         modifier = modifier,
         onClick = { viewModel.nextWaveShape() }
     ) {
-        Text(text = viewModel.waveShape.toString())
+        Text(text = viewModel.waveShape.abbreviation)
     }
 }
 
