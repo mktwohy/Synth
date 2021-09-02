@@ -37,6 +37,7 @@ abstract class Signal{
     /** Evaluates the signal fill an existing array */
     fun evaluateToBuffer(destination: FloatArray) {
         destination.indices.forEach { destination[it] = evaluateNext() }
+
     }
 }
 

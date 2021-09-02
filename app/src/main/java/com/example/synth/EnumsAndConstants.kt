@@ -19,6 +19,7 @@ object Constants{
     const val BUFFER_SIZE      = 128
     const val BUFFER_TIME_MS      = BUFFER_SIZE.toFloat() / SAMPLE_RATE * 1000
     const val WAVEFORM_SIZE = 360
+    val renderingThread = Thread()
 }
 
 enum class HarmonicFilter(val function: (Int) -> Boolean){
