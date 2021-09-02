@@ -18,7 +18,6 @@ android {
             useSupportLibrary true
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -35,6 +34,7 @@ android {
     }
     buildFeatures {
         compose true
+        prefab true //OBOE
     }
     composeOptions {
         kotlinCompilerExtensionVersion compose_version
@@ -61,4 +61,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+    implementation 'com.google.oboe:oboe:1.6.1' //OBOE
+
 }
