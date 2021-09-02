@@ -16,7 +16,7 @@ object Constants{
     const val MAX_16BIT_VALUE  = 32_767
     const val NUM_HARMONICS    = 15
     const val SAMPLE_RATE      = 44100
-    const val BUFFER_SIZE      = 128
+    const val BUFFER_SIZE      = 512
     const val BUFFER_TIME_MS      = BUFFER_SIZE.toFloat() / SAMPLE_RATE * 1000
     const val WAVEFORM_SIZE = 360
     val renderingThread = Thread()

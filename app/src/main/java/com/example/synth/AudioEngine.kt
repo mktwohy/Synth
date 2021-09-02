@@ -52,7 +52,7 @@ class AudioEngine{
                 .build())
         .setAudioFormat(
             AudioFormat.Builder()
-                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
                 .setSampleRate(SAMPLE_RATE)
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build())
@@ -78,15 +78,12 @@ class AudioEngine{
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                measureTimeMillis {
-                    if(signalBuffer.isNotEmpty()){
-                        masterSignal.clear()
-                        masterSignal.addAll(signalBuffer.poll()!!)
-                    }
-                    masterSignal.evaluateToBuffer(floatBuffer)
-                    floatBuffer.toShortArray(shortBuffer, Constants.MAX_16BIT_VALUE)
+                if(signalBuffer.isNotEmpty()){
+                    masterSignal.clear()
+                    masterSignal.addAll(signalBuffer.poll()!!)
                 }
-                audioTrack.write(shortBuffer, 0, BUFFER_SIZE)
+                masterSignal.evaluateToBuffer(floatBuffer)
+                audioTrack.write(floatBuffer, 0, BUFFER_SIZE, AudioTrack.WRITE_BLOCKING)
             }
             audioTrack.stop()
             audioTrack.flush()

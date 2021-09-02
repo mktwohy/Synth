@@ -161,13 +161,14 @@ fun FloatArray.clear(){
     indices.forEach{ i -> this[i] = 0f }
 }
 
-fun FloatArray.toShortArray(destination: ShortArray, scalar: Int){
+fun FloatArray.toShortIntArray(destination: ShortArray, scalar: Int){
     if (this.size != destination.size)
         throw Exception("Cannot clone to array of different size")
     for (i in destination.indices){
         destination[i] = (this[i] * scalar).toInt().toShort()
     }
 }
+
 
 fun FloatArray.normalize(
     lowerBound: Float = -1f,
