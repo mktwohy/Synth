@@ -57,6 +57,7 @@ class AudioEngine{
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build())
         .setTransferMode(AudioTrack.MODE_STREAM)
+        .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
         .build()
 
     /** Begins playing *currentAudio* on a loop */
