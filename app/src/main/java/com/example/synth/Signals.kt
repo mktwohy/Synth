@@ -223,19 +223,22 @@ class SumSignal(
     }
     override fun iterator(): MutableIterator<Signal> = signals.iterator()
     override fun remove(element: Signal): Boolean {
-        if(signals.contains(element)){
+        if(signals.remove(element)){
             element.parents.remove(this)
-            signals.remove(element)
             return true
         }
+        if(autoNormalize) normalize()
         return false
     }
 
     override fun removeAll(elements: Collection<Signal>): Boolean {
         var removed = false
         elements.forEach{
-            if(this.remove(it))
+            if(signals.remove(it)){
                 removed = true
+                it.parents.remove(this)
+            }
+
         }
         return removed
     }
@@ -259,15 +262,9 @@ class SumSignal(
                 this.signals.add(it)
             }
         }
+        if(autoNormalize) this.normalize()
         return added
     }
 
-
-}
-
-fun main() {
-    val b = FloatArray(Constants.BUFFER_SIZE)
-    val s = HarmonicSignal(Note.A_4, HarmonicSeries())
-    printAvgTimeMillis(repeat = 50000){ s.evaluateToBuffer(b) }
 
 }

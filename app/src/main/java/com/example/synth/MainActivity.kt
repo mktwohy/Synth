@@ -3,31 +3,31 @@ package com.example.synth
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.WindowManager
-import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.material.Button
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.example.synth.Note.Companion.plus
 
 object AppModel{
+    var noteRange = Note.C_3..Note.C_5
+        set(value){
+            field = value
+            logd(value)
+            pianoViewModel.pianoGrid.noteRange = value
+            oscillator.assignSignalsToNotes()
+        }
     val audioEngine = AudioEngine()
-    val noteRange = Note.C_3..Note.C_5
     val bendRange = -1f..1f
     val oscillator = Oscillator()
+
 
     val pianoViewModel          = PianoViewModel()
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(oscillator.harmonicSeries)
@@ -117,6 +117,14 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth(if (isPortrait) 0.9f else 0.95f),
                         viewModel = AppModel.pianoViewModel
                     )
+                    Button(
+                        modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+                        onClick = {
+                            val newStart = AppModel.noteRange.start
+                            val newEnd = AppModel.noteRange.endInclusive+1
+                            AppModel.noteRange = newStart..newEnd
+                        }
+                    ){}
                     PitchBend(
                         modifier = Modifier
                             .fillMaxSize()
@@ -124,6 +132,7 @@ class MainActivity : ComponentActivity() {
                         viewModel = AppModel.pitchBendViewModel
                     )
                 }
+
             }
         }
     }

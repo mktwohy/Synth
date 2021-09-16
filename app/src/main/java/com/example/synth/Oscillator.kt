@@ -57,7 +57,7 @@ class Oscillator{
         onBendChangedCallbacks.add(callback)
     }
 
-    private fun assignSignalsToNotes(){
+    fun assignSignalsToNotes(){
         noteToSignal.clear()
         AppModel.noteRange.toList().forEach {
             noteToSignal[it] = HarmonicSignal(it, harmonicSeries, waveShape, 1/7f)
