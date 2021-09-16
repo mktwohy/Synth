@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
 
 object AppModel{
@@ -23,6 +24,7 @@ object AppModel{
             logd(value)
             pianoViewModel.pianoGrid.noteRange = value
             oscillator.assignSignalsToNotes()
+            pianoViewModel.pianoGrid.recalculateWidths()
         }
     val audioEngine = AudioEngine()
     val bendRange = -1f..1f
@@ -117,14 +119,24 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth(if (isPortrait) 0.9f else 0.95f),
                         viewModel = AppModel.pianoViewModel
                     )
-                    Button(
-                        modifier = Modifier.fillMaxHeight().fillMaxWidth(),
-                        onClick = {
-                            val newStart = AppModel.noteRange.start
-                            val newEnd = AppModel.noteRange.endInclusive+1
-                            AppModel.noteRange = newStart..newEnd
-                        }
-                    ){}
+                    Column(Modifier.fillMaxSize()) {
+                        Button(
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
+                            onClick = {
+                                val newStart = AppModel.noteRange.start
+                                val newEnd = AppModel.noteRange.endInclusive-1
+                                AppModel.noteRange = newStart..newEnd
+                            }
+                        ){}
+                        Button(
+                            modifier = Modifier.fillMaxSize(),
+                            onClick = {
+                                val newStart = AppModel.noteRange.start
+                                val newEnd = AppModel.noteRange.endInclusive+1
+                                AppModel.noteRange = newStart..newEnd
+                            }
+                        ){}
+                    }
                     PitchBend(
                         modifier = Modifier
                             .fillMaxSize()
