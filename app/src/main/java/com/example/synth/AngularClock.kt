@@ -1,5 +1,10 @@
 package com.example.synth
 
+/** Used by [Signal] to keep track of its current angle with respect to some frequency
+ * It assumes that [tick] is being called every single audio sample.
+ * ie, if the sample rate is 44100, the [angle] is being updated 44100 times per second,
+ * regardless of its [frequency]
+ * */
 class AngularClock(
     frequency: Float,
     initAngle: Float = 0f
@@ -18,6 +23,7 @@ class AngularClock(
         this.angle = initAngle
     }
 
+    /** essentially an update function. It iterates the current angle according to its frequency */
     fun tick(){
         angle = (angle + tickAmount) % 360
     }

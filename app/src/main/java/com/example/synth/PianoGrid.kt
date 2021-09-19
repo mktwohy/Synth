@@ -7,6 +7,7 @@ import com.example.synth.Note.Companion.minus
 import com.example.synth.Note.Companion.plus
 import com.example.synth.Note.Companion.toList
 
+/** Defines the hitboxes for the piano **/
 class PianoGrid(
     val width: MutableState<Dp>,
     val height: MutableState<Dp>,
