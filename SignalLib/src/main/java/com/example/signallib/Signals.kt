@@ -1,8 +1,6 @@
-package com.example.synth
-
-
-import com.example.synth.Constants.SAMPLE_RATE
-import com.example.synth.Note.Companion.bend
+import com.example.signallib.*
+import com.example.signallib.Constants.SAMPLE_RATE
+import com.example.signallib.Note.Companion.bend
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */

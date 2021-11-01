@@ -1,10 +1,13 @@
 package com.example.synth
 
-import com.example.synth.Note.Companion.plus
-import com.example.synth.Note.Companion.toList
+import HarmonicSignal
+import Signal
+import SilentSignal
+import com.example.signallib.Note.Companion.plus
+import com.example.signallib.Note.Companion.toList
 
 class Oscillator{
-    val harmonicSeries = HarmonicSeries()
+    val harmonicSeries = com.example.signallib.HarmonicSeries()
     var amplitude = 0f
         set(value) {
             field = value
@@ -18,7 +21,7 @@ class Oscillator{
             }
             onBendChangedCallbacks.forEach { it.invoke(value) }
         }
-    var waveShape: WaveShape = WaveShape.SINE
+    var waveShape: com.example.signallib.WaveShape = com.example.signallib.WaveShape.SINE
         set(value){
             for((_, signal) in noteToSignal){
                 signal.waveShape = value
@@ -27,8 +30,8 @@ class Oscillator{
             field = value
         }
 
-    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
-    private val onWaveShapeChangedCallbacks = mutableSetOf<(WaveShape) -> Unit>()
+    private val noteToSignal = mutableMapOf<com.example.signallib.Note, HarmonicSignal>()
+    private val onWaveShapeChangedCallbacks = mutableSetOf<(com.example.signallib.WaveShape) -> Unit>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
@@ -45,7 +48,7 @@ class Oscillator{
     }.toSet()
 
 
-    fun registerOnWaveShapeChangedCallback(callback: (WaveShape) -> Unit){
+    fun registerOnWaveShapeChangedCallback(callback: (com.example.signallib.WaveShape) -> Unit){
         onWaveShapeChangedCallbacks.add(callback)
     }
 
@@ -57,13 +60,12 @@ class Oscillator{
         onBendChangedCallbacks.add(callback)
     }
 
-    fun assignSignalsToNotes(){
+    private fun assignSignalsToNotes(){
         noteToSignal.clear()
         AppModel.noteRange.toList().forEach {
             noteToSignal[it] = HarmonicSignal(it, harmonicSeries, waveShape, 1/7f)
         }
         val lastNote = AppModel.noteRange.endInclusive
         noteToSignal[lastNote+1] = HarmonicSignal(lastNote+1, harmonicSeries, waveShape,1/7f)
-
     }
 }

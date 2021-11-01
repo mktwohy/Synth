@@ -1,17 +1,18 @@
-package com.example.synth
+package com.example.signallib
 
 /** Used by [Signal] to keep track of its current angle with respect to some frequency
+ *
  * It assumes that [tick] is being called every single audio sample.
- * ie, if the sample rate is 44100, the [angle] is being updated 44100 times per second,
+ * ie: if the sample rate is 44100, the [angle] is being updated 44100 times per second,
  * regardless of its [frequency]
- * */
+ */
 class AngularClock(
     frequency: Float,
     initAngle: Float = 0f
 ){
     var frequency: Float = 0f
         set(value){
-            tickAmount = 360 / (Constants.SAMPLE_RATE / value)
+            tickAmount = 360 / (com.example.signallib.Constants.SAMPLE_RATE / value)
             field = value
         }
     var tickAmount: Float = 0f

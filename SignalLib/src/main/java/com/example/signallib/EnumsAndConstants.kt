@@ -1,10 +1,7 @@
-package com.example.synth
+package com.example.signallib
 
-import android.graphics.Paint
 import android.util.Rational
-import androidx.compose.ui.graphics.Color
-import com.example.synth.Constants.WAVEFORM_SIZE
-import com.example.synth.Note.Companion.bend
+import com.example.signallib.Constants.WAVEFORM_SIZE
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.sin
@@ -80,7 +77,6 @@ enum class Interval(val ratio: Rational){
     MAJ_7   (Rational(15,8)),
     OCTAVE  (Rational(2,1));
 }
-
 
 /**
  * Every note on a piano and the frequency of its fundamental sine wave
@@ -210,14 +206,6 @@ enum class Note(val freq: Float): Comparable<Note> {
         //saving this as a static, immutable variable ensures that the memory is only allocated once,
         //which makes methods like [transpose] and [toList] more memory efficient
         private val notes = values().toList()
-
-        fun Note.color() =
-            if(this.name[1] == '_') Color.White else Color.Black
-
-        fun Note.color(isPressed: Boolean) =
-            if(isPressed) this.color() + Color(0.4f, 0.0f, 1f, 0.5f)
-            else this.color()
-
 
         fun toList() = notes
 

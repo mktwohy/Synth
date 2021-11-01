@@ -1,6 +1,5 @@
 package com.example.synth
 
-import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -13,19 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import com.example.synth.Note.Companion.color
-import com.example.synth.Note.Companion.minus
-import com.example.synth.Note.Companion.plus
-import com.example.synth.Note.Companion.toList
+import com.example.signallib.volumeToAmplitude
 
 @ExperimentalComposeUiApi
 @Composable
@@ -39,10 +33,10 @@ fun Piano(
             .fillMaxSize()
             .pointerInteropFilter(
                 onTouchEvent = {
-                    val newPressedNotes = mutableSetOf<Note>()
+                    val newPressedNotes = mutableSetOf<com.example.signallib.Note>()
 
                     for (i in 0 until it.pointerCount) {
-                        val note: Note?
+                        val note: com.example.signallib.Note?
                         with(density) {
                             note = viewModel.pianoGrid.findKeyAt(
                                 it
@@ -72,7 +66,7 @@ fun Piano(
                         viewModel.pressedNotes = newPressedNotes
                     }
 
-                    AppModel.audioEngine.signalBuffer += AppModel.oscillator.bundleSignals()
+                    AppModel.audioEngine.signalBufferQueue += AppModel.oscillator.bundleSignals()
 
 
 
@@ -218,7 +212,7 @@ fun HarmonicSeriesEditor(
     Row(modifier){
         RowOfVerticalSliders(
             modifier = Modifier.fillMaxWidth(0.9f),
-            numSliders = Constants.NUM_HARMONICS,
+            numSliders = com.example.signallib.Constants.NUM_HARMONICS,
             value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0

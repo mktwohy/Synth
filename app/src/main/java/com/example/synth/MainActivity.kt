@@ -14,18 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.example.synth.Note.Companion.minus
-import com.example.synth.Note.Companion.plus
+import com.example.signallib.Note.Companion.minus
+import com.example.signallib.Note.Companion.plus
 
 object AppModel{
-    var noteRange = Note.C_3..Note.C_5
-        set(value){
-            field = value
-            logd(value)
-            pianoViewModel.pianoGrid.noteRange = value
-            oscillator.assignSignalsToNotes()
-            pianoViewModel.pianoGrid.recalculateWidths()
-        }
+    var noteRange = com.example.signallib.Note.C_3..com.example.signallib.Note.C_5
     val audioEngine = AudioEngine()
     val bendRange = -1f..1f
     val oscillator = Oscillator()
