@@ -84,10 +84,10 @@ class AudioEngine{
         .build()
 
 
-    private val onWaveShapeChangedCallbacks = mutableSetOf<(com.example.signallib.WaveShape) -> Unit>()
+    private val onWaveShapeChangedCallbacks = mutableSetOf<(WaveShape) -> Unit>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
-    fun registerOnWaveShapeChangedCallback(callback: (com.example.signallib.WaveShape) -> Unit){
+    fun registerOnWaveShapeChangedCallback(callback: (WaveShape) -> Unit){
         onWaveShapeChangedCallbacks.add(callback)
     }
     fun registerOnAmpChangedCallback(callback: (Float) -> Unit){
@@ -104,7 +104,7 @@ class AudioEngine{
         noteToSignal[lastNote+1] = HarmonicSignal(lastNote+1, harmonicSeries, waveShape,1/7f)
     }
 
-    fun updateNotes(notes: Set<com.example.signallib.Note>, bend: Float){
+    fun updateNotes(notes: Set<Note>, bend: Float){
 
     }
 

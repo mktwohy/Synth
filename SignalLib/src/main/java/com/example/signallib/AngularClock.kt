@@ -12,7 +12,7 @@ class AngularClock(
 ){
     var frequency: Float = 0f
         set(value){
-            tickAmount = 360 / (com.example.signallib.Constants.SAMPLE_RATE / value)
+            tickAmount = 360 / (Constants.SAMPLE_RATE / value)
             field = value
         }
     var tickAmount: Float = 0f

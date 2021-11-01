@@ -1,12 +1,15 @@
 package com.example.synth
 
 import HarmonicSignal
+import com.example.signallib.HarmonicSeries
+import com.example.signallib.Note
 import com.example.signallib.Note.Companion.plus
 import com.example.signallib.Note.Companion.toList
+import com.example.signallib.WaveShape
 
 class SignalHandler {
-    val harmonicSeries = com.example.signallib.HarmonicSeries()
-    var waveShape: com.example.signallib.WaveShape = com.example.signallib.WaveShape.SINE
+    val harmonicSeries = HarmonicSeries()
+    var waveShape: WaveShape = WaveShape.SINE
         set(value){
             for((_, signal) in noteToSignal){
                 signal.waveShape = value
@@ -15,8 +18,8 @@ class SignalHandler {
             field = value
         }
 
-    private val noteToSignal = mutableMapOf<com.example.signallib.Note, HarmonicSignal>()
-    private val onWaveShapeChangedCallbacks = mutableSetOf<(com.example.signallib.WaveShape) -> Unit>()
+    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
+    private val onWaveShapeChangedCallbacks = mutableSetOf<(WaveShape) -> Unit>()
     private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
     private val onBendChangedCallbacks = mutableSetOf<(Float) -> Unit>()
 
@@ -25,12 +28,12 @@ class SignalHandler {
     }
 
     fun getSignals(
-        notes: Set<com.example.signallib.Note>,
+        notes: Set<Note>,
         bend: Float = 0f,
         amplitude: Float = 0f
     ): Set<HarmonicSignal> = notes.map { noteToSignal[it]!! }.toSet()
 
-    fun registerOnWaveShapeChangedCallback(callback: (com.example.signallib.WaveShape) -> Unit){
+    fun registerOnWaveShapeChangedCallback(callback: (WaveShape) -> Unit){
         onWaveShapeChangedCallbacks.add(callback)
     }
 

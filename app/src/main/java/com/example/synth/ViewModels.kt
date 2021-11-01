@@ -4,14 +4,14 @@ import HarmonicSignal
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import com.example.signallib.amplitudeToVolume
+import com.example.signallib.*
 
 
 class SignalPlotViewModel(
-    harmonicSeries: com.example.signallib.HarmonicSeries,
+    harmonicSeries: HarmonicSeries,
     numPeriods: Int = 4
 ) : ViewModel(){
-    val plotSignal = HarmonicSignal(com.example.signallib.Note.C_2, harmonicSeries, com.example.signallib.WaveShape.SINE)
+    val plotSignal = HarmonicSignal(Note.C_2, harmonicSeries, WaveShape.SINE)
     val plotBuffer = FloatArray(plotSignal.period.toInt()*numPeriods)
     val plotData   = mutableStateListOf<Float>()
 
@@ -44,17 +44,17 @@ class SignalPlotViewModel(
 }
 
 class PianoViewModel : ViewModel(){
-    var pressedNotes by mutableStateOf(setOf<com.example.signallib.Note>())
+    var pressedNotes by mutableStateOf(setOf<Note>())
     var width = mutableStateOf(0.dp)
     var height = mutableStateOf(0.dp)
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
 class WaveFormChangeViewModel(val oscillator: Oscillator): ViewModel() {
-    var waveShape by mutableStateOf(com.example.signallib.WaveShape.SINE)
+    var waveShape by mutableStateOf(WaveShape.SINE)
 
     private var index = 1
-    private val waveShapes = com.example.signallib.WaveShape.values()
+    private val waveShapes = WaveShape.values()
     fun nextWaveShape(){
         oscillator.waveShape = waveShapes[index]
         index = (index + 1) % waveShapes.size
@@ -87,11 +87,11 @@ class PitchBendViewModel(val oscillator: Oscillator) : ViewModel(){
 }
 
 class HarmonicSeriesViewModel(
-    val harmonicSeries: com.example.signallib.HarmonicSeries
+    val harmonicSeries: HarmonicSeries
 ): ViewModel(){
     var sliderState = mutableStateListOf<Float>()
     init {
-        repeat(com.example.signallib.Constants.NUM_HARMONICS){
+        repeat(Constants.NUM_HARMONICS){
             sliderState.add(0f)
         }
         AppModel.oscillator.harmonicSeries.registerOnUpdatedCallback {

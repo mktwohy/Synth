@@ -19,6 +19,8 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import com.example.signallib.Constants
+import com.example.signallib.Note
 import com.example.signallib.volumeToAmplitude
 
 @ExperimentalComposeUiApi
@@ -33,10 +35,10 @@ fun Piano(
             .fillMaxSize()
             .pointerInteropFilter(
                 onTouchEvent = {
-                    val newPressedNotes = mutableSetOf<com.example.signallib.Note>()
+                    val newPressedNotes = mutableSetOf<Note>()
 
                     for (i in 0 until it.pointerCount) {
-                        val note: com.example.signallib.Note?
+                        val note: Note?
                         with(density) {
                             note = viewModel.pianoGrid.findKeyAt(
                                 it
@@ -212,7 +214,7 @@ fun HarmonicSeriesEditor(
     Row(modifier){
         RowOfVerticalSliders(
             modifier = Modifier.fillMaxWidth(0.9f),
-            numSliders = com.example.signallib.Constants.NUM_HARMONICS,
+            numSliders = Constants.NUM_HARMONICS,
             value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0

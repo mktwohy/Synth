@@ -3,6 +3,7 @@ package com.example.synth
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.signallib.Note
 import com.example.signallib.Note.Companion.minus
 import com.example.signallib.Note.Companion.plus
 import com.example.signallib.Note.Companion.toList
@@ -11,10 +12,10 @@ import com.example.signallib.Note.Companion.toList
 class PianoGrid(
     val width: MutableState<Dp>,
     val height: MutableState<Dp>,
-    var noteRange: ClosedRange<com.example.signallib.Note>
+    var noteRange: ClosedRange<Note>
 ){
-    val topRow = mutableListOf<Pair<com.example.signallib.Note, Dp>>()
-    val bottomRow = mutableListOf<Pair<com.example.signallib.Note, Dp>>()
+    val topRow = mutableListOf<Pair<Note, Dp>>()
+    val bottomRow = mutableListOf<Pair<Note, Dp>>()
 
     fun recalculateWidths(){
         topRow.clear()
@@ -28,7 +29,7 @@ class PianoGrid(
         }
     }
 
-    fun findKeyAt(x: Dp, y: Dp): com.example.signallib.Note? {
+    fun findKeyAt(x: Dp, y: Dp): Note? {
         var cumSum: Dp
         fun searchRow(row: List<Pair<com.example.signallib.Note, Dp>>): com.example.signallib.Note?{
             cumSum = 0.dp
