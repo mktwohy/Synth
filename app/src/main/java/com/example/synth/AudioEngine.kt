@@ -1,17 +1,13 @@
 package com.example.synth
 
-import HarmonicSignal
 import Signal
-import SumSignal
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import android.util.Log
+import com.example.signallib.*
 import com.example.signallib.Constants.BUFFER_SIZE
 import com.example.signallib.Constants.SAMPLE_RATE
-import com.example.signallib.HarmonicSeries
-import com.example.signallib.WaveShape
-import com.example.signallib.Note
 import com.example.signallib.Note.Companion.plus
 import com.example.signallib.Note.Companion.toList
 

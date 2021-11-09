@@ -1,6 +1,5 @@
 package com.example.synth
 
-import HarmonicSignal
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel

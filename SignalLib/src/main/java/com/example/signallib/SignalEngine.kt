@@ -1,15 +1,14 @@
 package com.example.signallib
 
-import HarmonicSignal
-
 class SignalEngine {
     var waveShape       = WaveShape.SINE
-    var harmonicSeries  = HarmonicSeries()
+    val harmonicSeries  = HarmonicSeries()
 
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
 
     init {
         // initialize noteToSignal
+        // Note: This ensures that all keys for noteToSignal are not null.
         for(note in Note.toList()){
             noteToSignal[note] = HarmonicSignal(
                 fundamental = note,
@@ -21,14 +20,17 @@ class SignalEngine {
         }
     }
 
-    fun renderPcmToBuffer(buffer: FloatArray, notes: List<Note>, pitchBend: Float){
+    fun renderPcmToBuffer(buffer: FloatArray, notes: List<Note>, pitchBend: Float, amp: Float){
         // assign pitch bend to appropriate signals
-        notes.forEach { noteToSignal[it]?.bendAmount = pitchBend }
+        for(note in notes) {
+            noteToSignal[note]!!.bendAmount = pitchBend
+            noteToSignal[note]!!.amp = amp
+        }
 
         for(i in buffer.indices){
             var sum = 0f
             for(note in notes){
-                sum += noteToSignal[note]?.evaluateNext() ?: 0f
+                sum += noteToSignal[note]!!.evaluateNext()
             }
             buffer[i] = sum
         }

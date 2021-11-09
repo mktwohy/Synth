@@ -1,9 +1,9 @@
 package com.example.synth
 
-import HarmonicSignal
 import Signal
 import SilentSignal
 import com.example.signallib.HarmonicSeries
+import com.example.signallib.HarmonicSignal
 import com.example.signallib.Note
 import com.example.signallib.Note.Companion.plus
 import com.example.signallib.Note.Companion.toList
