@@ -4,7 +4,8 @@ import com.example.signallib.Note.Companion.bend
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
-abstract class Signal{
+abstract class Signal(
+    var sampleRate: Int = SAMPLE_RATE){
     val parents = mutableSetOf<SignalCollection>()
     abstract val period: Float
     var amp: Float = 1f
@@ -41,6 +42,7 @@ abstract class Signal{
 
 abstract class SignalCollection: Signal(), Collection<Signal>{
     var autoNormalize: Boolean = true
+
 
     fun normalize() {
         if (this.isEmpty())
@@ -107,7 +109,7 @@ class PeriodicSignal(
 
     private val angularClock = AngularClock(frequency)
 
-    override val period get() = SAMPLE_RATE / angularClock.frequency
+    override val period get() = sampleRate / angularClock.frequency
 
     override fun reset() { this.angularClock.reset() }
 
@@ -131,13 +133,16 @@ class HarmonicSignal(
     autoNormalize: Boolean = true
 ): SignalCollection() {
     override val size get() = signals.size
-    override val period = SAMPLE_RATE / fundamental.freq
+    override val period = sampleRate / fundamental.freq
     private val signals = List(Constants.NUM_HARMONICS){ i ->
         PeriodicSignal(
-            fundamental.freq*(i+1),
-            0f,
-            waveShape
-        ).also { it.parents.add(this) }
+            frequency = fundamental.freq*(i+1),
+            waveShape = waveShape,
+            amp = 0f
+        ).also {
+            it.parents.add(this)
+            it.sampleRate = this.sampleRate
+        }
     }
     var waveShape: WaveShape = waveShape
         set(value){
@@ -263,6 +268,4 @@ class SumSignal(
         if(autoNormalize) this.normalize()
         return added
     }
-
-
 }

@@ -63,7 +63,6 @@ class AudioEngine{
 
     val signalBufferQueue: Queue<Set<Signal>> = LinkedList()
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
-    private val noteBufferQueue: Queue<Set<Signal>> = LinkedList()
     private val audioBuffer = FloatArray(BUFFER_SIZE)
     private var runMainLoop = false
     private val masterSignal = SumSignal(autoNormalize = false)
