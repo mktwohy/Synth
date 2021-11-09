@@ -534,3 +534,65 @@ class Oscillator{
     }
 }
  */
+
+
+/*
+
+//----- IntArray ----- //
+/** Performs an in-place mapping of an IntArray*/
+inline fun IntArray.mapInPlace(transform: (Int) -> Int){
+    this.indices.forEach{ this[it] = transform(this[it]) }
+}
+
+inline fun IntArray.mapInPlaceIndexed(transform: (Int, Int) -> Int){
+    this.indices.forEach{ this[it] = transform(it, this[it]) }
+}
+
+//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
+//https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
+fun IntArray.normalize(
+    lowerBound: Int = MIN_16BIT_VALUE,
+    upperBound: Int = MAX_16BIT_VALUE
+) {
+    //Check that array isn't empty
+    if (isEmpty()) return
+
+    val minValue   = this.minByOrNull { it }!!
+    val maxValue   = this.maxByOrNull { it }!!
+    val valueRange = (maxValue - minValue).toFloat()
+    val boundRange = (upperBound - lowerBound).toFloat()
+
+    //Check that array isn't already normalized
+    // (I would use in range, but this produces excess memory)
+    if ((minValue == 0 && maxValue == 0)
+        || (maxValue <= upperBound && maxValue > upperBound-2
+                && minValue >= lowerBound && minValue < lowerBound+2)) {
+        return
+    }
+
+    //Normalize
+    for (i in indices) {
+        this[i] = ( ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound ).toInt()
+    }
+}
+
+
+
+fun IntArray.toShortArray(destination: ShortArray){
+    if (this.size != destination.size)
+        throw Exception("Cannot clone to array of different size")
+    for (i in destination.indices){
+        destination[i] = this[i].toShort()
+    }
+}
+
+fun FloatArray.toShortIntArray(destination: ShortArray, scalar: Int){
+    if (this.size != destination.size)
+        throw Exception("Cannot clone to array of different size")
+    for (i in destination.indices){
+        destination[i] = (this[i] * scalar).toInt().toShort()
+    }
+}
+ */
+
+

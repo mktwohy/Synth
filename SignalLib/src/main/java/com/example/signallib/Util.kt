@@ -1,45 +1,9 @@
 package com.example.signallib
 
 import Signal
-import android.util.Log
 import android.util.Rational
-import com.example.signallib.Constants.MAX_16BIT_VALUE
-import com.example.signallib.Constants.MIN_16BIT_VALUE
-import java.lang.StringBuilder
 import kotlin.math.PI
 import kotlin.math.pow
-import kotlin.system.measureNanoTime
-import kotlin.system.measureTimeMillis
-
-fun logd(message: Any){ Log.d("m_tag",message.toString()) }
-
-fun logTime(title: String = "", block: () -> Unit){
-    measureTimeMillis { block() }.also { logd("$title $it ms") }
-}
-fun printTime(title: String = "", block: () -> Unit){
-    measureTimeMillis { block() }.also { println("$title $it ms") }
-}
-fun printAvgTimeMillis(title: String = "", repeat: Int = 100, block: () -> Unit){
-    println("$title avg: ${avgTimeMillis(repeat, block)}")
-}
-fun avgTimeMillis(repeat: Int, block: () -> Unit): Double {
-    val times = mutableListOf<Long>()
-    repeat(repeat){
-        measureTimeMillis{ block() }
-            .also{ times += it }
-    }
-    return times.average()
-}
-fun avgTimeNano(repeat: Int, block: () -> Any?): Double {
-    val times = mutableListOf<Long>()
-    repeat(repeat){
-        measureNanoTime{ block() }
-            .also{ times += it }
-    }
-    return times.average()
-}
-
-
 
 fun volumeToAmplitude(volume: Float) = volume.pow(3f)
 fun amplitudeToVolume(amplitude: Float) = amplitude.pow(1/3f)
@@ -54,56 +18,8 @@ fun degreeToRadian(degree: Double) = radianToDegree(degree.toFloat())
 fun Rational.times(that: Int) = Rational(numerator*that, numerator)
 
 
-//----- IntArray ----- //
-/** Performs an in-place mapping of an IntArray*/
-inline fun IntArray.mapInPlace(transform: (Int) -> Int){
-    this.indices.forEach{ this[it] = transform(this[it]) }
-}
-
-inline fun IntArray.mapInPlaceIndexed(transform: (Int, Int) -> Int){
-    this.indices.forEach{ this[it] = transform(it, this[it]) }
-}
-
-//https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
-//https://stackoverflow.com/questions/1226587/how-to-normalize-a-list-of-int-values
-fun IntArray.normalize(
-    lowerBound: Int = MIN_16BIT_VALUE,
-    upperBound: Int = MAX_16BIT_VALUE
-) {
-    //Check that array isn't empty
-    if (isEmpty()) return
-
-    val minValue   = this.minByOrNull { it }!!
-    val maxValue   = this.maxByOrNull { it }!!
-    val valueRange = (maxValue - minValue).toFloat()
-    val boundRange = (upperBound - lowerBound).toFloat()
-
-    //Check that array isn't already normalized
-    // (I would use in range, but this produces excess memory)
-    if ((minValue == 0 && maxValue == 0)
-        || (maxValue <= upperBound && maxValue > upperBound-2
-                && minValue >= lowerBound && minValue < lowerBound+2)) {
-        return
-    }
-
-    //Normalize
-    for (i in indices) {
-        this[i] = ( ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound ).toInt()
-    }
-}
-
-fun IntArray.toShortArray(destination: ShortArray){
-    if (this.size != destination.size)
-        throw Exception("Cannot clone to array of different size")
-    for (i in destination.indices){
-        destination[i] = this[i].toShort()
-    }
-}
-
-
 //----- List<Int> ----- //
-//https://www.geeksforgeeks.org/gcd-two-array-numbers/
-
+/** [source](https://www.geeksforgeeks.org/gcd-two-array-numbers/) */
 fun List<Int>.lcm(): Int{
     fun gcd(a: Int, b: Int): Int =
         if (a == 0) b
@@ -123,28 +39,8 @@ fun List<Int>.lcm(): Int{
     }
 }
 
-
-//----- String -----//
-operator fun String.times(multiplier: Int) = this.repeat(multiplier)
-
-fun String.repeat(times: Int): String{
-    val s = StringBuilder()
-    repeat(times) { s.append(this) }
-    return s.toString()
-}
-
-val logTab = "\t" * 152
-
 inline fun FloatArray.mapInPlace(transform: (Float) -> Float){
     this.indices.forEach{ this[it] = transform(this[it]) }
-}
-
-fun FloatArray.toShortIntArray(destination: ShortArray, scalar: Int){
-    if (this.size != destination.size)
-        throw Exception("Cannot clone to array of different size")
-    for (i in destination.indices){
-        destination[i] = (this[i] * scalar).toInt().toShort()
-    }
 }
 
 
@@ -173,7 +69,6 @@ fun FloatArray.normalize(
         this[i] = ((boundRange * (this[i] - minValue)) / valueRange) + lowerBound
     }
 }
-
 
 fun Signal.plotInConsole(
     allowClipping: Boolean = true,
