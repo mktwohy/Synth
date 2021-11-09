@@ -41,12 +41,8 @@ fun Piano(
                         val note: Note?
                         with(density) {
                             note = viewModel.pianoGrid.findKeyAt(
-                                it
-                                    .getX(i)
-                                    .toDp(),
-                                it
-                                    .getY(i)
-                                    .toDp()
+                                it.getX(i).toDp(),
+                                it.getY(i).toDp()
                             )
                         }
                         if (note != null) {
@@ -68,9 +64,7 @@ fun Piano(
                         viewModel.pressedNotes = newPressedNotes
                     }
 
-                    AppModel.audioEngine.signalBufferQueue += AppModel.oscillator.bundleSignals()
-
-
+                    AppModel.audioEngine.noteQueue += viewModel.pressedNotes
 
                     true
                 }
@@ -180,12 +174,12 @@ fun PitchBend(
     VerticalSlider(
         modifier = modifier,
         value = viewModel.sliderState,
-        valueRange = viewModel.bendRange,
+        valueRange = AppModel.bendRange,
         onValueChange = {
-            viewModel.oscillator.bend = it
+            AppModel.pitchBend = it
         },
         onValueChangeFinished = {
-            viewModel.oscillator.bend = 0f //snap back to 0f
+            AppModel.pitchBend = 0f //snap back to 0f
         },
     )
 }
@@ -199,7 +193,7 @@ fun VolumeSlider(
         modifier = modifier,
         value = viewModel.sliderState,
         onValueChange = {
-            viewModel.oscillator.amplitude = volumeToAmplitude(it)
+            //AppModel.amplitude = volumeToAmplitude(it)
         },
         showValue = true
     )

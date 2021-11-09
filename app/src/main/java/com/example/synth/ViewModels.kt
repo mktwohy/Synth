@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.signallib.*
 
-
 class SignalPlotViewModel(
     harmonicSeries: HarmonicSeries,
     numPeriods: Int = 4
@@ -17,15 +16,15 @@ class SignalPlotViewModel(
     init {
         updatePlot()
         harmonicSeries.registerOnUpdatedCallback { updatePlot() }
-        AppModel.oscillator.registerOnAmpChangedCallback {
-            plotSignal.amp = it
-            updatePlot()
-        }
-        AppModel.oscillator.registerOnBendChangedCallback {
-            plotSignal.bendAmount = it
-            updatePlot()
-        }
-        AppModel.oscillator.registerOnWaveShapeChangedCallback {
+//        AppModel.oscillator.registerOnAmpChangedCallback {
+//            plotSignal.amp = it
+//            updatePlot()
+//        }
+//        AppModel.registerOnBendChangedCallback {
+//            plotSignal.bendAmount = it
+//            updatePlot()
+//        }
+        AppModel.signalEngine.registerOnWaveShapeChangedCallback {
             plotSignal.waveShape = it
             updatePlot()
         }
@@ -49,40 +48,34 @@ class PianoViewModel : ViewModel(){
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
-class WaveFormChangeViewModel(val oscillator: Oscillator): ViewModel() {
+class WaveFormChangeViewModel(val signalEngine: SignalEngine): ViewModel() {
     var waveShape by mutableStateOf(WaveShape.SINE)
 
     private var index = 1
     private val waveShapes = WaveShape.values()
     fun nextWaveShape(){
-        oscillator.waveShape = waveShapes[index]
+        signalEngine.waveShape = waveShapes[index]
         index = (index + 1) % waveShapes.size
     }
 
     init {
-        oscillator.registerOnWaveShapeChangedCallback {
+        AppModel.signalEngine.registerOnWaveShapeChangedCallback {
             waveShape = it
         }
     }
 }
 
-class VolumeSliderViewModel(val oscillator: Oscillator) : ViewModel(){
+class VolumeSliderViewModel(val signalEngine: SignalEngine) : ViewModel(){
     var sliderState by mutableStateOf(1f)
     init {
-        oscillator.registerOnAmpChangedCallback {
-            sliderState = amplitudeToVolume(it)
-        }
+//        oscillator.registerOnAmpChangedCallback {
+//            sliderState = amplitudeToVolume(it)
+//        }
     }
 }
 
-class PitchBendViewModel(val oscillator: Oscillator) : ViewModel(){
-    val bendRange = AppModel.bendRange
+class PitchBendViewModel(val signalEngine: SignalEngine) : ViewModel(){
     var sliderState by mutableStateOf(0f)
-    init {
-        oscillator.registerOnBendChangedCallback {
-            sliderState = it
-        }
-    }
 }
 
 class HarmonicSeriesViewModel(
@@ -93,8 +86,8 @@ class HarmonicSeriesViewModel(
         repeat(Constants.NUM_HARMONICS){
             sliderState.add(0f)
         }
-        AppModel.oscillator.harmonicSeries.registerOnUpdatedCallback {
-            AppModel.oscillator.harmonicSeries.forEach { (harmonic, amplitude) ->
+        harmonicSeries.registerOnUpdatedCallback {
+            harmonicSeries.forEach { (harmonic, amplitude) ->
                 sliderState[harmonic-1] = amplitudeToVolume(amplitude)
             }
         }

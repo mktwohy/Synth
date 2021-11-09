@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
 
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        AppModel.oscillator.harmonicSeries[1] = 1f
+        AppModel.signalEngine.harmonicSeries[1] = 1f
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT

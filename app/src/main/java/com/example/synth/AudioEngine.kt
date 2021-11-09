@@ -37,28 +37,10 @@ import java.util.*
  * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
 class AudioEngine{
-    var amplitude = 0f
-        set(value) {
-            field = value
-            onAmpChangedCallbacks.forEach { it.invoke(value) }
-        }
-    val harmonicSeries = HarmonicSeries()
-    var waveShape = WaveShape.SINE
-        set(value){
-            for((_, signal) in noteToSignal){
-                signal.waveShape = value
-            }
-            onWaveShapeChangedCallbacks.forEach { it.invoke(value) }
-            field = value
-        }
+    val signalEngine = SignalEngine()
 
-
-    init {
-        assignSignalsToNotes()
-    }
-
-    val signalBufferQueue: Queue<Set<Signal>> = LinkedList()
-    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
+    val noteQueue: Queue<Set<Note>> = LinkedList()
+    private val currentNotes = mutableSetOf<Note>()
     private val audioBuffer = FloatArray(BUFFER_SIZE)
     private var runMainLoop = false
     private val masterSignal = SumSignal(autoNormalize = false)
@@ -79,30 +61,6 @@ class AudioEngine{
         .build()
 
 
-    private val onWaveShapeChangedCallbacks = mutableSetOf<(WaveShape) -> Unit>()
-    private val onAmpChangedCallbacks = mutableSetOf<(Float) -> Unit>()
-
-    fun registerOnWaveShapeChangedCallback(callback: (WaveShape) -> Unit){
-        onWaveShapeChangedCallbacks.add(callback)
-    }
-    fun registerOnAmpChangedCallback(callback: (Float) -> Unit){
-        onAmpChangedCallbacks.add(callback)
-    }
-
-    private fun assignSignalsToNotes(){
-        Log.d("m_tag","$noteToSignal")
-        noteToSignal.clear()
-        AppModel.noteRange.toList().forEach {
-            noteToSignal[it] = HarmonicSignal(it, harmonicSeries, waveShape, 1/7f)
-        }
-        val lastNote = AppModel.noteRange.endInclusive
-        noteToSignal[lastNote+1] = HarmonicSignal(lastNote+1, harmonicSeries, waveShape,1/7f)
-    }
-
-    fun updateNotes(notes: Set<Note>, bend: Float){
-
-    }
-
     /** Begins playing *currentAudio* on a loop */
     fun start(){
         if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
@@ -122,12 +80,22 @@ class AudioEngine{
         Thread {
             audioTrack.play()
             while (runMainLoop) {
-                if(signalBufferQueue.isNotEmpty()){
-                    masterSignal.clear()
-                    masterSignal.addAll(signalBufferQueue.poll()!!)
+                // update notes
+                if(noteQueue.isNotEmpty()){
+                    currentNotes.clear()
+                    currentNotes.addAll(noteQueue.poll()!!)
                 }
-                masterSignal.evaluateToBuffer(audioBuffer)
-                audioTrack.write(audioBuffer, 0, BUFFER_SIZE, AudioTrack.WRITE_BLOCKING)
+                // play notes
+                if(currentNotes.isNotEmpty()){
+                    signalEngine.renderPcmToBuffer(
+                        audioBuffer,
+                        currentNotes,
+                        AppModel.pitchBend,
+                        1/7f
+                    )
+                    audioTrack.write(audioBuffer, 0, BUFFER_SIZE, AudioTrack.WRITE_BLOCKING)
+                }
+
             }
             audioTrack.stop()
             audioTrack.flush()
