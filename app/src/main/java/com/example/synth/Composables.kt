@@ -37,14 +37,18 @@ fun Piano(
                 onTouchEvent = {
                     val newPressedNotes = mutableSetOf<Note>()
 
+                    // loop through each finger/pointer
                     for (i in 0 until it.pointerCount) {
-                        val note: Note?
-                        with(density) {
-                            note = viewModel.pianoGrid.findKeyAt(
+
+                        // find the note/key the finger is touching
+                        val note = with(density) {
+                            viewModel.pianoGrid.findKeyAt(
                                 it.getX(i).toDp(),
                                 it.getY(i).toDp()
                             )
                         }
+
+                        // add or remove note from list
                         if (note != null) {
                             if (i == it.actionIndex) {
                                 when (it.actionMasked) {
@@ -60,11 +64,12 @@ fun Piano(
                             }
                         }
                     }
+
+                    // compare newNotes to old notes. Only update notes if notes changed
                     if (newPressedNotes != viewModel.pressedNotes) {
                         viewModel.pressedNotes = newPressedNotes
+                        AppModel.audioEngine.noteQueue += viewModel.pressedNotes
                     }
-
-                    AppModel.audioEngine.noteQueue += viewModel.pressedNotes
 
                     true
                 }
