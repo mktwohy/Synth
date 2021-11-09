@@ -1,6 +1,6 @@
 package com.example.signallib
 
-
+/** Abstracts away the creation and management of Signals */
 class SignalEngine(
     waveShape: WaveShape = WaveShape.SINE,
     val harmonicSeries: HarmonicSeries = HarmonicSeries()

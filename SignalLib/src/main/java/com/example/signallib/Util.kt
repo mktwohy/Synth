@@ -56,16 +56,12 @@ fun Rational.times(that: Int) = Rational(numerator*that, numerator)
 
 //----- IntArray ----- //
 /** Performs an in-place mapping of an IntArray*/
-fun IntArray.mapInPlace(transform: (Int) -> Int){
-    for(i in indices){
-        this[i] = transform(this[i])
-    }
+inline fun IntArray.mapInPlace(transform: (Int) -> Int){
+    this.indices.forEach{ this[it] = transform(this[it]) }
 }
 
-fun IntArray.mapInPlaceIndexed(transform: (Int, Int) -> Int){
-    for(i in indices){
-        this[i] = transform(i, this[i])
-    }
+inline fun IntArray.mapInPlaceIndexed(transform: (Int, Int) -> Int){
+    this.indices.forEach{ this[it] = transform(it, this[it]) }
 }
 
 //https://stats.stackexchange.com/questions/178626/how-to-normalize-data-between-1-and-1
@@ -139,14 +135,8 @@ fun String.repeat(times: Int): String{
 
 val logTab = "\t" * 152
 
-fun FloatArray.mapInPlace(transform: (Float) -> Float){
-    for(i in indices){
-        this[i] = transform(this[i])
-    }
-}
-
-fun FloatArray.clear(){
-    indices.forEach{ i -> this[i] = 0f }
+inline fun FloatArray.mapInPlace(transform: (Float) -> Float){
+    this.indices.forEach{ this[it] = transform(this[it]) }
 }
 
 fun FloatArray.toShortIntArray(destination: ShortArray, scalar: Int){

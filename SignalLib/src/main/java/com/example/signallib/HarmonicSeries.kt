@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 class HarmonicSeries : Iterable<Pair<Int, Float>>{
     //indices refer to overtone-1. for example, index 0 refers to the first overtone
-    private val harmonicSeries = FloatArray(Constants.NUM_HARMONICS){ 0f }
+    private val amplitudes = FloatArray(Constants.NUM_HARMONICS){ 0f }
 
     private val callbacks = mutableListOf<() -> Unit>()
     private fun invokeCallbacks(){ callbacks.forEach { it.invoke() } }
@@ -18,16 +18,16 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
 
 
 
-    operator fun get(overtone: Int) = harmonicSeries[overtone-1]
+    operator fun get(overtone: Int) = amplitudes[overtone-1]
     operator fun set(overtone: Int, amplitude: Float){
         if(overtone in 1..Constants.NUM_HARMONICS && amplitude in 0f..1f){
-            harmonicSeries[overtone-1] = amplitude
+            amplitudes[overtone-1] = amplitude
         }
         invokeCallbacks()
     }
 
     fun reset(){
-        harmonicSeries.indices.forEach{ harmonicSeries[it] = 0f }
+        amplitudes.mapInPlace{ 0f }
         invokeCallbacks()
     }
 
@@ -39,7 +39,7 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
         ceiling: Float = 1.0f,
         filter: (Int) -> Boolean = HarmonicFilter.ALL.function
     ) {
-        for(index in harmonicSeries.indices){
+        for(index in amplitudes.indices){
             val overtone = index+1
             if(filter(overtone)){
                 this[overtone] = ((ceiling-floor) * (1f-decayRate).pow(index) + floor)
@@ -91,7 +91,7 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
     }
 
     override fun iterator() =
-        harmonicSeries.mapIndexed { index, amplitude ->
+        amplitudes.mapIndexed { index, amplitude ->
             index+1 to amplitude
         }.iterator()
 }
