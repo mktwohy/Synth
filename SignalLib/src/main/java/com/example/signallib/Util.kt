@@ -2,6 +2,7 @@ package com.example.signallib
 
 import Signal
 import android.util.Rational
+import java.lang.StringBuilder
 import kotlin.math.PI
 import kotlin.math.pow
 
@@ -38,6 +39,17 @@ fun List<Int>.lcm(): Int{
         }
     }
 }
+
+//----- String -----//
+operator fun String.times(multiplier: Int) = this.repeat(multiplier)
+
+fun String.repeat(times: Int): String{
+    val s = StringBuilder()
+    repeat(times) { s.append(this) }
+    return s.toString()
+}
+
+val logTab = "\t" * 152
 
 inline fun FloatArray.mapInPlace(transform: (Float) -> Float){
     this.indices.forEach{ this[it] = transform(this[it]) }

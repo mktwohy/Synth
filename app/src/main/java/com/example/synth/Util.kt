@@ -56,15 +56,6 @@ fun avgTimeNano(repeat: Int, block: () -> Any?): Double {
     return times.average()
 }
 
-//----- String -----//
-operator fun String.times(multiplier: Int) = this.repeat(multiplier)
 
-fun String.repeat(times: Int): String{
-    val s = StringBuilder()
-    repeat(times) { s.append(this) }
-    return s.toString()
-}
-
-val logTab = "\t" * 152
 
 
