@@ -140,7 +140,6 @@ fun XYPlot(
     color: Color = Color.Green,
     strokeWidth: Float = 3f,
 ) {
-    logd("PLOT")
     Box(modifier = modifier, contentAlignment = Alignment.Center){
         Canvas(modifier = Modifier
             .fillMaxHeight(0.9f)
@@ -199,13 +198,15 @@ fun PitchBend(
 @Composable
 fun VolumeSlider(
     modifier: Modifier = Modifier,
-    viewModel: VolumeSliderViewModel
+    onVolumeChange: (Float) -> Unit = {}
 ){
+    var sliderState by remember { mutableStateOf( 0.0f) }
     LabeledVerticalSlider(
         modifier = modifier,
-        value = viewModel.sliderState,
+        value = sliderState,
         onValueChange = {
-            //AppModel.amplitude = volumeToAmplitude(it)
+            sliderState = it
+            onVolumeChange.invoke(it)
         },
         showValue = true
     )

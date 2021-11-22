@@ -40,10 +40,10 @@ class SignalManager(
 
     fun renderToBuffer(buffer: FloatArray, notes: Set<Note>, pitchBend: Float, amp: Float){
         // assign pitch bend to appropriate signals
-        for(note in notes) {
+        for(note in Note.notes) {
             with(noteToSignal[note]){
-                this?.bendAmount = pitchBend
-                this?.amp = amp
+                this?.bendAmount    = pitchBend
+                this?.amp           = amp
             }
         }
 

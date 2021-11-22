@@ -205,7 +205,7 @@ enum class Note(val freq: Float): Comparable<Note> {
     companion object{
         //saving this as a static, immutable variable ensures that the memory is only allocated once,
         //which makes methods like [transpose] and [toList] more memory efficient
-        private val notes = values().toList()
+        val notes = values().toList()
 
         fun toList() = notes
 
@@ -223,7 +223,10 @@ enum class Note(val freq: Float): Comparable<Note> {
             notes.random()
 
         fun Note.transpose(steps: Int): Note =
-            notes[notes.indexOf(this) + steps]
+            if(this == C_0 || this == B_8)
+                this
+            else
+                notes[notes.indexOf(this) + steps]
 
         fun Note.bend(bendAmount: Float): Float{
             val sign = if(bendAmount < 0f) -1 else 1

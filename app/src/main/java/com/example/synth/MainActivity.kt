@@ -36,9 +36,26 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column {
+//                Row(modifier = Modifier
+//                    .fillMaxHeight(0.2f)
+//                    .fillMaxWidth()) {
+//                    XYPlot(
+//                        data = AppModel.currentAudio,
+//                        modifier = Modifier
+//                            .fillMaxWidth(0.9f)
+//                            .fillMaxHeight()
+//                    )
+//                    VolumeSlider(
+//                        modifier = Modifier.fillMaxSize(),
+//                        onVolumeChange = { AppModel.signalEngine.updateAmp(it) }
+//
+//                    )
+//                }
                 XYPlot(
                     data = AppModel.currentAudio,
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.25f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.2f)
                 )
                 HarmonicSeriesEditor(
                     modifier = Modifier

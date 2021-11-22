@@ -14,17 +14,19 @@ import java.util.*
  * A threaded wrapper class that uses [SignalManager] to continually feed data to [AudioTrack].
  *
  * How to use:
- * - set [signalManager] parameters waveShape and harmonicSeries
- * - start()
- * - update realtime input with [updateNotes], [updateAmp], and [updatePitchBend]
- * - stop()
+ * 1. set [signalManager] parameters waveShape and harmonicSeries
+ * 2. start()
+ * 3. update realtime input with [updateNotes], [updateAmp], and [updatePitchBend]
+ * 4. stop()
  */
 class SignalEngine(
     val signalManager: SignalManager = SignalManager(),
 ){
-    private val noteQueue: Queue<Set<Note>> = LinkedList()
-    private val pitchBendQueue: Queue<Float> = LinkedList()
-    private val ampQueue: Queue<Float> = LinkedList()
+    private val noteQueue: Queue<Set<Note>>     = LinkedList()
+    private val pitchBendQueue: Queue<Float>    = LinkedList()
+    // todo [HarmonicSignal] amp is bugged.
+//    private val ampQueue: Queue<Float>          = LinkedList()
+
     private val audioBuffer = FloatArray(BUFFER_SIZE)
     private var runMainLoop = false
     private var audioTrack = createAudioTrack()
@@ -34,9 +36,9 @@ class SignalEngine(
         onBufferUpdateListeners.add(callback)
     }
 
-    fun updateNotes(notes: Set<Note>)       { noteQueue.offer(notes)          }
-    fun updateAmp(amp: Float)               { ampQueue.offer(amp)             }
-    fun updatePitchBend(semitones: Float)   { pitchBendQueue.offer(semitones) }
+    fun updateNotes(notes: Set<Note>)       { noteQueue.offer(notes)            }
+//    fun updateAmp(amp: Float)               { ampQueue.offer(amp)               }
+    fun updatePitchBend(semitones: Float)   { pitchBendQueue.offer(semitones)   }
 
 
     fun start(){
@@ -50,7 +52,7 @@ class SignalEngine(
 
     /**
      * Stops AudioTrack, releases it from memory, creates a new AudioTrack, and starts it.
-     * If sample rate changes, AudioEngine should be reset.
+     * Note: If sample rate changes, AudioEngine should be reset.
      * */
     fun reset(){
         stop()
@@ -61,12 +63,12 @@ class SignalEngine(
     }
 
     private fun mainLoop(){
-        val prevNotes       = mutableSetOf<Note>()
-        val currentNotes    = mutableSetOf<Note>()
-        var pitchBend       = 0f
-        var amp             = 1/7f
-
         Thread {
+            val prevNotes       = mutableSetOf<Note>()
+            val currentNotes    = mutableSetOf<Note>()
+            var pitchBend       = 0f
+            var amp             = 1/7f
+
             audioTrack.play()
 
             while (runMainLoop) {
@@ -77,8 +79,8 @@ class SignalEngine(
                 if(pitchBendQueue.isNotEmpty())
                     pitchBend = pitchBendQueue.poll()!!
 
-                if(ampQueue.isNotEmpty())
-                    amp = ampQueue.poll()!!
+//                if(ampQueue.isNotEmpty())
+//                    amp = ampQueue.poll()!!
 
 
                 // check if audio buffer needs to be updated
