@@ -132,4 +132,17 @@ fun Signal.plotInConsole(
     println("\n\n")
 }
 
-
+fun List<Float>.toHistogram(scale: Int): String{
+    val sb = StringBuilder()
+    this.forEach{
+        val scaledValue = (scale * it).toInt()
+        if(it < 0){
+            sb.append(" " * (scale - scaledValue))
+        }else{
+            sb.append(" " * (scale/2))
+        }
+        sb.append("#" * scaledValue)
+        sb.append("\n")
+    }
+    return sb.toString()
+}

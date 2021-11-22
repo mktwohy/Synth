@@ -4,47 +4,99 @@ import Signal
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import android.util.Log
 import com.example.signallib.*
 import com.example.signallib.Constants.BUFFER_SIZE
 import com.example.signallib.Constants.SAMPLE_RATE
-import com.example.signallib.Note.Companion.plus
-import com.example.signallib.Note.Companion.toList
 
 import java.util.*
 
 
 /**
- * A wrapper class for [AudioTrack] that plays audio [Signal]s on a loop.
+ * A wrapper class for [AudioTrack] and [SignalEngine] that
  *
- *
- * Example Usage:
- * ```
- * val c = AudioGenerator.sinusoid(Note.C_4.freq, sine)
- * val dg = AudioGenerator.sinusoid(setOf(Note.D_4.freq, Note.G_4.freq)), sine)
- * val audioEngine = AudioEngine()
- *
- * audioEngine.currentAudio = setOf(c)
- * audioEngine.start()
- * ...
- * audioEngine.mute()
- * ...
- * audioEngine.signalForPlayback = setOf(c, dg)
- * ...
- * audioEngine.stop()
- * ```
- * .0
- * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
 class AudioEngine(
-    val signalEngine: SignalEngine = SignalEngine()
+    val signalEngine: SignalEngine = SignalEngine(),
 ){
-    val noteQueue: Queue<Set<Note>> = LinkedList()
-    private val currentNotes = mutableSetOf<Note>()
+    private val noteQueue: Queue<Set<Note>> = LinkedList()
     private val audioBuffer = FloatArray(BUFFER_SIZE)
     private var runMainLoop = false
-    private val masterSignal = SumSignal(autoNormalize = false)
-    private val audioTrack = AudioTrack.Builder()
+    private var audioTrack = createAudioTrack()
+    private val onBufferUpdateListeners = mutableSetOf< (FloatArray) -> Unit >()
+
+    fun registerOnBufferUpdateCallback(callback: (FloatArray) -> Unit){
+        onBufferUpdateListeners.add(callback)
+    }
+
+    fun updateNotes(notes: Set<Note>){
+        noteQueue.offer(notes)
+    }
+
+    /** Begins playing *currentAudio* on a loop */
+    fun start(){
+        if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
+            runMainLoop = true
+            mainLoop()
+        }
+    }
+
+    fun stop(){ runMainLoop = false }
+
+    /**
+     * Stops AudioTrack, releases it from memory, creates a new AudioTrack, and starts it.
+     * If sample rate changes, AudioEngine should be reset.
+     * */
+    fun reset(){
+        stop()
+        audioTrack.flush()
+        audioTrack.release()
+        this.audioTrack = createAudioTrack()
+        start()
+    }
+
+    private fun mainLoop(){
+        val prevNotes       = mutableSetOf<Note>()
+        val currentNotes    = mutableSetOf<Note>()
+
+        Thread {
+            audioTrack.play()
+
+            while (runMainLoop) {
+                // poll from note queue
+                if(noteQueue.isNotEmpty()) {
+                    currentNotes.clear()
+                    currentNotes.addAll(noteQueue.poll()!!)
+                }
+
+                // check if audio buffer needs to be updated
+                // (ensures silent audio doesn't get rendered)
+                if( !(prevNotes.isEmpty() && currentNotes.isEmpty()) ){
+                    // render notes to audio buffer
+                    signalEngine.renderToBuffer(
+                        buffer = audioBuffer,
+                        notes = currentNotes,
+                        pitchBend = AppModel.pitchBend,
+                        amp = 1 / 7f
+                    )
+
+                    onBufferUpdateListeners.forEach { it.invoke(audioBuffer) }
+                    prevNotes.replaceAll(currentNotes)
+                }
+
+                // write buffer to AudioTrack
+                audioTrack.write(
+                    audioBuffer,
+                    0,
+                    BUFFER_SIZE,
+                    AudioTrack.WRITE_BLOCKING
+                )
+            }
+            audioTrack.stop()
+            audioTrack.flush()
+        }.start()
+    }
+
+    private fun createAudioTrack() = AudioTrack.Builder()
         .setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
@@ -59,46 +111,4 @@ class AudioEngine(
         .setTransferMode(AudioTrack.MODE_STREAM)
         .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
         .build()
-
-
-    /** Begins playing *currentAudio* on a loop */
-    fun start(){
-        if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
-            runMainLoop = true
-            mainLoop()
-        }
-    }
-
-    fun stop(){ runMainLoop = false }
-
-    fun destroyAudioTrack(){
-        audioTrack.flush()
-        audioTrack.release()
-    }
-
-    private fun mainLoop(){
-        Thread {
-            audioTrack.play()
-            while (runMainLoop) {
-                // update notes
-                if(noteQueue.isNotEmpty()){
-                    currentNotes.clear()
-                    currentNotes.addAll(noteQueue.poll()!!)
-                }
-                // play notes
-                if(currentNotes.isNotEmpty()){
-                    signalEngine.renderPcmToBuffer(
-                        audioBuffer,
-                        currentNotes,
-                        AppModel.pitchBend,
-                        1/7f
-                    )
-                    audioTrack.write(audioBuffer, 0, BUFFER_SIZE, AudioTrack.WRITE_BLOCKING)
-                }
-
-            }
-            audioTrack.stop()
-            audioTrack.flush()
-        }.start()
-    }
 }

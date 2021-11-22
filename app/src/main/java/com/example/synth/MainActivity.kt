@@ -8,16 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.example.signallib.Note
-import com.example.signallib.Note.Companion.minus
-import com.example.signallib.Note.Companion.plus
-
 
 
 @ExperimentalComposeUiApi
@@ -25,15 +20,26 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AppModel.audioEngine.start()
-
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        AppModel.signalEngine.harmonicSeries[1] = 1f
+
+
+        with(AppModel){
+            audioEngine.start()
+            audioEngine.registerOnBufferUpdateCallback {
+                currentAudio = it.toList()
+            }
+            signalEngine.harmonicSeries[1] = 1f
+        }
+
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column {
+                XYPlot(
+                    data = AppModel.currentAudio,
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(0.25f),
+                )
                 HarmonicSeriesEditor(
                     modifier = Modifier
                         .fillMaxHeight(if (isPortrait) 0.5f else 0.3f)
@@ -70,29 +76,11 @@ class MainActivity : ComponentActivity() {
                             .fillMaxWidth(if (isPortrait) 0.9f else 0.95f),
                         viewModel = AppModel.pianoViewModel
                     )
-                    Column(Modifier.fillMaxSize()) {
-                        Button(
-                            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.5f),
-                            onClick = {
-                                val newStart = AppModel.noteRange.start
-                                val newEnd = AppModel.noteRange.endInclusive-1
-                                AppModel.noteRange = newStart..newEnd
-                            }
-                        ){}
-                        Button(
-                            modifier = Modifier.fillMaxSize(),
-                            onClick = {
-                                val newStart = AppModel.noteRange.start
-                                val newEnd = AppModel.noteRange.endInclusive+1
-                                AppModel.noteRange = newStart..newEnd
-                            }
-                        ){}
-                    }
                     PitchBend(
                         modifier = Modifier
                             .fillMaxSize()
                             .border(1.dp, Color.White),
-                        viewModel = AppModel.pitchBendViewModel
+                        //viewModel = AppModel.pitchBendViewModel
                     )
                 }
 

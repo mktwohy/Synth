@@ -43,8 +43,12 @@ fun Piano(
                         // find the note/key the finger is touching
                         val note = with(density) {
                             viewModel.pianoGrid.findKeyAt(
-                                it.getX(i).toDp(),
-                                it.getY(i).toDp()
+                                it
+                                    .getX(i)
+                                    .toDp(),
+                                it
+                                    .getY(i)
+                                    .toDp()
                             )
                         }
 
@@ -68,7 +72,7 @@ fun Piano(
                     // compare newNotes to old notes. Only update notes if notes changed
                     if (newPressedNotes != viewModel.pressedNotes) {
                         viewModel.pressedNotes = newPressedNotes
-                        AppModel.audioEngine.noteQueue += viewModel.pressedNotes
+                        AppModel.audioEngine.updateNotes(viewModel.pressedNotes)
                     }
 
                     true
@@ -136,6 +140,7 @@ fun XYPlot(
     color: Color = Color.Green,
     strokeWidth: Float = 3f,
 ) {
+    logd("PLOT")
     Box(modifier = modifier, contentAlignment = Alignment.Center){
         Canvas(modifier = Modifier
             .fillMaxHeight(0.9f)
@@ -174,16 +179,18 @@ fun WaveShapeSelector(
 @Composable
 fun PitchBend(
     modifier: Modifier = Modifier,
-    viewModel: PitchBendViewModel
 ){
+    var sliderState by remember { mutableStateOf( 0.0f) }
     VerticalSlider(
         modifier = modifier,
-        value = viewModel.sliderState,
+        value = sliderState,
         valueRange = AppModel.bendRange,
         onValueChange = {
+            sliderState = it
             AppModel.pitchBend = it
         },
         onValueChangeFinished = {
+            sliderState = 0f
             AppModel.pitchBend = 0f //snap back to 0f
         },
     )
@@ -222,7 +229,10 @@ fun HarmonicSeriesEditor(
             label = { index -> if(index == 0) "f" else "${index+1}" },
             showValue = false
         )
-        Column(Modifier.fillMaxSize().border(1.dp, Color.White)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .border(1.dp, Color.White)) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -1,6 +1,15 @@
 package com.example.signallib
 
-/** Abstracts away the creation and management of Signals */
+import android.util.Log
+
+/**
+ * Abstracts away the creation and management of Signals.
+ *
+ * How to use:
+ * - set parameters [WaveShape] and [HarmonicSeries]
+ * - call [renderToBuffer] with realtime parameters to get a single buffer of PCM data
+ *
+ */
 class SignalEngine(
     waveShape: WaveShape = WaveShape.SINE,
     val harmonicSeries: HarmonicSeries = HarmonicSeries()
@@ -21,22 +30,27 @@ class SignalEngine(
         // Note: This ensures that all keys for noteToSignal are not null.
         for(note in Note.toList()){
             noteToSignal[note] = HarmonicSignal(
-                fundamental = note,
-                waveShape = this.waveShape,
-                harmonicSeries = this.harmonicSeries,
-                amp = 1f,
-                autoNormalize = false
+                fundamental     = note,
+                waveShape       = this.waveShape,
+                harmonicSeries  = this.harmonicSeries,
+                amp             = 1f,
+                autoNormalize   = false
             )
         }
     }
 
-    fun renderPcmToBuffer(buffer: FloatArray, notes: Set<Note>, pitchBend: Float, amp: Float){
+    fun renderToBuffer(buffer: FloatArray, notes: Set<Note>, pitchBend: Float, amp: Float){
         // assign pitch bend to appropriate signals
         for(note in notes) {
-            noteToSignal[note]!!.bendAmount = pitchBend
-            noteToSignal[note]!!.amp = amp
+            with(noteToSignal[note]){
+                if(this != null){
+                    this.bendAmount = pitchBend
+                    this.amp = amp
+                }
+            }
         }
 
+        // sum signals
         for(i in buffer.indices){
             var sum = 0f
             for(note in notes){
