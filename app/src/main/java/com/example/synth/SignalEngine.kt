@@ -1,6 +1,5 @@
 package com.example.synth
 
-import Signal
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
@@ -12,11 +11,16 @@ import java.util.*
 
 
 /**
- * A wrapper class for [AudioTrack] and [SignalEngine] that
+ * A threaded wrapper class that uses [SignalManager] to continually feed data to [AudioTrack].
  *
+ * How to use:
+ * - set [signalManager] parameters waveShape and harmonicSeries
+ * - start()
+ * - update realtime input with [updateNotes], [updateAmp], and [updatePitchBend]
+ * - stop()
  */
-class AudioEngine(
-    val signalEngine: SignalEngine = SignalEngine(),
+class SignalEngine(
+    val signalManager: SignalManager = SignalManager(),
 ){
     private val noteQueue: Queue<Set<Note>> = LinkedList()
     private val pitchBendQueue: Queue<Float> = LinkedList()
@@ -80,9 +84,8 @@ class AudioEngine(
                 // check if audio buffer needs to be updated
                 // (ensures silent audio doesn't get rendered)
                 if( !(prevNotes.isEmpty() && currentNotes.isEmpty()) ){
-                    logd("Notes: $currentNotes, bend: $pitchBend, amp: $amp")
                     // render notes to audio buffer
-                    signalEngine.renderToBuffer(
+                    signalManager.renderToBuffer(
                         buffer = audioBuffer,
                         notes = currentNotes,
                         pitchBend = pitchBend,

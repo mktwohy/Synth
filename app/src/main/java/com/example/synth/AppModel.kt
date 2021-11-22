@@ -2,24 +2,24 @@ package com.example.synth
 
 import androidx.compose.runtime.*
 import com.example.signallib.Note
-import com.example.signallib.SignalEngine
+import com.example.signallib.SignalManager
 
 object AppModel{
-    val signalEngine = SignalEngine()
-    val audioEngine  = AudioEngine(signalEngine)
+    val signalManager = SignalManager()
+    val signalEngine  = SignalEngine(signalManager)
     var noteRange = Note.C_3..Note.C_5
     var pitchBend = 0f
         set(value){
-            audioEngine.updatePitchBend(value)
+            signalEngine.updatePitchBend(value)
             field = value
         }
     val bendRange = -1f..1f
     var currentAudio by mutableStateOf<List<Float>>(listOf())
 
     val pianoViewModel          = PianoViewModel()
-    val harmonicSeriesViewModel = HarmonicSeriesViewModel(signalEngine.harmonicSeries)
-    val SignalPlotViewModel     = SignalPlotViewModel(signalEngine.harmonicSeries)
-    val waveFormChangeViewModel = WaveFormChangeViewModel(signalEngine)
-    val volumeSliderViewModel   = VolumeSliderViewModel(signalEngine)
-    val pitchBendViewModel      = PitchBendViewModel(signalEngine)
+    val harmonicSeriesViewModel = HarmonicSeriesViewModel(signalManager.harmonicSeries)
+    val SignalPlotViewModel     = SignalPlotViewModel(signalManager.harmonicSeries)
+    val waveFormChangeViewModel = WaveFormChangeViewModel(signalManager)
+    val volumeSliderViewModel   = VolumeSliderViewModel(signalManager)
+    val pitchBendViewModel      = PitchBendViewModel(signalManager)
 }

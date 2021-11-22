@@ -72,7 +72,7 @@ fun Piano(
                     // compare newNotes to old notes. Only update notes if notes changed
                     if (newPressedNotes != viewModel.pressedNotes) {
                         viewModel.pressedNotes = newPressedNotes
-                        AppModel.audioEngine.updateNotes(viewModel.pressedNotes)
+                        AppModel.signalEngine.updateNotes(viewModel.pressedNotes)
                     }
 
                     true

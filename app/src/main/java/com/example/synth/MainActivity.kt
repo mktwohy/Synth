@@ -25,11 +25,11 @@ class MainActivity : ComponentActivity() {
 
 
         with(AppModel){
-            audioEngine.start()
-            audioEngine.registerOnBufferUpdateCallback {
+            signalEngine.start()
+            signalEngine.registerOnBufferUpdateCallback {
                 currentAudio = it.toList()
             }
-            signalEngine.harmonicSeries[1] = 1f
+            signalManager.harmonicSeries[1] = 1f
         }
 
         setContent {

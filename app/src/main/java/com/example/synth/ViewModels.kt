@@ -24,7 +24,7 @@ class SignalPlotViewModel(
 //            plotSignal.bendAmount = it
 //            updatePlot()
 //        }
-        AppModel.signalEngine.registerOnWaveShapeChangedCallback {
+        AppModel.signalManager.registerOnWaveShapeChangedCallback {
             plotSignal.waveShape = it
             updatePlot()
         }
@@ -48,24 +48,24 @@ class PianoViewModel : ViewModel(){
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
-class WaveFormChangeViewModel(val signalEngine: SignalEngine): ViewModel() {
+class WaveFormChangeViewModel(val signalManager: SignalManager): ViewModel() {
     var waveShape by mutableStateOf(WaveShape.SINE)
 
     private var index = 1
     private val waveShapes = WaveShape.values()
     fun nextWaveShape(){
-        signalEngine.waveShape = waveShapes[index]
+        signalManager.waveShape = waveShapes[index]
         index = (index + 1) % waveShapes.size
     }
 
     init {
-        AppModel.signalEngine.registerOnWaveShapeChangedCallback {
+        AppModel.signalManager.registerOnWaveShapeChangedCallback {
             waveShape = it
         }
     }
 }
 
-class VolumeSliderViewModel(val signalEngine: SignalEngine) : ViewModel(){
+class VolumeSliderViewModel(val signalManager: SignalManager) : ViewModel(){
     var sliderState by mutableStateOf(1f)
     init {
 //        oscillator.registerOnAmpChangedCallback {
@@ -74,7 +74,7 @@ class VolumeSliderViewModel(val signalEngine: SignalEngine) : ViewModel(){
     }
 }
 
-class PitchBendViewModel(val signalEngine: SignalEngine) : ViewModel(){
+class PitchBendViewModel(val signalManager: SignalManager) : ViewModel(){
     var sliderState by mutableStateOf(0f)
 }
 

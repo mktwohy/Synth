@@ -1,16 +1,15 @@
 package com.example.signallib
 
-import android.util.Log
-
 /**
- * Abstracts away the creation and management of Signals.
+ * Abstracts away the creation and management of Signals. It maps a [HarmonicSignal] to each note,
+ * and ensures that they all have the same [WaveShape] and [HarmonicSeries].
  *
  * How to use:
  * - set parameters [WaveShape] and [HarmonicSeries]
  * - call [renderToBuffer] with realtime parameters to get a single buffer of PCM data
  *
  */
-class SignalEngine(
+class SignalManager(
     waveShape: WaveShape = WaveShape.SINE,
     val harmonicSeries: HarmonicSeries = HarmonicSeries()
 ) {
