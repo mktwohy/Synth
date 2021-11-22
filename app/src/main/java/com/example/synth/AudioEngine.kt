@@ -36,9 +36,9 @@ import java.util.*
  * .0
  * @property masterSignal the audio to be played on a loop by the [AudioEngine]
  */
-class AudioEngine{
-    val signalEngine = SignalEngine()
-
+class AudioEngine(
+    val signalEngine: SignalEngine = SignalEngine()
+){
     val noteQueue: Queue<Set<Note>> = LinkedList()
     private val currentNotes = mutableSetOf<Note>()
     private val audioBuffer = FloatArray(BUFFER_SIZE)

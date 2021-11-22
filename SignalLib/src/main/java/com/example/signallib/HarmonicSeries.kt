@@ -96,3 +96,4 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
             index+1 to amplitude
         }.iterator()
 }
+

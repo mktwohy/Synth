@@ -34,36 +34,6 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column {
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .fillMaxHeight(0.05f),
-//                    horizontalArrangement = Arrangement.Start,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Text(
-//                        modifier = Modifier.fillMaxWidth(0.1f),
-//                        text = "Latency: ${AppModel.lag}",
-//                        color = Color.White
-//                    )
-//                    LinearProgressIndicator(
-//                        modifier = Modifier
-//                            .fillMaxHeight(0.5f)
-//                            .fillMaxWidth(0.5f)
-//                            .border(1.dp, Color.White),
-//                        progress = AppModel.lag/Constants.BUFFER_TIME_MS,
-//                        color = run{
-//                            var clippingAmount = (AppModel.lag / Constants.BUFFER_TIME_MS)
-//                            if(clippingAmount > 1) clippingAmount = 1f
-//                            Color(
-//                                red = clippingAmount,
-//                                green = 1f - clippingAmount,
-//                                blue = 0f
-//                            )
-//                        }
-//                    )
-//                }
-
                 HarmonicSeriesEditor(
                     modifier = Modifier
                         .fillMaxHeight(if (isPortrait) 0.5f else 0.3f)
