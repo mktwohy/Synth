@@ -19,6 +19,8 @@ class AudioEngine(
     val signalEngine: SignalEngine = SignalEngine(),
 ){
     private val noteQueue: Queue<Set<Note>> = LinkedList()
+    private val pitchBendQueue: Queue<Float> = LinkedList()
+    private val ampQueue: Queue<Float> = LinkedList()
     private val audioBuffer = FloatArray(BUFFER_SIZE)
     private var runMainLoop = false
     private var audioTrack = createAudioTrack()
@@ -28,11 +30,11 @@ class AudioEngine(
         onBufferUpdateListeners.add(callback)
     }
 
-    fun updateNotes(notes: Set<Note>){
-        noteQueue.offer(notes)
-    }
+    fun updateNotes(notes: Set<Note>)       { noteQueue.offer(notes)          }
+    fun updateAmp(amp: Float)               { ampQueue.offer(amp)             }
+    fun updatePitchBend(semitones: Float)   { pitchBendQueue.offer(semitones) }
 
-    /** Begins playing *currentAudio* on a loop */
+
     fun start(){
         if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
             runMainLoop = true
@@ -57,26 +59,34 @@ class AudioEngine(
     private fun mainLoop(){
         val prevNotes       = mutableSetOf<Note>()
         val currentNotes    = mutableSetOf<Note>()
+        var pitchBend       = 0f
+        var amp             = 1/7f
 
         Thread {
             audioTrack.play()
 
             while (runMainLoop) {
-                // poll from note queue
-                if(noteQueue.isNotEmpty()) {
-                    currentNotes.clear()
-                    currentNotes.addAll(noteQueue.poll()!!)
-                }
+                // poll from realtime input queues
+                if(noteQueue.isNotEmpty())
+                    currentNotes.replaceAll(noteQueue.poll()!!)
+
+                if(pitchBendQueue.isNotEmpty())
+                    pitchBend = pitchBendQueue.poll()!!
+
+                if(ampQueue.isNotEmpty())
+                    amp = ampQueue.poll()!!
+
 
                 // check if audio buffer needs to be updated
                 // (ensures silent audio doesn't get rendered)
                 if( !(prevNotes.isEmpty() && currentNotes.isEmpty()) ){
+                    logd("Notes: $currentNotes, bend: $pitchBend, amp: $amp")
                     // render notes to audio buffer
                     signalEngine.renderToBuffer(
                         buffer = audioBuffer,
                         notes = currentNotes,
-                        pitchBend = AppModel.pitchBend,
-                        amp = 1 / 7f
+                        pitchBend = pitchBend,
+                        amp = amp
                     )
 
                     onBufferUpdateListeners.forEach { it.invoke(audioBuffer) }

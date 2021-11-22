@@ -9,6 +9,10 @@ object AppModel{
     val audioEngine  = AudioEngine(signalEngine)
     var noteRange = Note.C_3..Note.C_5
     var pitchBend = 0f
+        set(value){
+            audioEngine.updatePitchBend(value)
+            field = value
+        }
     val bendRange = -1f..1f
     var currentAudio by mutableStateOf<List<Float>>(listOf())
 

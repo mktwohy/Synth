@@ -43,10 +43,8 @@ class SignalEngine(
         // assign pitch bend to appropriate signals
         for(note in notes) {
             with(noteToSignal[note]){
-                if(this != null){
-                    this.bendAmount = pitchBend
-                    this.amp = amp
-                }
+                this?.bendAmount = pitchBend
+                this?.amp = amp
             }
         }
 
