@@ -31,7 +31,7 @@ class PianoGrid(
 
     fun findKeyAt(x: Dp, y: Dp): Note? {
         var cumSum: Dp
-        fun searchRow(row: List<Pair<com.example.signallib.Note, Dp>>): com.example.signallib.Note?{
+        fun searchRow(row: List<Pair<Note, Dp>>): Note?{
             cumSum = 0.dp
             for ((note, width) in row){
                 if (x in cumSum..cumSum+width) return note
@@ -47,7 +47,7 @@ class PianoGrid(
 
     }
 
-    private fun topRowNoteRatios(whiteNote: com.example.signallib.Note) =
+    private fun topRowNoteRatios(whiteNote: Note) =
         when(whiteNote.toString()[0]) {
             'C' -> listOf(whiteNote to 3/4f, (whiteNote + 1) to 1/4f)
             'D' -> listOf((whiteNote - 1) to 1/4f, whiteNote to 1/2f, (whiteNote + 1) to 1/4f)

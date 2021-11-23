@@ -25,7 +25,7 @@ class SignalEngine(
     private val noteQueue: Queue<Set<Note>>     = LinkedList()
     private val pitchBendQueue: Queue<Float>    = LinkedList()
     // todo [HarmonicSignal] amp is bugged.
-//    private val ampQueue: Queue<Float>          = LinkedList()
+    private val ampQueue: Queue<Float>          = LinkedList()
 
     private val audioBuffer = FloatArray(BUFFER_SIZE)
     private var runMainLoop = false
@@ -36,8 +36,10 @@ class SignalEngine(
         onBufferUpdateListeners.add(callback)
     }
 
+
+    @Deprecated("Amp does not properly update")
+    fun updateAmp(amp: Float)               { ampQueue.offer(amp)               }
     fun updateNotes(notes: Set<Note>)       { noteQueue.offer(notes)            }
-//    fun updateAmp(amp: Float)               { ampQueue.offer(amp)               }
     fun updatePitchBend(semitones: Float)   { pitchBendQueue.offer(semitones)   }
 
 
@@ -79,8 +81,8 @@ class SignalEngine(
                 if(pitchBendQueue.isNotEmpty())
                     pitchBend = pitchBendQueue.poll()!!
 
-//                if(ampQueue.isNotEmpty())
-//                    amp = ampQueue.poll()!!
+                if(ampQueue.isNotEmpty())
+                    amp = ampQueue.poll()!!
 
 
                 // check if audio buffer needs to be updated
