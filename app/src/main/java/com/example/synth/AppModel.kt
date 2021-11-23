@@ -2,6 +2,7 @@ package com.example.synth
 
 import androidx.compose.runtime.*
 import com.example.signallib.Note
+import com.example.signallib.SignalEngine
 import com.example.signallib.SignalManager
 
 object AppModel{

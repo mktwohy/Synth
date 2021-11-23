@@ -8,11 +8,6 @@ import java.lang.StringBuilder
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
 
-fun <T>MutableCollection<T>.replaceAll(elements: Collection<T>){
-    this.clear()
-    this.addAll(elements)
-}
-
 //----- Color -----//
 fun Color.mix(that: Color) =
     Color(

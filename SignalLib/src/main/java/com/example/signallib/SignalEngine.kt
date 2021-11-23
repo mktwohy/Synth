@@ -1,4 +1,4 @@
-package com.example.synth
+package com.example.signallib
 
 import android.media.AudioAttributes
 import android.media.AudioFormat

@@ -146,3 +146,8 @@ fun List<Float>.toHistogram(scale: Int): String{
     }
     return sb.toString()
 }
+
+fun <T>MutableCollection<T>.replaceAll(elements: Collection<T>){
+    this.clear()
+    this.addAll(elements)
+}
