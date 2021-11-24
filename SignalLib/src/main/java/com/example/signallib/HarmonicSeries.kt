@@ -7,9 +7,11 @@ import kotlin.math.log10
 import kotlin.math.pow
 import kotlin.random.Random
 
-class HarmonicSeries : Iterable<Pair<Int, Float>>{
+class HarmonicSeries(
+    val numHarmonics: Int
+) : Iterable<Pair<Int, Float>> {
     //indices refer to overtone-1. for example, index 0 refers to the first overtone
-    private val amplitudes = FloatArray(Constants.NUM_HARMONICS){ 0f }
+    private val amplitudes = FloatArray(numHarmonics){ 0f }
 
     private val callbacks = mutableListOf<() -> Unit>()
     private fun invokeCallbacks(){ callbacks.forEach { it.invoke() } }
@@ -21,7 +23,7 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
 
     operator fun get(overtone: Int) = amplitudes[overtone-1]
     operator fun set(overtone: Int, amplitude: Float){
-        if(overtone in 1..Constants.NUM_HARMONICS && amplitude in 0f..1f){
+        if(overtone in 1..numHarmonics && amplitude in 0f..1f){
             amplitudes[overtone-1] = amplitude
         }
         invokeCallbacks()
@@ -75,7 +77,7 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
         fun createRow(overtone: Int, amplitude: Float): String{
             val s = StringBuilder()
             s.append("$overtone")
-            repeat(Constants.NUM_HARMONICS.length() - overtone.length()){
+            repeat(numHarmonics.length() - overtone.length()){
                 s.append(" ")
             }
             s.append("|")
@@ -84,7 +86,7 @@ class HarmonicSeries : Iterable<Pair<Int, Float>>{
         }
 
         val s = StringBuilder()
-        for(overtone in 1..Constants.NUM_HARMONICS){
+        for(overtone in 1..numHarmonics){
             s.append(createRow(overtone, this[overtone]))
             s.append("\n")
         }

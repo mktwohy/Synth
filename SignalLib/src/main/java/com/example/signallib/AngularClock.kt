@@ -8,11 +8,12 @@ package com.example.signallib
  */
 class AngularClock(
     frequency: Float,
+    val sampleRate: Int,
     initAngle: Float = 0f
 ){
     var frequency: Float = 0f
         set(value){
-            tickAmount = 360 / (Constants.SAMPLE_RATE / value)
+            tickAmount = 360 / (sampleRate / value)
             field = value
         }
     var tickAmount: Float = 0f

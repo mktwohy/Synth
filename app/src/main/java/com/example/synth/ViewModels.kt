@@ -6,16 +6,15 @@ import androidx.lifecycle.ViewModel
 import com.example.signallib.*
 
 class SignalPlotViewModel(
-    harmonicSeries: HarmonicSeries,
+    val harmonicSignal: HarmonicSignal,
     numPeriods: Int = 4
 ) : ViewModel(){
-    val plotSignal = HarmonicSignal(Note.C_2, harmonicSeries, WaveShape.SINE)
-    val plotBuffer = FloatArray(plotSignal.period.toInt()*numPeriods)
+    val plotBuffer = FloatArray(harmonicSignal.period.toInt()*numPeriods)
     val plotData   = mutableStateListOf<Float>()
 
     init {
         updatePlot()
-        harmonicSeries.registerOnUpdatedCallback { updatePlot() }
+        harmonicSignal.harmonicSeries.registerOnUpdatedCallback { updatePlot() }
 //        AppModel.oscillator.registerOnAmpChangedCallback {
 //            plotSignal.amp = it
 //            updatePlot()
@@ -25,15 +24,15 @@ class SignalPlotViewModel(
 //            updatePlot()
 //        }
         AppModel.signalManager.registerOnWaveShapeChangedCallback {
-            plotSignal.waveShape = it
+            harmonicSignal.waveShape = it
             updatePlot()
         }
 
     }
 
     private fun updatePlot(){
-        plotSignal.reset()
-        plotSignal.evaluateToBuffer(plotBuffer)
+        harmonicSignal.reset()
+        harmonicSignal.evaluateToBuffer(plotBuffer)
         plotData.clear()
         for(i in plotBuffer.indices){
             plotData.add(plotBuffer[i])
@@ -83,7 +82,7 @@ class HarmonicSeriesViewModel(
 ): ViewModel(){
     var sliderState = mutableStateListOf<Float>()
     init {
-        repeat(Constants.NUM_HARMONICS){
+        repeat(AppModel.NUM_HARMONICS){
             sliderState.add(0f)
         }
         harmonicSeries.registerOnUpdatedCallback {

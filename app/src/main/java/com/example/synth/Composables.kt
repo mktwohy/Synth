@@ -183,7 +183,7 @@ fun PitchBend(
     VerticalSlider(
         modifier = modifier,
         value = sliderState,
-        valueRange = AppModel.bendRange,
+        valueRange = -1f..1f,
         onValueChange = {
             sliderState = it
             AppModel.pitchBend = it
@@ -221,7 +221,7 @@ fun HarmonicSeriesEditor(
     Row(modifier){
         RowOfVerticalSliders(
             modifier = Modifier.fillMaxWidth(0.9f),
-            numSliders = Constants.NUM_HARMONICS,
+            numSliders = viewModel.harmonicSeries.numHarmonics,
             value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0

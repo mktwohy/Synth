@@ -11,12 +11,8 @@ object Constants{
     const val TWO_PI           = 2.0 * PI.toFloat()
     const val MIN_16BIT_VALUE  = -32_768
     const val MAX_16BIT_VALUE  = 32_767
-    const val NUM_HARMONICS    = 15
-    const val SAMPLE_RATE      = 44800
-    const val BUFFER_SIZE      = 192
-    const val BUFFER_TIME_MS      = BUFFER_SIZE.toFloat() / SAMPLE_RATE * 1000
+    //    const val BUFFER_TIME_MS      = BUFFER_SIZE.toFloat() / SAMPLE_RATE * 1000
     const val WAVEFORM_SIZE = 360
-    val renderingThread = Thread()
 }
 
 enum class HarmonicFilter(val function: (Int) -> Boolean){

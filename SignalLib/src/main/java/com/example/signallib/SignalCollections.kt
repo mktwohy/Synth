@@ -4,7 +4,9 @@ import PeriodicSignal
 import Signal
 import com.example.signallib.Note.Companion.bend
 
-abstract class SignalCollection: Signal(), Collection<Signal>{
+abstract class SignalCollection(
+    sampleRate: Int
+): Signal(sampleRate), Collection<Signal> {
     var autoNormalize: Boolean = true
 
     fun normalize() {
@@ -46,16 +48,18 @@ abstract class SignalCollection: Signal(), Collection<Signal>{
 
 
 class HarmonicSignal(
+    sampleRate: Int,
     fundamental: Note,
-    val harmonicSeries: HarmonicSeries = HarmonicSeries(),
+    val harmonicSeries: HarmonicSeries,
     waveShape: WaveShape = WaveShape.SINE,
     amp: Float = 1f,
     autoNormalize: Boolean = true
-): SignalCollection() {
+): SignalCollection(sampleRate) {
     override val size get() = signals.size
     override val period = sampleRate / fundamental.freq
-    private val signals = List(Constants.NUM_HARMONICS){ i ->
+    private val signals = List(harmonicSeries.numHarmonics){ i ->
         PeriodicSignal(
+            sampleRate = this.sampleRate,
             frequency = fundamental.freq*(i+1),
             waveShape = waveShape,
             amp = 0f
@@ -109,13 +113,11 @@ class HarmonicSignal(
 
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
+    sampleRate: Int,
     signals: Collection<Signal>,
     amp: Float = 1f,
     autoNormalize: Boolean = true
-) : SignalCollection(), MutableCollection<Signal> {
-    constructor(vararg signal: Signal, amp: Float = 1f, autoNormalize: Boolean = true)
-            : this(signal.toSet(), amp, autoNormalize)
-
+) : SignalCollection(sampleRate), MutableCollection<Signal> {
     private val signals = mutableSetOf<Signal>()
     override val period
         get() = signals.map{ it.period.toInt() }.lcm().toFloat()

@@ -10,8 +10,9 @@ package com.example.signallib
  *
  */
 class SignalManager(
+    val sampleRate: Int,
     waveShape: WaveShape = WaveShape.SINE,
-    val harmonicSeries: HarmonicSeries = HarmonicSeries()
+    val harmonicSeries: HarmonicSeries
 ) {
     var waveShape: WaveShape = waveShape
         set(value){
@@ -29,6 +30,7 @@ class SignalManager(
         // Note: This ensures that all keys for noteToSignal are not null.
         for(note in Note.toList()){
             noteToSignal[note] = HarmonicSignal(
+                sampleRate      = this.sampleRate,
                 fundamental     = note,
                 waveShape       = this.waveShape,
                 harmonicSeries  = this.harmonicSeries,

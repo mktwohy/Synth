@@ -1,11 +1,10 @@
 import com.example.signallib.*
-import com.example.signallib.Constants.SAMPLE_RATE
-import com.example.signallib.Note.Companion.bend
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
 abstract class Signal(
-    var sampleRate: Int = SAMPLE_RATE){
+    var sampleRate: Int
+){
     val parents = mutableSetOf<SignalCollection>()
     abstract val period: Float
     var amp: Float = 1f
@@ -40,22 +39,12 @@ abstract class Signal(
     }
 }
 
-
-object SilentSignal: Signal() {
-    override var period: Float = 1f
-
-    override fun reset() { }
-    override fun evaluateNext() = 0f
-
-    override fun toString() = "SilentSignal"
-}
-
-
 class PeriodicSignal(
     frequency: Float,
+    sampleRate: Int,
     amp: Float = 1f,
     var waveShape: WaveShape = WaveShape.SINE
-): Signal() {
+): Signal(sampleRate) {
     var frequency: Float = frequency
         set(value) {
             angularClock.frequency = value
@@ -66,7 +55,7 @@ class PeriodicSignal(
         this.amp = amp
     }
 
-    private val angularClock = AngularClock(frequency)
+    private val angularClock = AngularClock(frequency, this.sampleRate)
 
     override val period get() = sampleRate / angularClock.frequency
 

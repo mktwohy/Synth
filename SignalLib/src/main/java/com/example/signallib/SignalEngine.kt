@@ -3,9 +3,6 @@ package com.example.signallib
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
-import com.example.signallib.*
-import com.example.signallib.Constants.BUFFER_SIZE
-import com.example.signallib.Constants.SAMPLE_RATE
 
 import java.util.*
 
@@ -20,14 +17,16 @@ import java.util.*
  * 4. stop()
  */
 class SignalEngine(
-    val signalManager: SignalManager = SignalManager(),
+    var sampleRate: Int,
+    var bufferSize: Int,
+    val signalManager: SignalManager,
 ){
     private val noteQueue: Queue<Set<Note>>     = LinkedList()
     private val pitchBendQueue: Queue<Float>    = LinkedList()
     // todo [HarmonicSignal] amp is bugged.
     private val ampQueue: Queue<Float>          = LinkedList()
 
-    private val audioBuffer = FloatArray(BUFFER_SIZE)
+    private val audioBuffer = FloatArray(bufferSize)
     private var runMainLoop = false
     private var audioTrack = createAudioTrack()
     private val onBufferUpdateListeners = mutableSetOf< (FloatArray) -> Unit >()
@@ -104,7 +103,7 @@ class SignalEngine(
                 audioTrack.write(
                     audioBuffer,
                     0,
-                    BUFFER_SIZE,
+                    bufferSize,
                     AudioTrack.WRITE_BLOCKING
                 )
             }
@@ -122,7 +121,7 @@ class SignalEngine(
         .setAudioFormat(
             AudioFormat.Builder()
                 .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                .setSampleRate(SAMPLE_RATE)
+                .setSampleRate(sampleRate)
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build())
         .setTransferMode(AudioTrack.MODE_STREAM)
