@@ -86,8 +86,8 @@ class HarmonicSignal(
     init {
         this.autoNormalize = autoNormalize
         this.amp = amp
-        if(autoNormalize)
-            normalize()
+        if(autoNormalize) normalize()
+
         signalSettings.registerHarmonicSeriesListener {
             for((overtone, amplitude) in it){
                 signals[overtone-1].amp = amplitude
@@ -95,7 +95,6 @@ class HarmonicSignal(
             if(autoNormalize)
                 normalize()
         }
-
     }
 
     override fun contains(element: Signal): Boolean = signals.contains(element)
@@ -106,12 +105,12 @@ class HarmonicSignal(
 
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
-    signals: Collection<Signal>,
+    private val signals: MutableSet<Signal>,
     amp: Float = 1f,
     autoNormalize: Boolean = true,
     signalSettings: SignalSettings
-) : SignalCollection(signalSettings), MutableCollection<Signal> {
-    private val signals = mutableSetOf<Signal>()
+) : SignalCollection(signalSettings), MutableCollection<Signal> by signals {
+    //private val signals = mutableSetOf<Signal>()
     override val period
         get() = signals.map{ it.period.toInt() }.lcm().toFloat()
 
@@ -129,17 +128,17 @@ class SumSignal(
             else                -> this.signals.add(that)
         }
     }
-
-    override val size: Int get() = signals.size
-    override fun contains(element: Signal): Boolean = signals.contains(element)
-    override fun containsAll(elements: Collection<Signal>): Boolean = signals.containsAll(elements)
-    override fun isEmpty(): Boolean = signals.isEmpty()
-    override fun retainAll(elements: Collection<Signal>): Boolean = this.signals.retainAll(elements)
+//
+//    override val size: Int get() = signals.size
+//    override fun contains(element: Signal): Boolean = signals.contains(element)
+//    override fun containsAll(elements: Collection<Signal>): Boolean = signals.containsAll(elements)
+//    override fun isEmpty(): Boolean = signals.isEmpty()
+//    override fun retainAll(elements: Collection<Signal>): Boolean = this.signals.retainAll(elements)
     override fun clear() {
         signals.forEach{ it.parents.remove(this) }
         signals.clear()
     }
-    override fun iterator(): MutableIterator<Signal> = signals.iterator()
+//    override fun iterator(): MutableIterator<Signal> = signals.iterator()
     override fun remove(element: Signal): Boolean {
         if(signals.remove(element)){
             element.parents.remove(this)

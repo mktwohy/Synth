@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.example.signallib.*
 
 class SignalPlotViewModel(
-    signalSettings: SignalSettings,
+    val signalSettings: SignalSettings,
     numPeriods: Int = 4
 ) : ViewModel(){
     private val harmonicSignal = HarmonicSignal(
@@ -17,12 +17,16 @@ class SignalPlotViewModel(
     val plotData   = mutableStateListOf<Float>()
 
     init {
+        signalSettings.registerHarmonicSeriesListener { updatePlot() }
+        signalSettings.registerWaveShapeListener {
+            logd(it)
+            updatePlot()
+        }
         updatePlot()
-        harmonicSignal.signalSettings.registerHarmonicSeriesListener { updatePlot() }
-        harmonicSignal.signalSettings.registerWaveShapeListener { updatePlot() }
     }
 
     private fun updatePlot(){
+        logd("PLOT: wave shape = ${harmonicSignal.signalSettings.waveShape}")
         harmonicSignal.reset()
         harmonicSignal.evaluateToBuffer(plotBuffer)
         plotData.clear()
@@ -39,19 +43,19 @@ class PianoViewModel : ViewModel(){
     val pianoGrid = PianoGrid(width, height, AppModel.noteRange)
 }
 
-class WaveFormChangeViewModel(val signalSettings: SignalSettings): ViewModel() {
-    var waveShape by mutableStateOf(WaveShape.SINE)
-
-    private var index = 1
+class WaveShapeSelectorViewModel(val signalSettings: SignalSettings): ViewModel() {
+    var waveShapeName by mutableStateOf(signalSettings.waveShape.abbreviation)
+    private var index = 0
     private val waveShapes = WaveShape.values()
     fun nextWaveShape(){
-        signalSettings.waveShape = waveShapes[index]
         index = (index + 1) % waveShapes.size
+        signalSettings.waveShape = waveShapes[index]
+        logd("VIEW MODEL: wave shape = ${signalSettings.waveShape}, index = $index")
     }
 
     init {
         signalSettings.registerWaveShapeListener {
-            waveShape = it
+            waveShapeName = it.abbreviation
         }
     }
 }

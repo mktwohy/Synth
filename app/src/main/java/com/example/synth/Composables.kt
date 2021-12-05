@@ -19,7 +19,6 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import com.example.signallib.Constants
 import com.example.signallib.Note
 import com.example.signallib.volumeToAmplitude
 
@@ -165,13 +164,13 @@ fun XYPlot(
 @Composable
 fun WaveShapeSelector(
     modifier: Modifier,
-    viewModel: WaveFormChangeViewModel
+    viewModel: WaveShapeSelectorViewModel
 ){
     Button(
         modifier = modifier,
         onClick = { viewModel.nextWaveShape() }
     ) {
-        Text(text = viewModel.waveShape.abbreviation)
+        Text(text = viewModel.waveShapeName)
     }
 }
 
@@ -186,11 +185,11 @@ fun PitchBend(
         valueRange = -1f..1f,
         onValueChange = {
             sliderState = it
-            AppModel.pitchBend = it
+            AppModel.signalEngine.updatePitchBend(it)
         },
         onValueChangeFinished = {
             sliderState = 0f
-            AppModel.pitchBend = 0f //snap back to 0f
+            AppModel.signalEngine.updatePitchBend(0f) //snap back to 0f
         },
     )
 }

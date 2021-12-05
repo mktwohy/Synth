@@ -19,8 +19,6 @@ class HarmonicSeries(
         callbacks.add(callback)
     }
 
-
-
     operator fun get(overtone: Int) = amplitudes[overtone-1]
     operator fun set(overtone: Int, amplitude: Float){
         if(overtone in 1..numHarmonics && amplitude in 0f..1f){

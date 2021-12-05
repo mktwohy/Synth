@@ -14,15 +14,10 @@ object AppModel{
     val signalEngine  = SignalEngine(signalSettings, signalManager)
 
     var noteRange = Note.C_3..Note.C_5
-    var pitchBend = 0f
-        set(value){
-            signalEngine.updatePitchBend(value)
-            field = value
-        }
     var currentAudio by mutableStateOf<List<Float>>(listOf())
 
     val pianoViewModel          = PianoViewModel()
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(signalSettings)
     val SignalPlotViewModel     = SignalPlotViewModel(signalSettings)
-    val waveFormChangeViewModel = WaveFormChangeViewModel(signalSettings)
+    val waveFormChangeViewModel = WaveShapeSelectorViewModel(signalSettings)
 }

@@ -8,18 +8,18 @@ class SignalSettings(
 ){
     var waveShape = waveShape
         set(value){
-            waveShapeListeners.forEach { it.invoke(value) }
             field = value
+            waveShapeListeners.forEach { it.invoke(value) }
         }
     var sampleRate = sampleRate
         set(value){
-            sampleRateListeners.forEach { it.invoke(value) }
             field = value
+            sampleRateListeners.forEach { it.invoke(value) }
         }
     var bufferSize = bufferSize
         set(value){
-            bufferSizeListeners.forEach { it.invoke(value) }
             field = value
+            bufferSizeListeners.forEach { it.invoke(value) }
         }
 
     fun registerHarmonicSeriesListener(callback: (HarmonicSeries) -> Unit){
