@@ -260,7 +260,7 @@ fun HarmonicSeriesEditor(
                 onClick = { harmonicSeries.reset() }
             ) {
                 Text(
-                    text = "RESET",
+                    text = "RST",
                     color = Color.White,
                     fontSize = 11.sp
                 )
@@ -273,7 +273,7 @@ fun HarmonicSeriesEditor(
                 }
             ) {
                 Text(
-                    text = "RANDOM",
+                    text = "RNDM",
                     color = Color.White,
                     fontSize = 11.sp
                 )
