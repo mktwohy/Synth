@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
             signalEngine.registerOnBufferUpdateCallback {
                 currentAudio = it.toList()
             }
-            signalManager.harmonicSeries[1] = 1f
+            signalSettings.harmonicSeries[1] = 1f
         }
 
         setContent {

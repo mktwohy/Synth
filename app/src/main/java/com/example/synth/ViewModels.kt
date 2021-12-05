@@ -23,7 +23,7 @@ class SignalPlotViewModel(
 //            plotSignal.bendAmount = it
 //            updatePlot()
 //        }
-        AppModel.signalManager.registerOnWaveShapeChangedCallback {
+        AppModel.signalSettings.registerWaveShapeListener {
             harmonicSignal.waveShape = it
             updatePlot()
         }
@@ -53,12 +53,12 @@ class WaveFormChangeViewModel(val signalManager: SignalManager): ViewModel() {
     private var index = 1
     private val waveShapes = WaveShape.values()
     fun nextWaveShape(){
-        signalManager.waveShape = waveShapes[index]
+        AppModel.signalSettings.waveShape = waveShapes[index]
         index = (index + 1) % waveShapes.size
     }
 
     init {
-        AppModel.signalManager.registerOnWaveShapeChangedCallback {
+        AppModel.signalSettings.registerWaveShapeListener {
             waveShape = it
         }
     }

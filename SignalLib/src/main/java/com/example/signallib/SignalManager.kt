@@ -9,31 +9,23 @@ package com.example.signallib
  * - call [renderToBuffer] with realtime parameters to get a single buffer of PCM data
  *
  */
-class SignalManager(
-    val sampleRate: Int,
-    waveShape: WaveShape = WaveShape.SINE,
-    val harmonicSeries: HarmonicSeries
-) {
-    var waveShape: WaveShape = waveShape
-        set(value){
-            Note.toList().forEach { noteToSignal[it]?.waveShape = value }
-            waveShapeCallbacks.forEach { it.invoke(value) }
-            field = value
+class SignalManager(val signalSettings: SignalSettings) {
+    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
+    init {
+        signalSettings.registerWaveShapeListener { waveShape ->
+            for (note in Note.notes){
+                noteToSignal[note]?.waveShape = waveShape
+            }
         }
 
-    private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
-    private val waveShapeCallbacks = mutableSetOf< (WaveShape) -> Unit >()
-
-
-    init {
         // initialize noteToSignal
         // Note: This ensures that all keys for noteToSignal are not null.
         for(note in Note.toList()){
             noteToSignal[note] = HarmonicSignal(
-                sampleRate      = this.sampleRate,
+                sampleRate      = signalSettings.sampleRate,
                 fundamental     = note,
-                waveShape       = this.waveShape,
-                harmonicSeries  = this.harmonicSeries,
+                waveShape       = signalSettings.waveShape,
+                harmonicSeries  = signalSettings.harmonicSeries,
                 amp             = 1f,
                 autoNormalize   = false
             )
@@ -57,9 +49,5 @@ class SignalManager(
             }
             buffer[i] = sum
         }
-    }
-
-    fun registerOnWaveShapeChangedCallback(callback: (WaveShape) -> Unit){
-        waveShapeCallbacks.add(callback)
     }
 }
