@@ -12,12 +12,6 @@ package com.example.signallib
 class SignalManager(val signalSettings: SignalSettings) {
     private val noteToSignal = mutableMapOf<Note, HarmonicSignal>()
     init {
-//        signalSettings.registerWaveShapeListener { waveShape ->
-//            for (note in Note.notes){
-//                noteToSignal[note]?.waveShape = waveShape
-//            }
-//        }
-
         // initialize noteToSignal
         // Note: This ensures that all keys for noteToSignal are not null.
         for(note in Note.toList()){

@@ -1,6 +1,8 @@
 package com.example.synth
 
+import android.content.Context
 import android.content.res.Configuration
+import android.media.AudioManager
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -23,9 +25,21 @@ class MainActivity : ComponentActivity() {
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
+        val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         with(AppModel){
-            signalEngine.start()
+            // get phone's sample rate and buffer size
+            signalSettings.sampleRate = am.getProperty(
+                AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE
+            ).toInt()
+
+            signalSettings.bufferSize = am.getProperty(
+                AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER
+            ).toInt()
+
+            // reset the signalEngine so that it's AudioTrack uses this up-to-date
+            signalEngine.reset()
+            signalEngine.play()
             signalEngine.registerOnBufferUpdateCallback {
                 currentAudio = it.toList()
             }

@@ -25,9 +25,9 @@ class SignalEngine(
     // todo [HarmonicSignal] amp is bugged.
     private val ampQueue: Queue<Float>          = LinkedList()
 
-    private val audioBuffer = FloatArray(signalSettings.bufferSize)
+    private var audioBuffer = FloatArray(signalSettings.bufferSize)
     private var runMainLoop = false
-    private var audioTrack = createAudioTrack()
+    private var audioTrack = buildAudioTrack()
     private val onBufferUpdateListeners = mutableSetOf< (FloatArray) -> Unit >()
 
     fun registerOnBufferUpdateCallback(callback: (FloatArray) -> Unit){
@@ -41,25 +41,25 @@ class SignalEngine(
     fun updatePitchBend(semitones: Float)   { pitchBendQueue.offer(semitones)   }
 
 
-    fun start(){
+    fun play(){
         if (audioTrack.playState != AudioTrack.PLAYSTATE_PLAYING){
             runMainLoop = true
             mainLoop()
         }
     }
 
-    fun stop(){ runMainLoop = false }
+    fun pause(){ runMainLoop = false }
 
     /**
      * Stops AudioTrack, releases it from memory, creates a new AudioTrack, and starts it.
-     * Note: If sample rate changes, AudioEngine should be reset.
+     * Note: If sample rate or buffer size changes, AudioEngine should be reset.
      * */
     fun reset(){
-        stop()
+        pause()
         audioTrack.flush()
         audioTrack.release()
-        this.audioTrack = createAudioTrack()
-        start()
+        audioBuffer = FloatArray(signalSettings.bufferSize)
+        this.audioTrack = buildAudioTrack()
     }
 
     private fun mainLoop(){
@@ -106,12 +106,10 @@ class SignalEngine(
                     AudioTrack.WRITE_BLOCKING
                 )
             }
-            audioTrack.stop()
-            audioTrack.flush()
         }.start()
     }
 
-    private fun createAudioTrack() = AudioTrack.Builder()
+    private fun buildAudioTrack() = AudioTrack.Builder()
         .setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)

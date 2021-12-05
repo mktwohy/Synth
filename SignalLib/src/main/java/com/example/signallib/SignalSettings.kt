@@ -34,7 +34,7 @@ class SignalSettings(
         sampleRateListeners.add(callback)
     }
 
-    fun registerBuffSizeListener(callback: (Int) -> Unit){
+    fun registerBufferSizeListener(callback: (Int) -> Unit){
         bufferSizeListeners.add(callback)
     }
 

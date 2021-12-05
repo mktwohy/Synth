@@ -7,8 +7,8 @@ object AppModel{
     val signalSettings = SignalSettings(
         harmonicSeries = HarmonicSeries(15),
         waveShape = WaveShape.SINE,
-        sampleRate = 44800,
-        bufferSize = 192
+        sampleRate = 44100,
+        bufferSize = 512
     )
     val signalManager = SignalManager(signalSettings)
     val signalEngine  = SignalEngine(signalSettings, signalManager)
@@ -20,4 +20,5 @@ object AppModel{
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(signalSettings)
     val SignalPlotViewModel     = SignalPlotViewModel(signalSettings)
     val waveFormChangeViewModel = WaveShapeSelectorViewModel(signalSettings)
+
 }
