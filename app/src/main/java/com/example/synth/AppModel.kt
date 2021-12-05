@@ -4,6 +4,8 @@ import androidx.compose.runtime.*
 import com.example.signallib.*
 
 object AppModel{
+    var initialAppOpen = true
+
     val signalSettings = SignalSettings(
         harmonicSeries = HarmonicSeries(15),
         waveShape = WaveShape.SINE,
