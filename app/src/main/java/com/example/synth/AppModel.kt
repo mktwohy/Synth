@@ -4,7 +4,7 @@ import androidx.compose.runtime.*
 import com.example.signallib.*
 
 object AppModel{
-    var initialAppOpen = true
+    var startup = true
 
     val signalSettings = SignalSettings(
         harmonicSeries = HarmonicSeries(15),

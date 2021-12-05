@@ -19,38 +19,16 @@ import androidx.compose.ui.unit.dp
 
 @ExperimentalComposeUiApi
 class MainActivity : ComponentActivity() {
+    override fun onStart() {
+        super.onStart()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
-        if (AppModel.initialAppOpen){
-            val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-            with(AppModel){
-                // get phone's sample rate and buffer size
-                signalSettings.sampleRate = am.getProperty(
-                    AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE
-                ).toInt()
-
-                signalSettings.bufferSize = am.getProperty(
-                    AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER
-                ).toInt()
-
-                // reset the signalEngine so that it's AudioTrack uses this up-to-date
-                signalEngine.reset()
-                signalEngine.play()
-                signalEngine.registerOnBufferUpdateCallback {
-                    currentAudio = it.toList()
-                }
-                signalSettings.harmonicSeries[1] = 1f
-
-                // ensure that this doesn't run when screen rotates
-                initialAppOpen = false
-            }
-        }
-
+        if (AppModel.startup) startup()
 
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
@@ -123,5 +101,41 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+    }
+
+    private fun startup(){
+        val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        with(AppModel){
+            // get phone's sample rate and buffer size
+            signalSettings.sampleRate = am.getProperty(
+                AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE
+            ).toInt()
+
+            signalSettings.bufferSize = am.getProperty(
+                AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER
+            ).toInt()
+
+            // reset the signalEngine so that it's AudioTrack uses this up-to-date
+            signalEngine.reset()
+            signalEngine.play()
+            signalEngine.registerOnBufferUpdateCallback {
+                currentAudio = it.toList()
+            }
+            signalSettings.harmonicSeries[1] = 1f
+
+            // ensure that this doesn't run when screen rotates
+            startup = false
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        AppModel.signalEngine.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AppModel.signalEngine.play()
     }
 }
