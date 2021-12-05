@@ -218,14 +218,15 @@ fun HarmonicSeriesEditor(
     modifier: Modifier = Modifier,
     viewModel: HarmonicSeriesViewModel
 ){
+    val harmonicSeries = viewModel.signalSettings.harmonicSeries
     Row(modifier){
         RowOfVerticalSliders(
             modifier = Modifier.fillMaxWidth(0.9f),
-            numSliders = viewModel.harmonicSeries.numHarmonics,
+            numSliders = viewModel.signalSettings.harmonicSeries.numHarmonics,
             value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
                 val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
-                viewModel.harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
+                harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
             },
             label = { index -> if(index == 0) "f" else "${index+1}" },
             showValue = false
@@ -238,7 +239,7 @@ fun HarmonicSeriesEditor(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.5f),
-                onClick = {viewModel.harmonicSeries.reset() }
+                onClick = { harmonicSeries.reset() }
             ) {
                 Text(
                     text = "RESET",
@@ -249,8 +250,8 @@ fun HarmonicSeriesEditor(
             Button(
                 modifier = Modifier.fillMaxSize(),
                 onClick = {
-                    viewModel.harmonicSeries.reset()
-                    viewModel.harmonicSeries.generateRandom()
+                    harmonicSeries.reset()
+                    harmonicSeries.generateRandom()
                 }
             ) {
                 Text(

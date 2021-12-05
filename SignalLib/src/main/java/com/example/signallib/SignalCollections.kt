@@ -3,10 +3,11 @@ package com.example.signallib
 import PeriodicSignal
 import Signal
 import com.example.signallib.Note.Companion.bend
+import kotlin.math.sign
 
 abstract class SignalCollection(
-    sampleRate: Int
-): Signal(sampleRate), Collection<Signal> {
+    signalSettings: SignalSettings
+): Signal(signalSettings), Collection<Signal> {
     var autoNormalize: Boolean = true
 
     fun normalize() {
@@ -48,31 +49,23 @@ abstract class SignalCollection(
 
 
 class HarmonicSignal(
-    sampleRate: Int,
     fundamental: Note,
-    val harmonicSeries: HarmonicSeries,
-    waveShape: WaveShape = WaveShape.SINE,
     amp: Float = 1f,
-    autoNormalize: Boolean = true
-): SignalCollection(sampleRate) {
+    autoNormalize: Boolean = true,
+    signalSettings: SignalSettings
+): SignalCollection(signalSettings) {
     override val size get() = signals.size
-    override val period = sampleRate / fundamental.freq
-    private val signals = List(harmonicSeries.numHarmonics){ i ->
+    override val period = signalSettings.sampleRate / fundamental.freq
+    private val signals = List(signalSettings.harmonicSeries.numHarmonics){ i ->
         PeriodicSignal(
-            sampleRate = this.sampleRate,
             frequency = fundamental.freq*(i+1),
-            waveShape = waveShape,
-            amp = 0f
+            amp = 0f,
+            signalSettings = this.signalSettings
         ).also {
             it.parents.add(this)
-            it.sampleRate = this.sampleRate
+//            it.signalSettings = this.sampleRate
         }
     }
-    var waveShape: WaveShape = waveShape
-        set(value){
-            signals.forEach{ it.waveShape = value }
-            field = value
-        }
     var bendAmount: Float = 1f
         set(value){
             val bentFundFreq = fundamental.bend(value)
@@ -95,8 +88,8 @@ class HarmonicSignal(
         this.amp = amp
         if(autoNormalize)
             normalize()
-        harmonicSeries.registerOnUpdatedCallback {
-            for((overtone, amplitude) in harmonicSeries){
+        signalSettings.registerHarmonicSeriesListener {
+            for((overtone, amplitude) in it){
                 signals[overtone-1].amp = amplitude
             }
             if(autoNormalize)
@@ -113,11 +106,11 @@ class HarmonicSignal(
 
 /** Combines two or more Signals into one Signal. */
 class SumSignal(
-    sampleRate: Int,
     signals: Collection<Signal>,
     amp: Float = 1f,
-    autoNormalize: Boolean = true
-) : SignalCollection(sampleRate), MutableCollection<Signal> {
+    autoNormalize: Boolean = true,
+    signalSettings: SignalSettings
+) : SignalCollection(signalSettings), MutableCollection<Signal> {
     private val signals = mutableSetOf<Signal>()
     override val period
         get() = signals.map{ it.period.toInt() }.lcm().toFloat()

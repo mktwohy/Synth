@@ -17,8 +17,7 @@ import java.util.*
  * 4. stop()
  */
 class SignalEngine(
-    var sampleRate: Int,
-    var bufferSize: Int,
+    val signalSettings: SignalSettings,
     val signalManager: SignalManager,
 ){
     private val noteQueue: Queue<Set<Note>>     = LinkedList()
@@ -26,7 +25,7 @@ class SignalEngine(
     // todo [HarmonicSignal] amp is bugged.
     private val ampQueue: Queue<Float>          = LinkedList()
 
-    private val audioBuffer = FloatArray(bufferSize)
+    private val audioBuffer = FloatArray(signalSettings.bufferSize)
     private var runMainLoop = false
     private var audioTrack = createAudioTrack()
     private val onBufferUpdateListeners = mutableSetOf< (FloatArray) -> Unit >()
@@ -103,7 +102,7 @@ class SignalEngine(
                 audioTrack.write(
                     audioBuffer,
                     0,
-                    bufferSize,
+                    signalSettings.bufferSize,
                     AudioTrack.WRITE_BLOCKING
                 )
             }
@@ -121,7 +120,7 @@ class SignalEngine(
         .setAudioFormat(
             AudioFormat.Builder()
                 .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                .setSampleRate(sampleRate)
+                .setSampleRate(signalSettings.sampleRate)
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build())
         .setTransferMode(AudioTrack.MODE_STREAM)
