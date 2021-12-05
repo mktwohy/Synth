@@ -233,6 +233,16 @@ enum class Note(val freq: Float): Comparable<Note> {
             return transposeNote.freq + freqBend
         }
 
+        fun Note.nextWhiteNote(): Note{
+            val n = this + 1
+            return if (n.name[1] == '_') n else n + 1
+        }
+
+        fun Note.prevWhiteNote(): Note{
+            val n = this - 1
+            return if (n.name[1] == '_') n else n - 1
+        }
+
         operator fun Note.plus(steps: Int) = transpose(steps)
         operator fun Note.minus(steps: Int) = transpose(-1*steps)
     }

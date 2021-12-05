@@ -41,22 +41,14 @@ fun Piano(
 
                         // find the note/key the finger is touching
                         val note = with(density) {
-                            viewModel.pianoGrid.findKeyAt(
-                                it
-                                    .getX(i)
-                                    .toDp(),
-                                it
-                                    .getY(i)
-                                    .toDp()
-                            )
+                            viewModel.pianoGrid.findKeyAt(it.getX(i).toDp(), it.getY(i).toDp())
                         }
 
                         // add or remove note from list
                         if (note != null) {
                             if (i == it.actionIndex) {
                                 when (it.actionMasked) {
-                                    MotionEvent.ACTION_DOWN,
-                                    MotionEvent.ACTION_MOVE
+                                    MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE
                                     -> newPressedNotes.add(note)
 
                                     MotionEvent.ACTION_UP
@@ -79,11 +71,11 @@ fun Piano(
             )
     ){
         SideEffect {
-            if(viewModel.width.value != this.maxWidth
-                || viewModel.height.value != this.maxHeight
+            if(viewModel.width != this.maxWidth
+                || viewModel.height != this.maxHeight
             ){
-                viewModel.width.value = this.maxWidth
-                viewModel.height.value = this.maxHeight
+                viewModel.width = this.maxWidth
+                viewModel.height = this.maxHeight
                 viewModel.pianoGrid.recalculateWidths()
             }
         }
@@ -92,13 +84,13 @@ fun Piano(
             for(row in listOf(viewModel.pianoGrid.topRow, viewModel.pianoGrid.bottomRow) ){
                 Row(
                     modifier = Modifier
-                        .size(viewModel.width.value, viewModel.height.value/2),
+                        .size(viewModel.width, viewModel.height/2),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     for ((note, width) in row){
                         Box(
                             modifier = Modifier
-                                .size(width, viewModel.height.value / 2)
+                                .size(width, viewModel.height / 2)
                                 .background(note.color(note in viewModel.pressedNotes))
                         )
                     }
@@ -109,13 +101,14 @@ fun Piano(
             for((_, width) in viewModel.pianoGrid.bottomRow){
                 Box(
                     Modifier
-                        .size(width, viewModel.height.value)
+                        .size(width, viewModel.height)
                         .border(2.dp, Color.Black)
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun SignalPlot(

@@ -10,11 +10,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.example.signallib.Note.Companion.minus
+import com.example.signallib.Note.Companion.plus
 
 
 @ExperimentalComposeUiApi
@@ -34,21 +38,31 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column {
-//                Row(modifier = Modifier
-//                    .fillMaxHeight(0.2f)
-//                    .fillMaxWidth()) {
-//                    XYPlot(
-//                        data = AppModel.currentAudio,
-//                        modifier = Modifier
-//                            .fillMaxWidth(0.9f)
-//                            .fillMaxHeight()
-//                    )
-//                    VolumeSlider(
-//                        modifier = Modifier.fillMaxSize(),
-//                        onVolumeChange = { AppModel.signalEngine.updateAmp(it) }
-//
-//                    )
-//                }
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.1f)){
+                    Button(
+                        onClick = { AppModel.pianoViewModel.shiftNoteRange(-1, 0) }
+                    ) {
+                        Text("<", color = Color.White)
+                    }
+                    Button(
+                        onClick = { AppModel.pianoViewModel.shiftNoteRange(1, 0) }
+                    ) {
+                        Text(">", color = Color.White)
+                    }
+                    Button(
+                        onClick = { AppModel.pianoViewModel.shiftNoteRange(0, -1) }
+                    ) {
+                        Text("<", color = Color.White)
+                    }
+                    Button(
+                        onClick = { AppModel.pianoViewModel.shiftNoteRange(0, 1) }
+
+                    ) {
+                        Text(">", color = Color.White)
+                    }
+                }
                 XYPlot(
                     data = AppModel.currentAudio,
                     modifier = Modifier
@@ -89,7 +103,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(if (isPortrait) 0.9f else 0.95f),
-                        viewModel = AppModel.pianoViewModel
+                        viewModel = AppModel.pianoViewModel,
                     )
                     PitchBend(
                         modifier = Modifier

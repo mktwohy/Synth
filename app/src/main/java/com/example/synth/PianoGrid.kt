@@ -1,7 +1,8 @@
 package com.example.synth
 
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.signallib.Note
 import com.example.signallib.Note.Companion.minus
@@ -10,22 +11,20 @@ import com.example.signallib.Note.Companion.toList
 
 /** Defines the hitboxes for the piano **/
 class PianoGrid(
-    val width: MutableState<Dp>,
-    val height: MutableState<Dp>,
-    var noteRange: ClosedRange<Note>
+    val viewModel: PianoViewModel
 ){
-    val topRow = mutableListOf<Pair<Note, Dp>>()
-    val bottomRow = mutableListOf<Pair<Note, Dp>>()
+    val topRow = mutableStateListOf<Pair<Note, Dp>>()
+    val bottomRow = mutableStateListOf<Pair<Note, Dp>>()
 
     fun recalculateWidths(){
         topRow.clear()
         bottomRow.clear()
-        val whiteNotes = noteRange.toList().filter { it.name[1] == '_' }
+        val whiteNotes = viewModel.noteRange.toList().filter { it.name[1] == '_' }
         whiteNotes.forEach { whiteNote ->
             for((note, ratio) in topRowNoteRatios(whiteNote)){
-                topRow.add(note to width.value * ratio/whiteNotes.size)
+                topRow.add(note to viewModel.width * ratio/whiteNotes.size)
             }
-            bottomRow.add(whiteNote to width.value / whiteNotes.size)
+            bottomRow.add(whiteNote to viewModel.width / whiteNotes.size)
         }
     }
 
@@ -40,8 +39,8 @@ class PianoGrid(
             return null
         }
         return when{
-            y < 0.dp || y > height.value -> null
-            y < height.value / 2 -> searchRow(topRow)
+            y < 0.dp || y > viewModel.height -> null
+            y < viewModel.height / 2 -> searchRow(topRow)
             else -> searchRow(bottomRow)
         }
 

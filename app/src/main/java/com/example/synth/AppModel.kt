@@ -15,8 +15,7 @@ object AppModel{
     val signalManager = SignalManager(signalSettings)
     val signalEngine  = SignalEngine(signalSettings, signalManager)
 
-    var noteRange = Note.C_3..Note.C_5
-    var currentAudio by mutableStateOf<List<Float>>(listOf())
+    var currentAudio by mutableStateOf(listOf<Float>())
 
     val pianoViewModel          = PianoViewModel()
     val harmonicSeriesViewModel = HarmonicSeriesViewModel(signalSettings)
