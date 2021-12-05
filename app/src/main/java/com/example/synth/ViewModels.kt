@@ -18,15 +18,11 @@ class SignalPlotViewModel(
 
     init {
         signalSettings.registerHarmonicSeriesListener { updatePlot() }
-        signalSettings.registerWaveShapeListener {
-            logd(it)
-            updatePlot()
-        }
+        signalSettings.registerWaveShapeListener { updatePlot() }
         updatePlot()
     }
 
     private fun updatePlot(){
-        logd("PLOT: wave shape = ${harmonicSignal.signalSettings.waveShape}")
         harmonicSignal.reset()
         harmonicSignal.evaluateToBuffer(plotBuffer)
         plotData.clear()
@@ -50,7 +46,6 @@ class WaveShapeSelectorViewModel(val signalSettings: SignalSettings): ViewModel(
     fun nextWaveShape(){
         index = (index + 1) % waveShapes.size
         signalSettings.waveShape = waveShapes[index]
-        logd("VIEW MODEL: wave shape = ${signalSettings.waveShape}, index = $index")
     }
 
     init {
