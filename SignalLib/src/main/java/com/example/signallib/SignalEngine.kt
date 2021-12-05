@@ -48,7 +48,11 @@ class SignalEngine(
         }
     }
 
-    fun pause(){ runMainLoop = false }
+    fun pause(){
+        audioTrack.pause()
+        audioTrack.flush()
+        runMainLoop = false
+    }
 
     /**
      * Stops AudioTrack, releases it from memory, creates a new AudioTrack, and starts it.
