@@ -11,16 +11,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.RangeSlider
 import androidx.compose.material.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.example.signallib.Note
 import com.example.signallib.Note.Companion.minus
 import com.example.signallib.Note.Companion.plus
 
-
+@ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 class MainActivity : ComponentActivity() {
     override fun onStart() {
@@ -37,37 +44,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
-            Column {
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.1f)){
-                    Button(
-                        onClick = { AppModel.pianoViewModel.shiftNoteRange(-1, 0) }
-                    ) {
-                        Text("<", color = Color.White)
-                    }
-                    Button(
-                        onClick = { AppModel.pianoViewModel.shiftNoteRange(1, 0) }
-                    ) {
-                        Text(">", color = Color.White)
-                    }
-                    Button(
-                        onClick = { AppModel.pianoViewModel.shiftNoteRange(0, -1) }
-                    ) {
-                        Text("<", color = Color.White)
-                    }
-                    Button(
-                        onClick = { AppModel.pianoViewModel.shiftNoteRange(0, 1) }
-
-                    ) {
-                        Text(">", color = Color.White)
-                    }
-                }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 XYPlot(
                     data = AppModel.currentAudio,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.2f)
+                        .fillMaxHeight(0.1f)
                 )
                 HarmonicSeriesEditor(
                     modifier = Modifier
@@ -98,6 +80,12 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                Box(Modifier.fillMaxHeight(0.2f).fillMaxWidth(0.85f)){
+                    NoteRange(
+                        viewModel = AppModel.pianoViewModel
+                    )
+                }
+
                 Row(Modifier.border(1.dp, Color.White)) {
                     Piano(
                         modifier = Modifier
@@ -112,7 +100,6 @@ class MainActivity : ComponentActivity() {
                         //viewModel = AppModel.pitchBendViewModel
                     )
                 }
-
             }
         }
     }

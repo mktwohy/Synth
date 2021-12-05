@@ -5,9 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -21,6 +19,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.example.signallib.Note
 import com.example.signallib.volumeToAmplitude
+
+
+@ExperimentalMaterialApi
+@Composable
+fun NoteRange(
+    modifier: Modifier = Modifier,
+    viewModel: PianoViewModel
+){
+    RangeSlider(
+        modifier = modifier,
+        values = viewModel.rangeSliderState,
+        onValueChange = {
+            viewModel.noteRange = it.start.toNote()..it.endInclusive.toNote()
+            viewModel.pianoGrid.recalculateWidths()
+            viewModel.rangeSliderState = it
+        }
+    )
+
+}
+fun Float.toNote() = Note.notes[(this * (Note.notes.size-1)).toInt()]
+fun Note.toFloat() = Note.notes.indexOf(this).toFloat() / Note.notes.size.toFloat()
 
 @ExperimentalComposeUiApi
 @Composable
@@ -41,7 +60,14 @@ fun Piano(
 
                         // find the note/key the finger is touching
                         val note = with(density) {
-                            viewModel.pianoGrid.findKeyAt(it.getX(i).toDp(), it.getY(i).toDp())
+                            viewModel.pianoGrid.findKeyAt(
+                                it
+                                    .getX(i)
+                                    .toDp(),
+                                it
+                                    .getY(i)
+                                    .toDp()
+                            )
                         }
 
                         // add or remove note from list

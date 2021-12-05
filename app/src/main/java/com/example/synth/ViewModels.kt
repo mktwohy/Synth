@@ -43,6 +43,9 @@ class PianoViewModel : ViewModel(){
     var height by mutableStateOf(0.dp)
     var noteRange by mutableStateOf(Note.C_4..Note.C_5)
     val pianoGrid = PianoGrid(this)
+    var rangeSliderState by mutableStateOf(
+        noteRange.start.toFloat()..noteRange.endInclusive.toFloat()
+    )
 
     fun shiftNoteRange(startOffset: Int, endOffset: Int){
         var start = noteRange.start
