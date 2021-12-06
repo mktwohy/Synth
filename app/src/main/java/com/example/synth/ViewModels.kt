@@ -112,7 +112,7 @@ class HarmonicSeriesViewModel(
         AppModel.signalEngine.registerAfterBufferWriteCallback {
             if (harmonicSeriesUpdateQueue.isNotEmpty()){
                 val (sliderIndex, sliderValue) = harmonicSeriesUpdateQueue.poll()!!
-                signalSettings.harmonicSeries[sliderIndex+1] = amplitudeToVolume(sliderValue)
+                signalSettings.harmonicSeries[sliderIndex+1] = volumeToAmplitude(sliderValue)
             }
 //            logd("queue size: ${harmonicSeriesUpdateQueue.size}")
         }
