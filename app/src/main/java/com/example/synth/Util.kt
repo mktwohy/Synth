@@ -4,9 +4,16 @@ package com.example.synth
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import com.example.signallib.Note
-import java.lang.StringBuilder
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
+
+inline fun <T>MutableList<T>.mapInPlace(transform: (T) -> T){
+    this.indices.forEach{ this[it] = transform(this[it]) }
+}
+
+inline fun <T>MutableList<T>.mapInPlaceIndexed(transform: (Int, T) -> T) {
+    this.indices.forEach { this[it] = transform(it, this[it]) }
+}
 
 //----- Color -----//
 fun Color.mix(that: Color) =

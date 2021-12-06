@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.example.signallib.Note
+import com.example.signallib.amplitudeToVolume
 import com.example.signallib.volumeToAmplitude
 
 
@@ -59,7 +60,14 @@ fun Piano(
 
                         // find the note/key the finger is touching
                         val note = with(density) {
-                            viewModel.pianoGrid.findKeyAt(it.getX(i).toDp(), it.getY(i).toDp())
+                            viewModel.pianoGrid.findKeyAt(
+                                it
+                                    .getX(i)
+                                    .toDp(),
+                                it
+                                    .getY(i)
+                                    .toDp()
+                            )
                         }
 
                         // add or remove note from list
@@ -235,8 +243,9 @@ fun HarmonicSeriesEditor(
             numSliders = viewModel.signalSettings.harmonicSeries.numHarmonics,
             value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
             onValueChange = { sliderIndex, sliderValue ->
-                val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
-                harmonicSeries[sliderIndex+1] = volumeToAmplitude(newSliderValue)
+                var newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
+                viewModel.harmonicSeriesUpdateQueue.offer(sliderIndex to newSliderValue)
+                viewModel.sliderState[sliderIndex] = newSliderValue
             },
             label = { index -> if(index == 0) "f" else "${index+1}" },
             showValue = false
@@ -249,7 +258,7 @@ fun HarmonicSeriesEditor(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.5f),
-                onClick = { harmonicSeries.reset() }
+                onClick = { viewModel.reset() }
             ) {
                 Text(
                     text = "RST",
@@ -259,10 +268,7 @@ fun HarmonicSeriesEditor(
             }
             Button(
                 modifier = Modifier.fillMaxSize(),
-                onClick = {
-                    harmonicSeries.reset()
-                    harmonicSeries.generateRandom()
-                }
+                onClick = { viewModel.random() }
             ) {
                 Text(
                     text = "RNDM",

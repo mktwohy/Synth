@@ -28,12 +28,16 @@ class SignalEngine(
     private var audioBuffer = FloatArray(signalSettings.bufferSize)
     private var runMainLoop = false
     private var audioTrack = buildAudioTrack()
-    private val onBufferUpdateListeners = mutableSetOf< (FloatArray) -> Unit >()
+    private val afterBufferWriteOneTimeListeners = mutableSetOf< (FloatArray) -> Unit >()
+    private val afterBufferWriteListeners = mutableSetOf< (FloatArray) -> Unit >()
 
-    fun registerOnBufferUpdateCallback(callback: (FloatArray) -> Unit){
-        onBufferUpdateListeners.add(callback)
+    fun registerAfterBufferWriteOneTimeCallback(callback: (FloatArray) -> Unit){
+        afterBufferWriteOneTimeListeners.add(callback)
     }
 
+    fun registerAfterBufferWriteCallback(callback: (FloatArray) -> Unit){
+        afterBufferWriteListeners.add(callback)
+    }
 
     @Deprecated("Amp does not properly update")
     fun updateAmp(amp: Float)               { ampQueue.offer(amp)               }
@@ -98,7 +102,7 @@ class SignalEngine(
                         amp = amp
                     )
 
-                    onBufferUpdateListeners.forEach { it.invoke(audioBuffer) }
+                    afterBufferWriteOneTimeListeners.forEach { it.invoke(audioBuffer) }
                     prevNotes.replaceAll(currentNotes)
                 }
 
@@ -109,6 +113,10 @@ class SignalEngine(
                     signalSettings.bufferSize,
                     AudioTrack.WRITE_BLOCKING
                 )
+
+                afterBufferWriteListeners.forEach{ it.invoke(audioBuffer) }
+                afterBufferWriteOneTimeListeners.forEach{ it.invoke(audioBuffer) }
+                afterBufferWriteOneTimeListeners.clear()
             }
         }.start()
     }

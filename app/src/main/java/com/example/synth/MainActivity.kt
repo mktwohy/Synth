@@ -10,30 +10,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.RangeSlider
-import androidx.compose.material.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.example.signallib.Note
-import com.example.signallib.Note.Companion.minus
-import com.example.signallib.Note.Companion.plus
 
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 class MainActivity : ComponentActivity() {
-    override fun onStart() {
-        super.onStart()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -45,12 +32,12 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                XYPlot(
-//                    data = AppModel.currentAudio,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .fillMaxHeight(0.1f)
-//                )
+                XYPlot(
+                    data = AppModel.currentAudio,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.1f)
+                )
                 HarmonicSeriesEditor(
                     modifier = Modifier
                         .fillMaxHeight(if (isPortrait) 0.5f else 0.3f)
@@ -105,6 +92,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startup(){
+        // ensure that this only runs once.
+        // if this variable isn't used, it will run every time screen rotates
+        AppModel.startup = false
+
         val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         with(AppModel){
@@ -119,14 +110,12 @@ class MainActivity : ComponentActivity() {
 
             // reset the signalEngine so that it's AudioTrack uses this up-to-date
             signalEngine.reset()
-            signalEngine.play()
-            signalEngine.registerOnBufferUpdateCallback {
+            signalEngine.registerAfterBufferWriteCallback {
                 currentAudio = it.toList()
             }
             signalSettings.harmonicSeries[1] = 1f
 
-            // ensure that this doesn't run when screen rotates
-            startup = false
+            signalEngine.play()
         }
     }
 

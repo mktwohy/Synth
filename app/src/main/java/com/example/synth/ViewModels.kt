@@ -4,22 +4,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.signallib.*
-import com.example.signallib.Note.Companion.minus
 import com.example.signallib.Note.Companion.nextWhiteNote
-import com.example.signallib.Note.Companion.plus
 import com.example.signallib.Note.Companion.prevWhiteNote
+import java.util.*
 import kotlin.math.abs
 
 class SignalPlotViewModel(
     val signalSettings: SignalSettings,
     numPeriods: Int = 4
 ) : ViewModel(){
-    private val harmonicSignal = HarmonicSignal(
+    private val plotSignal = HarmonicSignal(
         fundamental = Note.A_4,
         signalSettings = signalSettings
     )
-    val plotBuffer = FloatArray(harmonicSignal.period.toInt()*numPeriods)
-    val plotData   = mutableStateListOf<Float>()
+    private val plotBuffer = FloatArray(plotSignal.period.toInt()*numPeriods)
+    var plotData  by mutableStateOf(plotBuffer.toList())
 
     init {
         signalSettings.registerHarmonicSeriesListener { updatePlot() }
@@ -28,12 +27,13 @@ class SignalPlotViewModel(
     }
 
     private fun updatePlot(){
-        harmonicSignal.reset()
-        harmonicSignal.evaluateToBuffer(plotBuffer)
-        plotData.clear()
-        for(i in plotBuffer.indices){
-            plotData.add(plotBuffer[i])
-        }
+        plotSignal.reset()
+        plotSignal.evaluateToBuffer(plotBuffer)
+//        plotData.clear()
+//        for(i in plotBuffer.indices){
+//            plotData.add(plotBuffer[i])
+//        }
+        plotData = plotBuffer.toList()
     }
 }
 
@@ -100,15 +100,34 @@ class PitchBendViewModel(val signalSettings: SignalSettings) : ViewModel(){
 class HarmonicSeriesViewModel(
     val signalSettings: SignalSettings
 ): ViewModel(){
-    var sliderState = mutableStateListOf<Float>()
+    val sliderState = mutableStateListOf<Float>()
+
+    /** Queue of Pairs of sliderIndex, sliderValue */
+    val harmonicSeriesUpdateQueue: Queue<Pair<Int, Float>> = LinkedList()
+
     init {
         repeat(signalSettings.harmonicSeries.numHarmonics){
             sliderState.add(0f)
         }
-        signalSettings.registerHarmonicSeriesListener {
-            it.forEach { (harmonic, amplitude) ->
-                sliderState[harmonic-1] = amplitudeToVolume(amplitude)
+        AppModel.signalEngine.registerAfterBufferWriteCallback {
+            if (harmonicSeriesUpdateQueue.isNotEmpty()){
+                val (sliderIndex, sliderValue) = harmonicSeriesUpdateQueue.poll()!!
+                signalSettings.harmonicSeries[sliderIndex+1] = amplitudeToVolume(sliderValue)
             }
+//            logd("queue size: ${harmonicSeriesUpdateQueue.size}")
         }
+    }
+
+    fun reset(){
+        signalSettings.harmonicSeries.reset()
+        sliderState.mapInPlace { 0f }
+    }
+
+    fun random(){
+        AppModel.signalEngine.registerAfterBufferWriteOneTimeCallback {
+            signalSettings.harmonicSeries.generateRandom()
+            sliderState.mapInPlaceIndexed { i, _ -> signalSettings.harmonicSeries[i+1] }
+        }
+
     }
 }
