@@ -45,12 +45,12 @@ class MainActivity : ComponentActivity() {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                XYPlot(
-                    data = AppModel.currentAudio,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.1f)
-                )
+//                XYPlot(
+//                    data = AppModel.currentAudio,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .fillMaxHeight(0.1f)
+//                )
                 HarmonicSeriesEditor(
                     modifier = Modifier
                         .fillMaxHeight(if (isPortrait) 0.5f else 0.3f)
