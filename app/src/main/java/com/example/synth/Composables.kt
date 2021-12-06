@@ -36,7 +36,6 @@ fun NoteRange(
             viewModel.rangeSliderState = it
         }
     )
-
 }
 fun Float.toNote() = Note.notes[(this * (Note.notes.size-1)).toInt()]
 fun Note.toFloat() = Note.notes.indexOf(this).toFloat() / Note.notes.size.toFloat()
@@ -60,14 +59,7 @@ fun Piano(
 
                         // find the note/key the finger is touching
                         val note = with(density) {
-                            viewModel.pianoGrid.findKeyAt(
-                                it
-                                    .getX(i)
-                                    .toDp(),
-                                it
-                                    .getY(i)
-                                    .toDp()
-                            )
+                            viewModel.pianoGrid.findKeyAt(it.getX(i).toDp(), it.getY(i).toDp())
                         }
 
                         // add or remove note from list
