@@ -68,14 +68,14 @@ class HarmonicSeries(
     }
 
     override fun toString(): String {
-        fun Int.length() = when(this) {
+        fun Int.numDigits() = when(this) {
             0 -> 1
             else -> log10(abs(toDouble())).toInt() + 1
         }
         fun createRow(overtone: Int, amplitude: Float): String{
             val s = StringBuilder()
             s.append("$overtone")
-            repeat(numHarmonics.length() - overtone.length()){
+            repeat(numHarmonics.numDigits() - overtone.numDigits()){
                 s.append(" ")
             }
             s.append("|")
