@@ -1,5 +1,5 @@
 # Synth 
-- [v1.0.0-alpha](https://github.com/mktwohy/Synth/releases/tag/v1.0.0-alpha)
+- [Download v1.0.0-alpha](https://github.com/mktwohy/Synth/releases/tag/v1.0.0-alpha)
 - [demo](https://youtu.be/TbRYWaP0Ipc)
 
 ## Source Code:
