@@ -1,3 +1,7 @@
+## Source Code:
+- [Backend](https://github.com/mktwohy/Synth/tree/Main/SignalLib/src/main/java/com/example/signallib)
+- [Frontend](https://github.com/mktwohy/Synth/tree/Main/app/src/main/java/com/example/synth)
+
 
 ## Changelogs 
 - **12-6-2021 (v1.0.0-alpha)**
