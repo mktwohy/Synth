@@ -2,7 +2,7 @@
 - [Download v1.0.0-alpha](https://github.com/mktwohy/Synth/releases/tag/v1.0.0-alpha)
 - [Watch Demo](https://youtu.be/TbRYWaP0Ipc)
 
-## Source Code:
+## Source Code
 - [Backend](https://github.com/mktwohy/Synth/tree/Main/SignalLib/src/main/java/com/example/signallib)
 - [Frontend](https://github.com/mktwohy/Synth/tree/Main/app/src/main/java/com/example/synth)
 
