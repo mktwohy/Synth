@@ -1,6 +1,6 @@
-# Synth 
+# App
 - [Download v1.0.0-alpha](https://github.com/mktwohy/Synth/releases/tag/v1.0.0-alpha)
-- [demo](https://youtu.be/TbRYWaP0Ipc)
+- [Watch Demo](https://youtu.be/TbRYWaP0Ipc)
 
 ## Source Code:
 - [Backend](https://github.com/mktwohy/Synth/tree/Main/SignalLib/src/main/java/com/example/signallib)
