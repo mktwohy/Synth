@@ -8,7 +8,7 @@
 
 
 ## Changelogs 
-- **12-6-2021 (v1.0.0-alpha)**
+- **12-6-2021 (v1.0.0-alpha):**
   - Finally at version 1.0.0-alpha! Nearing official release. Please note that:
     1. Because I went back to college, it has been a while since the last changelog.
     1. There are not many new features with this build - the majority of the time was spent on improving the underlying code architecture to have a more stable foundation.
