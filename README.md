@@ -1,4 +1,4 @@
-# App
+## App
 - [Download v1.0.0-alpha](https://github.com/mktwohy/Synth/releases/tag/v1.0.0-alpha)
 - [Watch Demo](https://youtu.be/TbRYWaP0Ipc)
 
