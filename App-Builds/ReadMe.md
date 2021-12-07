@@ -1,6 +1,7 @@
 ## Install Instructions
 - Click on the most recent build. 
-  - Builds use the following naming scheme: Synth_v(month)-(day)-(year).apk
+  - Older builds used the following naming scheme: Synth_v(month)-(day)-(year).apk
+  - Now, they use conventional semantic versioning (the most recent is Synth_v1.0.0-alpha)
 - Click "view raw." 
   - This should download the file. 
 - Once downloaded, click on the download and it should automatically install. 
