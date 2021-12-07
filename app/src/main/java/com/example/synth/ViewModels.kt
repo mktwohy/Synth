@@ -8,6 +8,7 @@ import com.example.signallib.Note.Companion.nextWhiteNote
 import com.example.signallib.Note.Companion.prevWhiteNote
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.sign
 
 class SignalPlotViewModel(
     val signalSettings: SignalSettings,
@@ -106,15 +107,15 @@ class HarmonicSeriesViewModel(
     val harmonicSeriesUpdateQueue: Queue<Pair<Int, Float>> = LinkedList()
 
     init {
-        repeat(signalSettings.harmonicSeries.numHarmonics){
-            sliderState.add(0f)
+        with(signalSettings.harmonicSeries){
+            for (i in 1..numHarmonics){
+                sliderState.add(this[i]) }
         }
         AppModel.signalEngine.registerAfterBufferWriteCallback {
             if (harmonicSeriesUpdateQueue.isNotEmpty()){
                 val (sliderIndex, sliderValue) = harmonicSeriesUpdateQueue.poll()!!
                 signalSettings.harmonicSeries[sliderIndex+1] = volumeToAmplitude(sliderValue)
             }
-//            logd("queue size: ${harmonicSeriesUpdateQueue.size}")
         }
     }
 

@@ -24,6 +24,10 @@ class SignalManager(val signalSettings: SignalSettings) {
         }
     }
 
+    fun resetSignals(notes: Set<Note>){
+        notes.forEach{ noteToSignal[it]?.reset() }
+    }
+
     fun renderToBuffer(buffer: FloatArray, notes: Set<Note>, pitchBend: Float, amp: Float){
         // assign pitch bend to appropriate signals
         for(note in notes) {

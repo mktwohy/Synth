@@ -113,7 +113,6 @@ class MainActivity : ComponentActivity() {
             signalEngine.registerAfterBufferWriteCallback {
                 currentAudio = it.toList()
             }
-            signalSettings.harmonicSeries[1] = 1f
 
             signalEngine.play()
         }

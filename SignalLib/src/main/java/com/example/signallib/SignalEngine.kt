@@ -80,16 +80,12 @@ class SignalEngine(
             audioTrack.play()
 
             while (runMainLoop) {
-                // poll from realtime input queues
-                if(noteQueue.isNotEmpty())
-                    currentNotes.replaceAll(noteQueue.poll()!!)
+                // poll from realtime input queues. if not null, update property
+                noteQueue.poll()?.also { currentNotes.replaceAll(it) }
 
-                if(pitchBendQueue.isNotEmpty())
-                    pitchBend = pitchBendQueue.poll()!!
+                pitchBendQueue.poll()?.also { pitchBend = it }
 
-                if(ampQueue.isNotEmpty())
-                    amp = ampQueue.poll()!!
-
+                ampQueue.poll()?.also { amp = it }
 
                 // check if audio buffer needs to be updated
                 // (ensures silent audio doesn't get rendered)
@@ -102,7 +98,9 @@ class SignalEngine(
                         amp = amp
                     )
 
-                    afterBufferWriteOneTimeListeners.forEach { it.invoke(audioBuffer) }
+                    val removedNotes = prevNotes.filter{ it !in currentNotes }
+                    signalManager.resetSignals(removedNotes.toSet())
+
                     prevNotes.replaceAll(currentNotes)
                 }
 
