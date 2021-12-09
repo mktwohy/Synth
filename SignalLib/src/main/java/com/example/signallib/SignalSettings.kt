@@ -6,20 +6,24 @@ class SignalSettings(
     sampleRate: Int,
     bufferSize: Int,
 ){
+    val waveShapeBroadcaster = Broadcaster<WaveShape>()
+    val sampleRateBroadcaster = Broadcaster<Int>()
+    val bufferSizeBroadcaster = Broadcaster<Int>()
+
     var waveShape = waveShape
         set(value){
             field = value
-            waveShapeListeners.forEach { it.invoke(value) }
+            waveShapeBroadcaster.broadcast(value)
         }
     var sampleRate = sampleRate
         set(value){
             field = value
-            sampleRateListeners.forEach { it.invoke(value) }
+            sampleRateBroadcaster.broadcast(value)
         }
     var bufferSize = bufferSize
         set(value){
             field = value
-            bufferSizeListeners.forEach { it.invoke(value) }
+            bufferSizeBroadcaster.broadcast(value)
         }
 
     fun registerHarmonicSeriesListener(callback: (HarmonicSeries) -> Unit){
@@ -27,18 +31,14 @@ class SignalSettings(
     }
 
     fun registerWaveShapeListener(callback: (WaveShape) -> Unit){
-        waveShapeListeners.add(callback)
+        waveShapeBroadcaster.registerListener(callback)
     }
 
     fun registerSampleRateListener(callback: (Int) -> Unit){
-        sampleRateListeners.add(callback)
+        sampleRateBroadcaster.registerListener(callback)
     }
 
     fun registerBufferSizeListener(callback: (Int) -> Unit){
-        bufferSizeListeners.add(callback)
+        bufferSizeBroadcaster.registerListener(callback)
     }
-
-    private val waveShapeListeners = mutableSetOf<(WaveShape) -> Unit>()
-    private val sampleRateListeners = mutableSetOf<(Int) -> Unit>()
-    private val bufferSizeListeners = mutableSetOf<(Int) -> Unit>()
 }

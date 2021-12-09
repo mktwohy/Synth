@@ -13,10 +13,10 @@ class HarmonicSeries(
     //indices refer to overtone-1. for example, index 0 refers to the first overtone
     private val amplitudes = FloatArray(numHarmonics){ 0f }
 
-    private val callbacks = mutableListOf<(HarmonicSeries) -> Unit>()
+    private val broadcaster = Broadcaster<HarmonicSeries>()
 
     fun registerOnUpdatedCallback(callback: (HarmonicSeries) -> Unit){
-        callbacks.add(callback)
+        broadcaster.registerListener(callback)
     }
 
     operator fun get(overtone: Int) = amplitudes[overtone-1]
@@ -24,12 +24,12 @@ class HarmonicSeries(
         if(overtone in 1..numHarmonics && amplitude in 0f..1f){
             amplitudes[overtone-1] = amplitude
         }
-        callbacks.forEach { it.invoke(this) }
+        broadcaster.broadcast(this)
     }
 
     fun reset(){
         amplitudes.mapInPlace{ 0f }
-        callbacks.forEach { it.invoke(this) }
+        broadcaster.broadcast(this)
     }
 
     /** produces a harmonic series with exponential decay
@@ -46,7 +46,7 @@ class HarmonicSeries(
                 this[overtone] = ((ceiling-floor) * (1f-decayRate).pow(index) + floor)
             }
         }
-        callbacks.forEach { it.invoke(this) }
+        broadcaster.broadcast(this)
     }
 
     fun generateRandom(){
