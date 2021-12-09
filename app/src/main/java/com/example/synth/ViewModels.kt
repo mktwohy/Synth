@@ -8,6 +8,7 @@ import com.example.signallib.Note.Companion.nextWhiteNote
 import com.example.signallib.Note.Companion.prevWhiteNote
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.sign
 
 class SignalPlotViewModel(
     val signalSettings: SignalSettings,
@@ -21,8 +22,8 @@ class SignalPlotViewModel(
     var plotData  by mutableStateOf(plotBuffer.toList())
 
     init {
-        signalSettings.harmonicSeries.registerListener { updatePlot() }
-        signalSettings.waveShape.registerListener { updatePlot() }
+        signalSettings.registerHarmonicSeriesListener { updatePlot() }
+        signalSettings.registerWaveShapeListener { updatePlot() }
         updatePlot()
     }
 
@@ -69,16 +70,16 @@ class PianoViewModel : ViewModel(){
 }
 
 class WaveShapeSelectorViewModel(val signalSettings: SignalSettings): ViewModel() {
-    var waveShapeName by mutableStateOf(signalSettings.waveShape.value.abbreviation)
+    var waveShapeName by mutableStateOf(signalSettings.waveShape.abbreviation)
     private var index = 0
     private val waveShapes = WaveShape.values()
     fun nextWaveShape(){
         index = (index + 1) % waveShapes.size
-        signalSettings.waveShape.value = waveShapes[index]
+        signalSettings.waveShape = waveShapes[index]
     }
 
     init {
-        signalSettings.waveShape.registerListener {
+        signalSettings.registerWaveShapeListener {
             waveShapeName = it.abbreviation
         }
     }

@@ -15,7 +15,7 @@ class HarmonicSeries(
 
     private val broadcaster = Broadcaster<HarmonicSeries>()
 
-    fun registerListener(callback: (HarmonicSeries) -> Unit){
+    fun registerOnUpdatedCallback(callback: (HarmonicSeries) -> Unit){
         broadcaster.registerListener(callback)
     }
 

@@ -55,14 +55,14 @@ class PeriodicSignal(
         this.amp = amp
     }
 
-    private val angularClock = AngularClock(frequency, signalSettings.sampleRate.value)
+    private val angularClock = AngularClock(frequency, signalSettings.sampleRate)
 
-    override val period get() = signalSettings.sampleRate.value / angularClock.frequency
+    override val period get() = signalSettings.sampleRate / angularClock.frequency
 
     override fun reset() { this.angularClock.reset() }
 
     override fun evaluateNext(): Float =
-        signalSettings.waveShape.value.lookupTable[angularClock.angle.toInt()] * amp
+        signalSettings.waveShape.lookupTable[angularClock.angle.toInt()] * amp
             .also { angularClock.tick() }
 
     override fun toString(): String {

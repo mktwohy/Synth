@@ -3,6 +3,7 @@ package com.example.signallib
 import PeriodicSignal
 import Signal
 import com.example.signallib.Note.Companion.bend
+import kotlin.math.sign
 
 abstract class SignalCollection(
     signalSettings: SignalSettings
@@ -54,7 +55,7 @@ class HarmonicSignal(
     signalSettings: SignalSettings
 ): SignalCollection(signalSettings) {
     override val size get() = signals.size
-    override val period = signalSettings.sampleRate.value / fundamental.freq
+    override val period = signalSettings.sampleRate / fundamental.freq
     private val signals = List(signalSettings.harmonicSeries.numHarmonics){ i ->
         PeriodicSignal(
             frequency = fundamental.freq*(i+1),
@@ -87,7 +88,7 @@ class HarmonicSignal(
         this.amp = amp
         if(autoNormalize) normalize()
 
-        signalSettings.harmonicSeries.registerListener {
+        signalSettings.registerHarmonicSeriesListener {
             for((overtone, amplitude) in it){
                 signals[overtone-1].amp = amplitude
             }
