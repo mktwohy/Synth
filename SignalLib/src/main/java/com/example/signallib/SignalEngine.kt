@@ -25,7 +25,7 @@ class SignalEngine(
     // todo [HarmonicSignal] amp is bugged.
     private val ampQueue: Queue<Float>          = LinkedList()
 
-    private var audioBuffer = FloatArray(signalSettings.bufferSize)
+    private var audioBuffer = FloatArray(signalSettings.bufferSize.value)
     private var runMainLoop = false
     private var audioTrack = buildAudioTrack()
 
@@ -66,7 +66,7 @@ class SignalEngine(
         pause()
         audioTrack.flush()
         audioTrack.release()
-        audioBuffer = FloatArray(signalSettings.bufferSize)
+        audioBuffer = FloatArray(signalSettings.bufferSize.value)
         this.audioTrack = buildAudioTrack()
     }
 
@@ -108,7 +108,7 @@ class SignalEngine(
                 audioTrack.write(
                     audioBuffer,
                     0,
-                    signalSettings.bufferSize,
+                    signalSettings.bufferSize.value,
                     AudioTrack.WRITE_BLOCKING
                 )
 
@@ -126,7 +126,7 @@ class SignalEngine(
         .setAudioFormat(
             AudioFormat.Builder()
                 .setEncoding(AudioFormat.ENCODING_PCM_FLOAT)
-                .setSampleRate(signalSettings.sampleRate)
+                .setSampleRate(signalSettings.sampleRate.value)
                 .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                 .build())
         .setTransferMode(AudioTrack.MODE_STREAM)

@@ -100,11 +100,11 @@ class MainActivity : ComponentActivity() {
 
         with(AppModel){
             // get phone's sample rate and buffer size
-            signalSettings.sampleRate = am.getProperty(
+            signalSettings.sampleRate.value = am.getProperty(
                 AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE
             ).toInt()
 
-            signalSettings.bufferSize = am.getProperty(
+            signalSettings.bufferSize.value = am.getProperty(
                 AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER
             ).toInt()
 
