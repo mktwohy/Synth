@@ -41,5 +41,4 @@ class SignalSettings(
     private val waveShapeListeners = mutableSetOf<(WaveShape) -> Unit>()
     private val sampleRateListeners = mutableSetOf<(Int) -> Unit>()
     private val bufferSizeListeners = mutableSetOf<(Int) -> Unit>()
-
 }
