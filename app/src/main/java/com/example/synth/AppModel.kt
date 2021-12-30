@@ -2,6 +2,7 @@ package com.example.synth
 
 import androidx.compose.runtime.*
 import com.example.signallib.*
+import com.example.signallib.enums.WaveShape
 
 object AppModel{
     var startup = true

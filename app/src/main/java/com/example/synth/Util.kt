@@ -3,7 +3,7 @@ package com.example.synth
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
-import com.example.signallib.Note
+import com.example.signallib.enums.Note
 import kotlin.system.measureNanoTime
 import kotlin.system.measureTimeMillis
 

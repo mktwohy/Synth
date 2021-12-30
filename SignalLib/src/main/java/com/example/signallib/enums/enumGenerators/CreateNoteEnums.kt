@@ -1,13 +1,15 @@
 package com.example.signallib.enums.enumGenerators
 
+import com.example.signallib.enums.PitchClass
 import java.io.File
 
 // spreadsheet from https://pages.mtu.edu/~suits/NoteFreqCalcs.html
 
 private data class NoteData(
     val freq: String,
-    val next: String,
-    val prev: String
+    val pClass: String,
+    val natural: String,
+    val octave: String
 )
 
 private fun File.splitByLine() =
@@ -23,9 +25,11 @@ private fun generateText(noteToNoteData: List<Pair<String, NoteData>>): String{
             " (",
             noteData.freq,
             ", ",
-            noteData.next,
+            noteData.pClass,
             ", ",
-            noteData.prev,
+            noteData.natural,
+            ", ",
+            noteData.octave,
             "),\n"
         )
     }
@@ -38,13 +42,7 @@ private fun String.formatNote() =
     else
         "${this[0]}_${this[1]}".substring(0..2)
 
-private fun getPrevNote(notes: List<String>, i: Int) =
-    if (i == 0) "null"
-    else notes[i - 1]
 
-private fun getNextNote(notes: List<String>, i: Int) =
-    if (i == notes.indices.last) "null"
-    else notes[i + 1]
 
 private fun main() {
     val path = System.getProperty("user.dir")!! +
@@ -59,10 +57,12 @@ private fun main() {
         .map { it.toString() + 'f' }
 
     val noteToNoteData = notes.mapIndexed { i, note ->
+        val natural = "s" !in note
         note to NoteData(
             freqs[i],
-            getPrevNote(notes, i),
-            getNextNote(notes, i)
+            if (natural) note[0].toString() else note.substring(0..1),
+            natural.toString(),
+            note[2].toString()
         )
     }
 

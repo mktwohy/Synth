@@ -4,8 +4,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.signallib.*
-import com.example.signallib.Note.Companion.nextWhiteNote
-import com.example.signallib.Note.Companion.prevWhiteNote
+import com.example.signallib.enums.Note
+import com.example.signallib.enums.Note.Companion.nextWhiteNote
+import com.example.signallib.enums.Note.Companion.prevWhiteNote
+import com.example.signallib.enums.WaveShape
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.sign

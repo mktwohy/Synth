@@ -4,10 +4,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.example.signallib.Note
-import com.example.signallib.Note.Companion.minus
-import com.example.signallib.Note.Companion.plus
-import com.example.signallib.Note.Companion.toList
+import com.example.signallib.enums.Note
+import com.example.signallib.enums.Note.Companion.minus
+import com.example.signallib.enums.Note.Companion.plus
+import com.example.signallib.enums.Note.Companion.toList
 
 /** Defines the hitboxes for the piano **/
 class PianoGrid(

@@ -17,8 +17,8 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import com.example.signallib.Note
 import com.example.signallib.amplitudeToVolume
+import com.example.signallib.enums.Note
 import com.example.signallib.volumeToAmplitude
 
 
@@ -117,7 +117,7 @@ fun Piano(
                         Box(
                             modifier = Modifier
                                 .size(width, viewModel.height / 2)
-                                .background(note.color(note in viewModel.pressedNotes))
+                                .background(color = note.color(note in viewModel.pressedNotes))
                         )
                     }
                 }
