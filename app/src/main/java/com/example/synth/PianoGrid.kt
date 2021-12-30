@@ -2,7 +2,6 @@ package com.example.synth
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.example.signallib.enums.Note
 import com.example.signallib.enums.Note.Companion.minus
@@ -19,7 +18,7 @@ class PianoGrid(
     fun recalculateWidths(){
         topRow.clear()
         bottomRow.clear()
-        val whiteNotes = viewModel.noteRange.toList().filter { it.name[1] == '_' }
+        val whiteNotes = viewModel.noteRange.toList().filter { it.natural }
         whiteNotes.forEach { whiteNote ->
             for((note, ratio) in topRowNoteRatios(whiteNote)){
                 topRow.add(note to viewModel.width * ratio/whiteNotes.size)

@@ -28,7 +28,7 @@ operator fun Color.plus(that: Color) = this.mix(that)
 
 
 fun Note.color() =
-    if(this.name[1] == '_') Color.White else Color.Black
+    if(this.natural) Color.White else Color.Black
 
 fun Note.color(isPressed: Boolean) =
     if(isPressed) this.color() + Color(0.4f, 0.0f, 1f, 0.5f)
