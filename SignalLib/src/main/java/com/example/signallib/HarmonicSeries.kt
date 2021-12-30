@@ -1,6 +1,7 @@
 package com.example.signallib
 
 
+import com.example.signallib.enums.HarmonicFilter
 import java.lang.StringBuilder
 import kotlin.math.abs
 import kotlin.math.log10

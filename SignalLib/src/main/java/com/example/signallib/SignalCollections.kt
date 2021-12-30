@@ -2,8 +2,8 @@ package com.example.signallib
 
 import PeriodicSignal
 import Signal
-import com.example.signallib.Note.Companion.bend
-import kotlin.math.sign
+import com.example.signallib.enums.Note
+import com.example.signallib.enums.Note.Companion.bend
 
 abstract class SignalCollection(
     signalSettings: SignalSettings

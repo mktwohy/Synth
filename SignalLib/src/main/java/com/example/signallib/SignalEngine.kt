@@ -3,6 +3,7 @@ package com.example.signallib
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import com.example.signallib.enums.Note
 
 import java.util.*
 

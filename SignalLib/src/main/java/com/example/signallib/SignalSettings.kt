@@ -1,5 +1,7 @@
 package com.example.signallib
 
+import com.example.signallib.enums.WaveShape
+
 class SignalSettings(
     val harmonicSeries: HarmonicSeries,
     waveShape: WaveShape,
