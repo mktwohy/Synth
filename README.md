@@ -3,8 +3,8 @@
 - [Watch Demo](https://youtu.be/TbRYWaP0Ipc)
 
 ## Source Code
-- [Backend](https://github.com/mktwohy/Synth/tree/Main/SignalLib/src/main/java/com/example/signallib)
-- [Frontend](https://github.com/mktwohy/Synth/tree/Main/app/src/main/java/com/example/synth)
+- [SignalLib](https://github.com/mktwohy/Synth/tree/Main/SignalLib/src/main/java/com/example/signallib)
+- [UI Layer](https://github.com/mktwohy/Synth/tree/Main/app/src/main/java/com/example/synth)
 
 
 ## Changelogs 
