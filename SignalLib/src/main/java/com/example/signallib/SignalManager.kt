@@ -1,6 +1,7 @@
 package com.example.signallib
 
 import com.example.signallib.enums.Note
+import com.example.signallib.signalCollections.HarmonicSignal
 
 /**
  * Abstracts away the creation and management of Signals. It maps a [HarmonicSignal] to each note,

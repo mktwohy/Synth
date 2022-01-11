@@ -1,5 +1,7 @@
-import com.example.signallib.*
-import kotlin.math.sign
+package com.example.signallib.signals
+
+import com.example.signallib.SignalSettings
+import com.example.signallib.signalCollections.SignalCollection
 
 /** Represents a time-varying signal.
  * Inspired by Allen Downey's ThinkDSP Python module */
@@ -39,37 +41,3 @@ abstract class Signal(
 
     }
 }
-
-class PeriodicSignal(
-    frequency: Float,
-    amp: Float = 1f,
-    signalSettings: SignalSettings
-): Signal(signalSettings) {
-    var frequency: Float = frequency
-        set(value) {
-            angularClock.frequency = value
-            field = value
-        }
-
-    init {
-        this.amp = amp
-    }
-
-    private val angularClock = AngularClock(frequency, signalSettings.sampleRate)
-
-    override val period get() = signalSettings.sampleRate / angularClock.frequency
-
-    override fun reset() { this.angularClock.reset() }
-
-    override fun evaluateNext(): Float =
-        signalSettings.waveShape.lookupTable[angularClock.angle.toInt()] * amp
-            .also { angularClock.tick() }
-
-    override fun toString(): String {
-        return "FuncSignal:" +
-                "\n\tnote = ${angularClock.frequency} " +
-                "\n\tamp  = $amp " +
-                "\n\twaveShape = ${signalSettings.waveShape}"
-    }
-}
-

@@ -8,9 +8,9 @@ import com.example.signallib.enums.Note
 import com.example.signallib.enums.Note.Companion.nextWhiteNote
 import com.example.signallib.enums.Note.Companion.prevWhiteNote
 import com.example.signallib.enums.WaveShape
+import com.example.signallib.signalCollections.HarmonicSignal
 import java.util.*
 import kotlin.math.abs
-import kotlin.math.sign
 
 class SignalPlotViewModel(
     val signalSettings: SignalSettings,

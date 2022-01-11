@@ -464,7 +464,7 @@ package com.example.synth
 import Signal
 import SilentSignal
 import com.example.signallib.HarmonicSeries
-import com.example.signallib.HarmonicSignal
+import com.example.signallib.signalCollections.HarmonicSignal
 import com.example.signallib.Note
 import com.example.signallib.Note.Companion.plus
 import com.example.signallib.Note.Companion.toList

@@ -1,7 +1,7 @@
 package com.example.signallib
 
-import Signal
 import android.util.Rational
+import com.example.signallib.signals.Signal
 import java.lang.StringBuilder
 import kotlin.math.PI
 import kotlin.math.pow

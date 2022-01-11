@@ -2,6 +2,12 @@ package com.example.signallib
 
 import com.example.signallib.enums.WaveShape
 
+/** Various parameters that each signal has.
+ *
+ * They are stored within a class so that multiple signals can have the a reference to the same
+ * SignalSettings, which ensures that, when you adjust the shared SignalSettings instance, you
+ * apply changes to all signals.
+ */
 class SignalSettings(
     val harmonicSeries: HarmonicSeries,
     waveShape: WaveShape,
