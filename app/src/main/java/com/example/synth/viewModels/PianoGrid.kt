@@ -1,4 +1,4 @@
-package com.example.synth
+package com.example.synth.viewModels
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.unit.Dp

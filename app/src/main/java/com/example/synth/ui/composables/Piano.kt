@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.signallib.enums.Note
 import com.example.synth.AppModel
-import com.example.synth.PianoViewModel
+import com.example.synth.viewModels.PianoViewModel
 import com.example.synth.color
 
 

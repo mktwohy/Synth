@@ -5,7 +5,7 @@ import androidx.compose.material.RangeSlider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.signallib.enums.Note
-import com.example.synth.PianoViewModel
+import com.example.synth.viewModels.PianoViewModel
 
 @ExperimentalMaterialApi
 @Composable
