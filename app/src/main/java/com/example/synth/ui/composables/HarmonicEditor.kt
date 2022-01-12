@@ -9,12 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.synth.viewModels.HarmonicSeriesViewModel
+import com.example.synth.viewModels.HarmonicEditor
 
 @Composable
-fun HarmonicSeriesEditor(
+fun HarmonicEditor(
     modifier: Modifier = Modifier,
-    viewModel: HarmonicSeriesViewModel
+    viewModel: HarmonicEditor
 ){
     Row(modifier){
         RowOfVerticalSliders(

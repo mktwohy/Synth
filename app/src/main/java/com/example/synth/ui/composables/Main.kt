@@ -1,23 +1,15 @@
 package com.example.synth.ui.composables
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.example.synth.AppModel
 
 
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 @Composable
 fun Main(isPortrait: Boolean) {
-    TestDial()
+    TestHarmonicDials()
 //    Column(horizontalAlignment = Alignment.CenterHorizontally) {
 //
 //        HarmonicSeriesEditor(

@@ -2,6 +2,7 @@ package com.example.synth.viewModels
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import com.example.signallib.HarmonicSeries
 import com.example.signallib.SignalSettings
 import com.example.signallib.volumeToAmplitude
 import com.example.synth.AppModel
@@ -10,8 +11,8 @@ import com.example.synth.mapInPlaceIndexed
 import java.util.*
 
 
-class HarmonicSeriesViewModel(
-    val signalSettings: SignalSettings
+class HarmonicEditor(
+    val signalSettings: SignalSettings,
 ): ViewModel(){
     val sliderState = mutableStateListOf<Float>()
 

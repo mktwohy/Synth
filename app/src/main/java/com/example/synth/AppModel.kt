@@ -3,7 +3,7 @@ package com.example.synth
 import androidx.compose.runtime.*
 import com.example.signallib.*
 import com.example.signallib.enums.WaveShape
-import com.example.synth.viewModels.HarmonicSeriesViewModel
+import com.example.synth.viewModels.HarmonicEditor
 import com.example.synth.viewModels.PianoViewModel
 import com.example.synth.viewModels.SignalPlot
 import com.example.synth.viewModels.WaveShapeSelectorViewModel
@@ -23,7 +23,7 @@ object AppModel{
     var currentAudio by mutableStateOf(listOf<Float>())
 
     val pianoViewModel          = PianoViewModel()
-    val harmonicSeriesViewModel = HarmonicSeriesViewModel(signalSettings)
+    val harmonicSeriesViewModel = HarmonicEditor(signalSettings)
     val SignalPlotViewModel     = SignalPlot(signalSettings)
     val waveFormChangeViewModel = WaveShapeSelectorViewModel(signalSettings)
 

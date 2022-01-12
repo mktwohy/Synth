@@ -14,35 +14,19 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.sp
-import com.example.synth.viewModels.HarmonicSeriesGeneratorViewModel
 import kotlin.math.PI
 import kotlin.math.atan2
 
-@Composable
-fun HarmonicSeriesGenerator(
-    modifier: Modifier,
-    viewModel: HarmonicSeriesGeneratorViewModel
-){
 
-}
+private fun toPositiveAngle(angle: Float) =
+    if (angle in 0f..180f) angle
+    else 360f + angle
 
-@ExperimentalComposeUiApi
-@Composable
-fun TestDial(){
-    var dialState by remember { mutableStateOf(0f) }
-    Text(text = dialState.toString(), fontSize = 24.sp, color = Color.White)
-    
-    Dial(
-        modifier = Modifier.fillMaxSize(),
-        value = dialState,
-        onValueChange = { dialState = it }
-    )
-}
 
 @ExperimentalComposeUiApi
 @Composable
 /** Based off of [Phillip Lackner's music knob](https://www.youtube.com/watch?v=TOflUdgx4pw) */
-private fun Dial(
+fun Dial(
     modifier: Modifier,
     lineColor: Color = Color.White,
     borderColor: Color = Color.Gray,
@@ -104,7 +88,15 @@ private fun Dial(
 
 }
 
+@ExperimentalComposeUiApi
+@Composable
+fun TestDial(){
+    var dialState by remember { mutableStateOf(0f) }
+    Text(text = dialState.toString(), fontSize = 24.sp, color = Color.White)
 
-private fun toPositiveAngle(angle: Float) =
-    if (angle in 0f..180f) angle
-    else 360f + angle
+    Dial(
+        modifier = Modifier.fillMaxSize(),
+        value = dialState,
+        onValueChange = { dialState = it }
+    )
+}
