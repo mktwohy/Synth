@@ -29,7 +29,7 @@ fun HarmonicEditor(
                     .fillMaxWidth(0.8f),
                 viewModel = viewModel
             )
-            OddsAndEvens(
+            FilterSelect(
                 modifier = Modifier.fillMaxSize(),
                 viewModel = viewModel
             )
@@ -54,27 +54,27 @@ fun HarmonicEditor(
 }
 
 @Composable
-private fun OddsAndEvens(modifier: Modifier, viewModel: HarmonicEditorViewModel){
+private fun FilterSelect(modifier: Modifier, viewModel: HarmonicEditorViewModel){
     var oddState by remember { mutableStateOf(true) }
     var evenState by remember { mutableStateOf(true) }
-    var fundState by remember { mutableStateOf(true) }
 
     fun applyToViewModel(){
         val filters = mutableSetOf<HarmonicFilter>()
-        if (oddState) filters += HarmonicFilter.ODD
-        if (evenState) filters += HarmonicFilter.EVEN
-        if (fundState) filters += HarmonicFilter.FUNDAMENTAL
+
+        viewModel.reset()
+
+        if (evenState) {
+            filters += HarmonicFilter.EVEN
+            filters += HarmonicFilter.FUNDAMENTAL
+        }
+        if (oddState)
+            filters += HarmonicFilter.ODD
         viewModel.filterState = filters
+
+        viewModel.generate()
     }
 
     Column(modifier){
-        Checkbox(
-            checked = fundState,
-            onCheckedChange = {
-                fundState = it
-                applyToViewModel()
-            }
-        )
         Checkbox(
             checked = oddState,
             onCheckedChange = {
@@ -89,9 +89,7 @@ private fun OddsAndEvens(modifier: Modifier, viewModel: HarmonicEditorViewModel)
                 applyToViewModel()
             }
         )
-
     }
-
 }
 
 @Composable
