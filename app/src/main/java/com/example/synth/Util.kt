@@ -26,14 +26,13 @@ fun Color.mix(that: Color) =
 
 operator fun Color.plus(that: Color) = this.mix(that)
 
-
-fun Note.color() =
-    if(this.natural) Color.White else Color.Black
-
-fun Note.color(isPressed: Boolean) =
-    if(isPressed) this.color() + Color(0.4f, 0.0f, 1f, 0.5f)
-    else this.color()
-
+fun Note.color(isPressed: Boolean): Color {
+    val baseColor = if(this.natural) Color.White else Color.Black
+    return if(isPressed)
+        baseColor + Color(0.4f, 0.0f, 1f, 0.5f)
+    else
+        baseColor
+}
 
 fun logd(message: Any){ Log.d("m_tag",message.toString()) }
 

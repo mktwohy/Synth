@@ -21,7 +21,6 @@ class HarmonicSignal(
             signalSettings = this.signalSettings
         ).also {
             it.parents.add(this)
-//            it.signalSettings = this.sampleRate
         }
     }
     var bendAmount: Float = 1f

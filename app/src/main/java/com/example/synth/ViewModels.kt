@@ -9,6 +9,7 @@ import com.example.signallib.enums.Note.Companion.nextWhiteNote
 import com.example.signallib.enums.Note.Companion.prevWhiteNote
 import com.example.signallib.enums.WaveShape
 import com.example.signallib.signalCollections.HarmonicSignal
+import com.example.synth.ui.composables.toFloat
 import java.util.*
 import kotlin.math.abs
 
