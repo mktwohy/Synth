@@ -5,6 +5,8 @@ import com.example.signallib.signals.Signal
 import java.lang.StringBuilder
 import kotlin.math.PI
 import kotlin.math.pow
+import kotlin.system.measureNanoTime
+import kotlin.system.measureTimeMillis
 
 fun volumeToAmplitude(volume: Float) = volume.pow(3f)
 fun amplitudeToVolume(amplitude: Float) = amplitude.pow(1/3f)
@@ -150,4 +152,27 @@ fun List<Float>.toHistogram(scale: Int): String{
 fun <T>MutableCollection<T>.replaceAll(elements: Collection<T>){
     this.clear()
     this.addAll(elements)
+}
+
+fun printTime(title: String = "", block: () -> Unit){
+    measureTimeMillis { block() }.also { println("$title $it ms") }
+}
+fun printAvgTimeMillis(title: String = "", repeat: Int = 100, block: () -> Unit){
+    println("$title avg: ${avgTimeMillis(repeat, block)}")
+}
+fun avgTimeMillis(repeat: Int, block: () -> Unit): Double {
+    val times = mutableListOf<Long>()
+    repeat(repeat){
+        measureTimeMillis{ block() }
+            .also{ times += it }
+    }
+    return times.average()
+}
+fun avgTimeNano(repeat: Int, block: () -> Any?): Double {
+    val times = mutableListOf<Long>()
+    repeat(repeat){
+        measureNanoTime{ block() }
+            .also{ times += it }
+    }
+    return times.average()
 }

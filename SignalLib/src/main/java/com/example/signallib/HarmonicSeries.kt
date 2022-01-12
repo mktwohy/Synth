@@ -41,13 +41,15 @@ class HarmonicSeries(
         ceiling: Float = 1.0f,
         filter: (Int) -> Boolean = HarmonicFilter.ALL.function
     ) {
-        for(index in amplitudes.indices){
-            val overtone = index+1
-            if(filter(overtone)){
-                this[overtone] = ((ceiling-floor) * (1f-decayRate).pow(index) + floor)
+
+        for (index in amplitudes.indices) {
+            val overtone = index + 1
+            if (filter(overtone)) {
+                amplitudes[index] = ((ceiling - floor) * (1f - decayRate).pow(index) + floor)
             }
         }
         broadcaster.broadcast(this)
+
     }
 
     fun generateRandom(){
