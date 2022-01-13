@@ -56,38 +56,20 @@ fun HarmonicEditor(
 
 @Composable
 private fun FilterSelect(modifier: Modifier, viewModel: HarmonicEditorViewModel){
-    var oddState by remember { mutableStateOf(true) }
-    var evenState by remember { mutableStateOf(true) }
-
-    fun applyToViewModel(){
-        val filters = mutableSetOf<HarmonicFilter>()
-
-        viewModel.reset()
-
-        if (evenState) {
-            filters += HarmonicFilter.EVEN
-            filters += HarmonicFilter.FUNDAMENTAL
-        }
-        if (oddState)
-            filters += HarmonicFilter.ODD
-        viewModel.filterState = filters
-
-        viewModel.generate()
-    }
 
     Column(modifier){
         Checkbox(
-            checked = oddState,
+            checked = viewModel.evenState,
             onCheckedChange = {
-                oddState = it
-                applyToViewModel()
+                viewModel.evenState = it
+                viewModel.applyFilters()
             }
         )
         Checkbox(
-            checked = evenState,
+            checked = viewModel.oddState,
             onCheckedChange = {
-                evenState = it
-                applyToViewModel()
+                viewModel.oddState = it
+                viewModel.applyFilters()
             }
         )
     }

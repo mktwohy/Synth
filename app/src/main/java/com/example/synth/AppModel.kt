@@ -12,7 +12,7 @@ object AppModel{
     var startup = true
 
     val signalSettings = SignalSettings(
-        harmonicSeries = HarmonicSeries(15),
+        harmonicSeries = HarmonicSeries(20),
         waveShape = WaveShape.SINE,
         sampleRate = 44100,
         bufferSize = 512
