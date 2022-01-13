@@ -49,9 +49,9 @@ class HarmonicEditorViewModel(
     fun generate(){
         AppModel.signalEngine.registerAfterBufferWriteOneTimeCallback {
             signalSettings.harmonicSeries.generate(
-                decayRate   = decayState,
-                floor       = floorState,
-                ceiling     = ceilingState,
+                decayRate   = volumeToAmplitude(decayState),
+                floor       = volumeToAmplitude(floorState),
+                ceiling     = volumeToAmplitude(ceilingState),
                 filter      = filter
             )
             updateSliders()
