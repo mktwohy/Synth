@@ -1,5 +1,10 @@
 package com.example.signallib
 
+import java.util.*
+import java.util.concurrent.BlockingDeque
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
+
 open class Broadcaster<T>{
     fun broadcast(value: T){
         callbacks.forEach{ it.invoke(value) }
@@ -7,9 +12,17 @@ open class Broadcaster<T>{
         oneTimeCallbacks.clear()
     }
 
-    private val callbacks = mutableSetOf< (T) -> Unit >()
 
-    private val oneTimeCallbacks = mutableSetOf< (T) -> Unit >()
+    /* Note:
+        callbacks and oneTimeCallbacks are treated like Sets rather than Queues.
+        The only reason it's being used is because it's blocking,
+        which prevents a concurrent modification exception.
+        However, Neither Java or Kotlin have Blocking Sets.
+     */
+
+    private val callbacks: BlockingQueue< (T) -> Unit > = LinkedBlockingQueue()
+
+    private val oneTimeCallbacks: BlockingQueue< (T) -> Unit > = LinkedBlockingQueue()
 
     fun registerListener(callback: (T) -> Unit){
         callbacks.add(callback)
