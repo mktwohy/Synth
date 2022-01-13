@@ -9,7 +9,6 @@ import com.example.signallib.SignalSettings
 import com.example.signallib.enums.HarmonicFilter
 import com.example.signallib.volumeToAmplitude
 import com.example.synth.AppModel
-import com.example.synth.logd
 import com.example.synth.mapInPlaceIndexed
 import java.util.*
 import kotlin.random.Random
@@ -46,7 +45,7 @@ class HarmonicEditorViewModel(
         }
     }
 
-    fun generate(){
+    fun updateHarmonicSeries(){
         AppModel.signalEngine.registerAfterBufferWriteOneTimeCallback {
             signalSettings.harmonicSeries.generate(
                 decayRate   = volumeToAmplitude(decayState),
@@ -59,8 +58,10 @@ class HarmonicEditorViewModel(
     }
 
     fun reset(){
-        signalSettings.harmonicSeries.reset()
-        updateSliders()
+        decayState = 0.9f
+        floorState = 0.1f
+        ceilingState = 0.9f
+        updateHarmonicSeries()
     }
 
     fun generateRandom(){
@@ -79,7 +80,7 @@ class HarmonicEditorViewModel(
                 oddState = true
         }
         applyFilters()
-        generate()
+        updateHarmonicSeries()
     }
 
     private val filter = { harmonic: Int ->
@@ -91,8 +92,6 @@ class HarmonicEditorViewModel(
     fun applyFilters(){
         val newFilters = mutableSetOf<HarmonicFilter>()
 
-        reset()
-
         if (evenState) {
             newFilters += HarmonicFilter.EVEN
             newFilters += HarmonicFilter.FUNDAMENTAL
@@ -102,7 +101,7 @@ class HarmonicEditorViewModel(
 
         filters.clear()
         filters.addAll(newFilters)
-        generate()
+        updateHarmonicSeries()
     }
 
     private fun updateSliders(){

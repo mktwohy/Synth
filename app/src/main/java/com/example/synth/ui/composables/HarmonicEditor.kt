@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.signallib.enums.HarmonicFilter
 import com.example.synth.viewModels.HarmonicEditorViewModel
 
 @ExperimentalComposeUiApi
@@ -132,26 +131,29 @@ private fun HarmonicDials(
         Row{
             Dial(
                 modifier = Modifier.size(dialWidth, dialHeight),
+                limitingAngle = 2f,
                 value = viewModel.decayState,
                 onValueChange = {
                     viewModel.decayState = it
-                    viewModel.generate()
+                    viewModel.updateHarmonicSeries()
                 }
             )
             Dial(
                 modifier = Modifier.size(dialWidth, dialHeight),
+                limitingAngle = 2f,
                 value = viewModel.floorState,
                 onValueChange = {
                     viewModel.floorState = it
-                    viewModel.generate()
+                    viewModel.updateHarmonicSeries()
                 }
             )
             Dial(
                 modifier = Modifier.size(dialWidth, dialHeight),
+                limitingAngle = 2f,
                 value = viewModel.ceilingState,
                 onValueChange = {
                     viewModel.ceilingState = it
-                    viewModel.generate()
+                    viewModel.updateHarmonicSeries()
                 }
             )
         }
