@@ -68,6 +68,7 @@ class HarmonicEditorViewModel(
         ceilingState = Random.nextFloat()
         evenState = Random.nextBoolean()
         oddState = Random.nextBoolean()
+        applyFilters()
         generate()
     }
 
