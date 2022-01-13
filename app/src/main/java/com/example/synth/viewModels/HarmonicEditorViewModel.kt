@@ -9,6 +9,7 @@ import com.example.signallib.SignalSettings
 import com.example.signallib.enums.HarmonicFilter
 import com.example.signallib.volumeToAmplitude
 import com.example.synth.AppModel
+import com.example.synth.logd
 import com.example.synth.mapInPlaceIndexed
 import java.util.*
 import kotlin.random.Random
@@ -25,7 +26,7 @@ class HarmonicEditorViewModel(
     var oddState by mutableStateOf(true)
 
 
-    val filters = mutableSetOf(HarmonicFilter.ALL)
+    private val filters = mutableSetOf(HarmonicFilter.ALL)
 
 
 
@@ -66,8 +67,17 @@ class HarmonicEditorViewModel(
         decayState = Random.nextFloat()
         floorState = Random.nextFloat()
         ceilingState = Random.nextFloat()
+
         evenState = Random.nextBoolean()
         oddState = Random.nextBoolean()
+
+        // ensure that at least one is true
+        if (!evenState && !oddState){
+            if (Random.nextBoolean())
+                evenState = true
+            else
+                oddState = true
+        }
         applyFilters()
         generate()
     }
