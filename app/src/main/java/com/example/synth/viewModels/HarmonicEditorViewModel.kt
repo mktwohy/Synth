@@ -10,6 +10,7 @@ import com.example.signallib.SignalSettings
 import com.example.signallib.enums.HarmonicFilter
 import com.example.signallib.volumeToAmplitude
 import com.example.synth.AppModel
+import com.example.synth.logd
 import com.example.synth.mapInPlaceIndexed
 import kotlin.random.Random
 
@@ -25,7 +26,8 @@ class HarmonicEditorViewModel(
     var oddState by mutableStateOf(true)
 
     init {
-        // initialize slider state
+
+        // initialize sliderState
         with(signalSettings.harmonicSeries){
             for (i in 1..numHarmonics){
                 sliderState.add(this[i]) }
@@ -39,31 +41,22 @@ class HarmonicEditorViewModel(
     }
 
     fun editHarmonicSeries(harmonic: Int, amp: Float){
-        editHarmonicSeries { hs ->
-            hs[harmonic+1] = volumeToAmplitude(amp)
-        }
+        editHarmonicSeries { it[harmonic+1] = volumeToAmplitude(amp) }
     }
-
-    fun editHarmonicSeries(transform: (Int, Float) -> Float){
-        editHarmonicSeries { hs ->
-            hs.map { (harm, amp) ->
-                volumeToAmplitude(transform(harm, amp))
-            }
-            updateSliders()
-        }
-    }
-
-
 
     fun applyDialsAndFilters(){
-        editHarmonicSeries { hs ->
-            hs.generate(
+        editHarmonicSeries {
+            // update harmonic series
+            it.generate(
                 decayRate   = volumeToAmplitude(decayState),
                 floor       = volumeToAmplitude(floorState),
                 ceiling     = volumeToAmplitude(ceilingState),
-                filter      = compileFilters()
+                filter      = createHarmonicFilter()
             )
+
+            // update sliders
             updateSliders()
+//            logd("update!")
         }
     }
 
@@ -95,16 +88,16 @@ class HarmonicEditorViewModel(
         applyDialsAndFilters()
     }
 
-    private fun compileFilters(): (Int) -> Boolean {
+    private fun createHarmonicFilter(): (Int) -> Boolean {
         val filters = mutableSetOf<HarmonicFilter>()
 
         if (evenState) {
             filters += HarmonicFilter.EVEN
             filters += HarmonicFilter.FUNDAMENTAL
         }
-        if (oddState)
+        if (oddState){
             filters += HarmonicFilter.ODD
-
+        }
         return { harmonic: Int ->
             filters
                 .map { it.function(harmonic) }
@@ -112,8 +105,11 @@ class HarmonicEditorViewModel(
         }
     }
 
-    private fun updateSliders(){
-        sliderState.mapInPlaceIndexed { i, _ -> signalSettings.harmonicSeries[i+1] }
+    fun updateSliders(){
+        signalSettings.harmonicSeries.forEach{ (harm, amp) ->
+            sliderState[harm-1] = amp
+        }
+//        sliderState.mapInPlaceIndexed { i, _ -> signalSettings.harmonicSeries[i+1] }
     }
 
     private fun ClosedRange<Float>.getValueAt(percent: Float): Float{

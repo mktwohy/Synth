@@ -49,7 +49,6 @@ fun HarmonicEditor(
             )
         }
     }
-
 }
 
 
@@ -60,6 +59,8 @@ private fun FilterSelect(modifier: Modifier, viewModel: HarmonicEditorViewModel)
             checked = viewModel.evenState,
             onCheckedChange = {
                 viewModel.evenState = it
+                viewModel.editHarmonicSeries { hs -> hs.map{ 0f } }
+                viewModel.updateSliders()
                 viewModel.applyDialsAndFilters()
             }
         )

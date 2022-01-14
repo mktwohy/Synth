@@ -87,6 +87,7 @@ class HarmonicSeries(
         }
 
         val s = StringBuilder()
+        s.append("Harmonic Series: \n")
         for(overtone in 1..numHarmonics){
             s.append(createRow(overtone, this[overtone]))
             s.append("\n")
