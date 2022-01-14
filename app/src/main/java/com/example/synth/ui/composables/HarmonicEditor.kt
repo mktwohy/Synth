@@ -110,7 +110,7 @@ private fun HarmonicSliders(modifier: Modifier, viewModel: HarmonicEditorViewMod
         value = { sliderIndex -> viewModel.sliderState[sliderIndex] },
         onValueChange = { sliderIndex, sliderValue ->
             val newSliderValue = if(sliderValue < 0.01f) 0f else sliderValue //snaps slider to 0
-            viewModel.harmonicSeriesUpdateQueue.offer(sliderIndex to newSliderValue)
+            viewModel.editHarmonicSeries(sliderIndex, newSliderValue)
             viewModel.sliderState[sliderIndex] = newSliderValue
         },
         label = { index -> if(index == 0) "f" else "${index+1}" },

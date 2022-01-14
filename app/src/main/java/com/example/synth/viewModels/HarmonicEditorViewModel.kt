@@ -27,21 +27,17 @@ class HarmonicEditorViewModel(
 
     private val filters = mutableSetOf(HarmonicFilter.ALL)
 
-
-
-    /** Queue of Pairs of sliderIndex, sliderValue */
-    val harmonicSeriesUpdateQueue: Queue<Pair<Int, Float>> = LinkedList()
-
     init {
+        // initialize slider state
         with(signalSettings.harmonicSeries){
             for (i in 1..numHarmonics){
                 sliderState.add(this[i]) }
         }
-        AppModel.signalEngine.registerAfterBufferWriteCallback {
-            if (harmonicSeriesUpdateQueue.isNotEmpty()){
-                val (sliderIndex, sliderValue) = harmonicSeriesUpdateQueue.poll()!!
-                signalSettings.harmonicSeries[sliderIndex+1] = volumeToAmplitude(sliderValue)
-            }
+    }
+
+    fun editHarmonicSeries(harmonic: Int, magnitude: Float){
+        AppModel.signalEngine.registerAfterBufferWriteOneTimeCallback {
+            signalSettings.harmonicSeries[harmonic+1] = volumeToAmplitude(magnitude)
         }
     }
 
