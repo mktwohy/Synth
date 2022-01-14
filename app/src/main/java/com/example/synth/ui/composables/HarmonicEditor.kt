@@ -55,20 +55,19 @@ fun HarmonicEditor(
 
 @Composable
 private fun FilterSelect(modifier: Modifier, viewModel: HarmonicEditorViewModel){
-
     Column(modifier){
         Checkbox(
             checked = viewModel.evenState,
             onCheckedChange = {
                 viewModel.evenState = it
-                viewModel.applyFilters()
+                viewModel.applyDialsAndFilters()
             }
         )
         Checkbox(
             checked = viewModel.oddState,
             onCheckedChange = {
                 viewModel.oddState = it
-                viewModel.applyFilters()
+                viewModel.applyDialsAndFilters()
             }
         )
     }
@@ -81,7 +80,7 @@ private fun HarmonicButtons(modifier: Modifier, viewModel: HarmonicEditorViewMod
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.5f),
-            onClick = { viewModel.reset() }
+            onClick = { viewModel.resetDialsAndFilters() }
         ) {
             Text(
                 text = "RST",
@@ -91,7 +90,7 @@ private fun HarmonicButtons(modifier: Modifier, viewModel: HarmonicEditorViewMod
         }
         Button(
             modifier = Modifier.fillMaxSize(),
-            onClick = { viewModel.generateRandom() }
+            onClick = { viewModel.randomizeDialsAndFilters() }
         ) {
             Text(
                 text = "RNDM",
@@ -135,7 +134,7 @@ private fun HarmonicDials(
                 value = viewModel.decayState,
                 onValueChange = {
                     viewModel.decayState = it
-                    viewModel.updateHarmonicSeries()
+                    viewModel.applyDialsAndFilters()
                 }
             )
             Dial(
@@ -144,7 +143,7 @@ private fun HarmonicDials(
                 value = viewModel.floorState,
                 onValueChange = {
                     viewModel.floorState = it
-                    viewModel.updateHarmonicSeries()
+                    viewModel.applyDialsAndFilters()
                 }
             )
             Dial(
@@ -153,7 +152,7 @@ private fun HarmonicDials(
                 value = viewModel.ceilingState,
                 onValueChange = {
                     viewModel.ceilingState = it
-                    viewModel.updateHarmonicSeries()
+                    viewModel.applyDialsAndFilters()
                 }
             )
         }

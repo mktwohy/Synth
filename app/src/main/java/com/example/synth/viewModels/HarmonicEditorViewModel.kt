@@ -5,12 +5,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.signallib.HarmonicSeries
 import com.example.signallib.SignalSettings
 import com.example.signallib.enums.HarmonicFilter
 import com.example.signallib.volumeToAmplitude
 import com.example.synth.AppModel
 import com.example.synth.mapInPlaceIndexed
-import java.util.*
 import kotlin.random.Random
 
 
@@ -24,9 +24,6 @@ class HarmonicEditorViewModel(
     var evenState by mutableStateOf(true)
     var oddState by mutableStateOf(true)
 
-
-    private val filters = mutableSetOf(HarmonicFilter.ALL)
-
     init {
         // initialize slider state
         with(signalSettings.harmonicSeries){
@@ -35,32 +32,52 @@ class HarmonicEditorViewModel(
         }
     }
 
-    fun editHarmonicSeries(harmonic: Int, magnitude: Float){
+    fun editHarmonicSeries(block: (HarmonicSeries) -> Unit) {
         AppModel.signalEngine.registerAfterBufferWriteOneTimeCallback {
-            signalSettings.harmonicSeries[harmonic+1] = volumeToAmplitude(magnitude)
+            block(signalSettings.harmonicSeries)
         }
     }
 
-    fun updateHarmonicSeries(){
-        AppModel.signalEngine.registerAfterBufferWriteOneTimeCallback {
-            signalSettings.harmonicSeries.generate(
+    fun editHarmonicSeries(harmonic: Int, amp: Float){
+        editHarmonicSeries { hs ->
+            hs[harmonic+1] = volumeToAmplitude(amp)
+        }
+    }
+
+    fun editHarmonicSeries(transform: (Int, Float) -> Float){
+        editHarmonicSeries { hs ->
+            hs.map { (harm, amp) ->
+                volumeToAmplitude(transform(harm, amp))
+            }
+            updateSliders()
+        }
+    }
+
+
+
+    fun applyDialsAndFilters(){
+        editHarmonicSeries { hs ->
+            hs.generate(
                 decayRate   = volumeToAmplitude(decayState),
                 floor       = volumeToAmplitude(floorState),
                 ceiling     = volumeToAmplitude(ceilingState),
-                filter      = filter
+                filter      = compileFilters()
             )
             updateSliders()
         }
     }
 
-    fun reset(){
+    fun resetDialsAndFilters(){
         decayState = 0.9f
         floorState = 0.1f
         ceilingState = 0.9f
-        updateHarmonicSeries()
+
+        applyDialsAndFilters()
     }
 
-    fun generateRandom(){
+    fun randomizeDialsAndFilters(){
+        resetDialsAndFilters()
+
         decayState = Random.nextFloat()
         floorState = Random.nextFloat()
         ceilingState = Random.nextFloat()
@@ -75,29 +92,24 @@ class HarmonicEditorViewModel(
             else
                 oddState = true
         }
-        applyFilters()
-        updateHarmonicSeries()
+        applyDialsAndFilters()
     }
 
-    private val filter = { harmonic: Int ->
-        this.filters
-            .map { it.function(harmonic) }
-            .contains(true)
-    }
-
-    fun applyFilters(){
-        val newFilters = mutableSetOf<HarmonicFilter>()
+    private fun compileFilters(): (Int) -> Boolean {
+        val filters = mutableSetOf<HarmonicFilter>()
 
         if (evenState) {
-            newFilters += HarmonicFilter.EVEN
-            newFilters += HarmonicFilter.FUNDAMENTAL
+            filters += HarmonicFilter.EVEN
+            filters += HarmonicFilter.FUNDAMENTAL
         }
         if (oddState)
-            newFilters += HarmonicFilter.ODD
+            filters += HarmonicFilter.ODD
 
-        filters.clear()
-        filters.addAll(newFilters)
-        updateHarmonicSeries()
+        return { harmonic: Int ->
+            filters
+                .map { it.function(harmonic) }
+                .contains(true)
+        }
     }
 
     private fun updateSliders(){
