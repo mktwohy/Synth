@@ -1,27 +1,36 @@
 package com.example.synth.ui.composables
 
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.RangeSlider
-import androidx.compose.runtime.Composable
+import androidx.compose.material.rememberSwipeableState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.signallib.enums.Note
 import com.example.synth.viewModels.PianoViewModel
 
 
-//@ExperimentalMaterialApi
-//@Composable
-//fun NoteRange(
-//    modifier: Modifier = Modifier,
-//    viewModel: PianoViewModel
-//){
-//    ScalingSlider(
-//        modifier = modifier,
-//        resolution = 88,
-//
-//    )
-//}
+@ExperimentalMaterialApi
+@Composable
+fun NoteRange(
+    modifier: Modifier = Modifier,
+    viewModel: PianoViewModel,
+
+){
+    val swipeState = rememberSwipeableState(0)
+    var scaleState by remember { mutableStateOf(12f) }
+
+
+    ScalingSlider(
+        modifier = modifier,
+        resolution = 88,
+        position = swipeState,
+        scale = scaleState,
+        onScaleChange = {
+            scaleState = it
+            viewModel.changeNoteRangeScale(scaleState)
+        }
+    )
+}
 
 @Deprecated("old")
 @ExperimentalMaterialApi

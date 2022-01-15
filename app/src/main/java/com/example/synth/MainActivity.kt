@@ -26,8 +26,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
-//            Main(isPortrait)
-            TestScalingSlider()
+            Main(isPortrait)
+//            TestScalingSlider()
         }
     }
 
