@@ -11,6 +11,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import com.example.synth.ui.composables.Main
+import com.example.synth.ui.composables.TestScalingSlider
 
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
@@ -25,7 +26,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isPortrait = LocalConfiguration.current.orientation ==
                     Configuration.ORIENTATION_PORTRAIT
-            Main(isPortrait)
+//            Main(isPortrait)
+            TestScalingSlider()
         }
     }
 
