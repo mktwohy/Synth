@@ -7,10 +7,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FractionalThreshold
-import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material.swipeable
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +23,9 @@ import kotlin.math.roundToInt
 @ExperimentalMaterialApi
 @Composable
 fun TestScalingSlider(){
+    val positionState = rememberSwipeableState(0)
+    var scaleState by remember { mutableStateOf(12f) }
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
 //        ScalingSlider(
 //            modifier = Modifier
@@ -40,7 +40,10 @@ fun TestScalingSlider(){
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.2f),
-            resolution = 88
+            resolution = 88,
+            position = positionState,
+            scale = scaleState,
+            onScaleChange = { scaleState = it }
         )
     }
 }
@@ -51,14 +54,14 @@ fun TestScalingSlider(){
 fun ScalingSlider(
     modifier: Modifier,
     resolution: Int,
+    position: SwipeableState<Int>,
+    scale: Float,
+    onScaleChange: (Float) -> Unit
 ) {
     BoxWithConstraints(modifier) {
-        val swipeState = rememberSwipeableState(0)
-        var scaleState by remember { mutableStateOf(12f) }
         val transformState = rememberTransformableState { zoomChange, _, _ ->
-            scaleState *= zoomChange
+            onScaleChange(scale * zoomChange)
         }
-
 
         val width       = this.maxWidth
         val squareWidth = this.maxWidth / resolution
@@ -70,7 +73,7 @@ fun ScalingSlider(
             modifier = Modifier
                 .width(width)
                 .swipeable(
-                    state = swipeState,
+                    state = position,
                     anchors = anchors,
                     thresholds = { _, _ -> FractionalThreshold(0.3f) },
                     orientation = Orientation.Horizontal
@@ -80,12 +83,12 @@ fun ScalingSlider(
         ) {
             Box(
                 Modifier
-                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
-                    .width(squareWidth * scaleState)
+                    .offset { IntOffset(position.offset.value.roundToInt(), 0) }
+                    .width(squareWidth * scale)
                     .fillMaxHeight()
                     .background(Color.DarkGray)
                     .graphicsLayer {
-                        scaleX = scaleState
+                        scaleX = scale
                     }
             )
         }

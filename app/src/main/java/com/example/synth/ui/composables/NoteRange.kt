@@ -1,5 +1,7 @@
 package com.example.synth.ui.composables
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.RangeSlider
 import androidx.compose.runtime.Composable
@@ -7,9 +9,24 @@ import androidx.compose.ui.Modifier
 import com.example.signallib.enums.Note
 import com.example.synth.viewModels.PianoViewModel
 
+
+//@ExperimentalMaterialApi
+//@Composable
+//fun NoteRange(
+//    modifier: Modifier = Modifier,
+//    viewModel: PianoViewModel
+//){
+//    ScalingSlider(
+//        modifier = modifier,
+//        resolution = 88,
+//
+//    )
+//}
+
+@Deprecated("old")
 @ExperimentalMaterialApi
 @Composable
-fun NoteRange(
+fun NoteRangeOLD(
     modifier: Modifier = Modifier,
     viewModel: PianoViewModel
 ){
@@ -23,5 +40,9 @@ fun NoteRange(
         }
     )
 }
+
+
+
+
 fun Float.toNote() = Note.notes[(this * (Note.notes.size-1)).toInt()]
 fun Note.toFloat() = Note.notes.indexOf(this).toFloat() / Note.notes.size.toFloat()

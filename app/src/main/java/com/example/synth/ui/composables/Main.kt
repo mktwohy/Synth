@@ -51,7 +51,7 @@ fun Main(isPortrait: Boolean) {
             Modifier
                 .fillMaxHeight(0.2f)
                 .fillMaxWidth(0.85f)) {
-            NoteRange(
+            NoteRangeOLD(
                 viewModel = AppModel.pianoViewModel
             )
         }
