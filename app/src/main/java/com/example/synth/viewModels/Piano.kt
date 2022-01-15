@@ -38,7 +38,7 @@ class PianoViewModel : ViewModel(){
     }
 
     fun changeNoteRangePosition(position: Int){
-
+        logd(position)
     }
 
     fun shiftNoteRange(startOffset: Int, endOffset: Int){

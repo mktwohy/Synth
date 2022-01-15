@@ -9,28 +9,31 @@ import com.example.signallib.enums.Note
 import com.example.synth.viewModels.PianoViewModel
 
 
-@ExperimentalMaterialApi
-@Composable
-fun NoteRange(
-    modifier: Modifier = Modifier,
-    viewModel: PianoViewModel,
-
-){
-    val swipeState = rememberSwipeableState(0)
-    var scaleState by remember { mutableStateOf(12f) }
-
-
-    ScalingSlider(
-        modifier = modifier,
-        resolution = 88,
-        position = swipeState,
-        scale = scaleState,
-        onScaleChange = {
-            scaleState = it
-            viewModel.changeNoteRangeScale(scaleState)
-        }
-    )
-}
+//@ExperimentalMaterialApi
+//@Composable
+//fun NoteRange(
+//    modifier: Modifier = Modifier,
+//    viewModel: PianoViewModel,
+//
+//){
+//    val swipeState = rememberSwipeableState(0)
+//    var scaleState by remember { mutableStateOf(12f) }
+//
+//
+//    ScalingSlider(
+//        modifier = modifier,
+//        resolution = 88,
+//        position = swipeState,
+//        scale = scaleState,
+//        onScaleChange = {
+//            scaleState = it
+//            viewModel.changeNoteRangeScale(scaleState)
+//        },
+//        onPositionChange = {
+//            viewModel.changeNoteRangePosition(it)
+//        }
+//    )
+//}
 
 @Deprecated("old")
 @ExperimentalMaterialApi
