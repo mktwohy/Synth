@@ -64,7 +64,9 @@ private fun FilterSelect(
     overlayColor: Color = Color.Black,
 ){
     val onToggle: (Boolean) -> Unit = {
-        viewModel.editHarmonicSeries { hs -> hs.map{ 0f } }
+        viewModel.editHarmonicSeries { hs ->
+            hs.onEach{ (harm, _) -> hs[harm] = 0f }
+        }
         viewModel.updateSliders()
         viewModel.applyDialsAndFilters()
     }

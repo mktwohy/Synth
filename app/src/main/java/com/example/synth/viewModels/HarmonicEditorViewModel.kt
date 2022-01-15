@@ -109,7 +109,6 @@ class HarmonicEditorViewModel(
         signalSettings.harmonicSeries.forEach{ (harm, amp) ->
             sliderState[harm-1] = amp
         }
-//        sliderState.mapInPlaceIndexed { i, _ -> signalSettings.harmonicSeries[i+1] }
     }
 
     private fun ClosedRange<Float>.getValueAt(percent: Float): Float{
