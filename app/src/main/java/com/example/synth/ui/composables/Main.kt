@@ -18,7 +18,6 @@ import com.example.synth.AppModel
 @Composable
 fun Main(isPortrait: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TestToggleButton()
         HarmonicEditor(
             modifier = Modifier
                 .fillMaxHeight(if (isPortrait) 0.5f else 0.3f)
