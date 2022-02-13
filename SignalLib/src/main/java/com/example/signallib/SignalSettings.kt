@@ -9,14 +9,24 @@ import com.example.signallib.enums.WaveShape
  * apply changes to all signals.
  */
 class SignalSettings(
-    val harmonicSeries: HarmonicSeries,
+    harmonicSeries: HarmonicSeries,
     waveShape: WaveShape,
     sampleRate: Int,
     bufferSize: Int,
 ){
-    val waveShapeBroadcaster = Broadcaster<WaveShape>()
-    val sampleRateBroadcaster = Broadcaster<Int>()
-    val bufferSizeBroadcaster = Broadcaster<Int>()
+    private val harmonicSeriesBroadcaster = Broadcaster<HarmonicSeries>()
+    private val waveShapeBroadcaster = Broadcaster<WaveShape>()
+    private val sampleRateBroadcaster = Broadcaster<Int>()
+    private val bufferSizeBroadcaster = Broadcaster<Int>()
+
+    /**
+     * For performance reasons, prefer mutating harmonicSeries rather than reassigning it
+     */
+    var harmonicSeries = harmonicSeries
+        set(value){
+            field = value
+            harmonicSeriesBroadcaster.broadcast(value)
+        }
 
     var waveShape = waveShape
         set(value){
@@ -36,6 +46,7 @@ class SignalSettings(
 
     fun registerHarmonicSeriesListener(callback: (HarmonicSeries) -> Unit){
         harmonicSeries.registerOnUpdatedCallback(callback)
+        harmonicSeriesBroadcaster.registerListener(callback)
     }
 
     fun registerWaveShapeListener(callback: (WaveShape) -> Unit){
